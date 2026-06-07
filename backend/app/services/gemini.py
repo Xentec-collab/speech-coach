@@ -16,7 +16,7 @@ class TopicListResponse(BaseModel):
     topics: list[GeneratedTopic]
 
 
-def generate_speaking_topics(category: str, difficulty: str, count: int = 1) -> TopicListResponse:
+def generate_speaking_topics(category: str, difficulty: str, count: int = 1, custom_topic: str = None) -> TopicListResponse:
     """
     Calls the Gemini API to generate public speaking prompts in a structured JSON schema.
     """
@@ -29,14 +29,27 @@ def generate_speaking_topics(category: str, difficulty: str, count: int = 1) -> 
     # Configure Google Generative AI
     genai.configure(api_key=settings.gemini_api_key)
 
-    prompt_text = f"""
-    You are a professional public speaking coach.
-    Generate a list containing exactly {count} public speaking topic(s).
-    Category: {category}
-    Difficulty Level: {difficulty}
+    if custom_topic and custom_topic.strip():
+        prompt_text = f"""
+        You are a professional public speaking coach.
+        The user wants to practice a speech on the following custom topic/theme: "{custom_topic.strip()}".
+        
+        Generate a list containing exactly {count} speaking prompt(s) based on this custom topic.
+        Refine their idea into a professional speaking prompt.
+        Category: {category}
+        Difficulty Level: {difficulty}
+        
+        Ensure each topic prompt is engaging, creative, realistic, and matches the difficulty level.
+        """
+    else:
+        prompt_text = f"""
+        You are a professional public speaking coach.
+        Generate a list containing exactly {count} public speaking topic(s).
+        Category: {category}
+        Difficulty Level: {difficulty}
 
-    Ensure each topic prompt is engaging, creative, realistic, and matches the difficulty level.
-    """
+        Ensure each topic prompt is engaging, creative, realistic, and matches the difficulty level.
+        """
 
     try:
         model = genai.GenerativeModel("gemini-2.5-flash")

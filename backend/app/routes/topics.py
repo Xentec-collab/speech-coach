@@ -9,6 +9,7 @@ router = APIRouter()
 def generate_topic(
     category: str = Query("impromptu", description="Speaking category (e.g. impromptu, interview, persuasive, warmup)"),
     difficulty: str = Query("medium", description="Difficulty level (e.g. easy, medium, hard)"),
+    custom_topic: str = Query(None, description="Optional custom topic or theme"),
     current_user: dict = Depends(get_current_user),
 ) -> TopicListResponse:
     """
@@ -16,7 +17,12 @@ def generate_topic(
     to the Supabase database under the user's ID, and returns the response.
     """
     # 1. Generate structured topic using Gemini
-    topic_list = generate_speaking_topics(category=category, difficulty=difficulty, count=1)
+    topic_list = generate_speaking_topics(
+        category=category,
+        difficulty=difficulty,
+        count=1,
+        custom_topic=custom_topic
+    )
 
     if not topic_list.topics:
         raise HTTPException(

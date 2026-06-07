@@ -21,6 +21,7 @@ export default function DashboardPage() {
   // Topic Generator State
   const [category, setCategory] = useState("impromptu");
   const [difficulty, setDifficulty] = useState("medium");
+  const [customTopic, setCustomTopic] = useState("");
   const [topics, setTopics] = useState<GeneratedTopic[]>([]);
   const [topicLoading, setTopicLoading] = useState(false);
   const [topicError, setTopicError] = useState<string | null>(null);
@@ -83,14 +84,16 @@ export default function DashboardPage() {
     setTopicError(null);
 
     try {
-      const response = await fetch(
-        `http://localhost:8000/api/topics/generate?category=${category}&difficulty=${difficulty}`,
-        {
-          headers: {
-            Authorization: `Bearer ${session.access_token}`,
-          },
-        }
-      );
+      let url = `http://localhost:8000/api/topics/generate?category=${category}&difficulty=${difficulty}`;
+      if (customTopic.trim()) {
+        url += `&custom_topic=${encodeURIComponent(customTopic.trim())}`;
+      }
+
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -213,55 +216,71 @@ export default function DashboardPage() {
           </section>
         </div>
 
-        {/* Section 2: Topic Generator (New feature!) */}
+        {/* Section 2: Topic Generator */}
         <section className="bg-white border border-slate-200 rounded-lg p-6 shadow-sm mb-8">
           <h2 className="text-xl font-bold text-slate-900 mb-4">AI Speaking Topic Generator</h2>
           <p className="text-sm text-slate-600 mb-6 leading-relaxed">
-            Generate a custom topic using Gemini. Each topic is stored in your personal history and comes with suggested talking points.
+            Generate a custom topic using Gemini. You can let the AI generate a random topic, or provide your own theme and have Gemini build structured coaching materials around it.
           </p>
 
-          <form onSubmit={handleGenerateTopic} className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <form onSubmit={handleGenerateTopic} className="space-y-4 mb-6">
             <div>
-              <label className="block text-xs font-semibold uppercase text-slate-400 mb-1" htmlFor="category">
-                Category
+              <label className="block text-xs font-semibold uppercase text-slate-400 mb-1" htmlFor="customTopic">
+                Own Topic or Theme (Optional)
               </label>
-              <select
-                id="category"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
+              <input
+                id="customTopic"
+                type="text"
+                value={customTopic}
+                onChange={(e) => setCustomTopic(e.target.value)}
+                placeholder="e.g. Benefits of a four-day work week, or why learning history matters"
                 className="w-full px-3 py-2 border border-slate-300 rounded text-slate-950 text-sm focus:outline-none focus:ring-1 focus:ring-brand-500"
-              >
-                <option value="impromptu">Impromptu Speaking</option>
-                <option value="interview">Job Interview Practice</option>
-                <option value="persuasive">Persuasive Argument</option>
-                <option value="warmup">Icebreaker & Warmup</option>
-              </select>
+              />
             </div>
 
-            <div>
-              <label className="block text-xs font-semibold uppercase text-slate-400 mb-1" htmlFor="difficulty">
-                Difficulty
-              </label>
-              <select
-                id="difficulty"
-                value={difficulty}
-                onChange={(e) => setDifficulty(e.target.value)}
-                className="w-full px-3 py-2 border border-slate-300 rounded text-slate-950 text-sm focus:outline-none focus:ring-1 focus:ring-brand-500"
-              >
-                <option value="easy">Easy</option>
-                <option value="medium">Medium</option>
-                <option value="hard">Hard</option>
-              </select>
-            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-xs font-semibold uppercase text-slate-400 mb-1" htmlFor="category">
+                  Category
+                </label>
+                <select
+                  id="category"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-300 rounded text-slate-950 text-sm focus:outline-none focus:ring-1 focus:ring-brand-500"
+                >
+                  <option value="impromptu">Impromptu Speaking</option>
+                  <option value="interview">Job Interview Practice</option>
+                  <option value="persuasive">Persuasive Argument</option>
+                  <option value="warmup">Icebreaker & Warmup</option>
+                </select>
+              </div>
 
-            <div className="flex items-end">
-              <button
-                type="submit"
-                disabled={topicLoading}
-                className="w-full bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold py-2 px-4 rounded transition-colors disabled:opacity-50"
-              >
-                {topicLoading ? "Generating Topic..." : "Generate speaking prompt"}
-              </button>
+              <div>
+                <label className="block text-xs font-semibold uppercase text-slate-400 mb-1" htmlFor="difficulty">
+                  Difficulty
+                </label>
+                <select
+                  id="difficulty"
+                  value={difficulty}
+                  onChange={(e) => setDifficulty(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-300 rounded text-slate-950 text-sm focus:outline-none focus:ring-1 focus:ring-brand-500"
+                >
+                  <option value="easy">Easy</option>
+                  <option value="medium">Medium</option>
+                  <option value="hard">Hard</option>
+                </select>
+              </div>
+
+              <div className="flex items-end">
+                <button
+                  type="submit"
+                  disabled={topicLoading}
+                  className="w-full bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold py-2 px-4 rounded transition-colors disabled:opacity-50"
+                >
+                  {topicLoading ? "Generating Topic..." : "Generate speaking prompt"}
+                </button>
+              </div>
             </div>
           </form>
 
