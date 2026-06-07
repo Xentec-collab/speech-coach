@@ -53,7 +53,7 @@ def generate_speaking_topics(category: str, difficulty: str, count: int = 1, cus
         """
 
     try:
-        model = genai.GenerativeModel("gemini-2.5-flash")
+        model = genai.GenerativeModel("gemini-flash-latest")
         response = model.generate_content(
             prompt_text,
             generation_config={
