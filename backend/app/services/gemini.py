@@ -32,14 +32,15 @@ def generate_speaking_topics(category: str, difficulty: str, count: int = 1, cus
     if custom_topic and custom_topic.strip():
         prompt_text = f"""
         You are a professional public speaking coach.
-        The user wants to practice a speech on the following custom topic/theme: "{custom_topic.strip()}".
+        The user has provided their own custom topic/theme: "{custom_topic.strip()}".
         
-        Generate a list containing exactly {count} speaking prompt(s) based on this custom topic.
-        Refine their idea into a professional speaking prompt.
-        Category: {category}
-        Difficulty Level: {difficulty}
+        You MUST generate a speaking prompt that is strictly about or directly based on their custom topic/theme. Do not generate a generic prompt.
         
-        Ensure each topic prompt is engaging, creative, realistic, and matches the difficulty level.
+        Tailor the prompt's style to the following parameters:
+        - Category: {category} (If category is 'impromptu', structure it as an impromptu speaking prompt about their theme. If it is 'interview', structure it as a job interview question related to their theme. If it is 'persuasive', structure it as a persuasive argument prompt. If it is 'warmup', make it an icebreaker prompt).
+        - Difficulty Level: {difficulty}
+        
+        Ensure the output contains exactly {count} topic(s).
         """
     else:
         prompt_text = f"""
