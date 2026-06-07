@@ -115,60 +115,57 @@ Default local URLs:
 
 ## Environment Variables & Supabase Auth Setup
 
-To run the authentication feature, you must configure the following local configuration files. If these variables are not configured, the applications will show a clear configuration error on startup or render.
+To run the authentication feature, you must configure the following local configuration files. If these variables are not configured, the applications will show a configuration error on startup or render.
+
+### Where to find credentials in Supabase:
+1. Log into your [Supabase Dashboard](https://supabase.com/dashboard) and open your project.
+2. Click on the **Project Settings** icon (gear icon in the bottom of the left sidebar).
+3. Select the **API** settings tab under the "Configuration" menu.
+4. Locate the keys:
+   - **Project URL**: Look for the input field in the **Project URL** section. Copy this URL. This maps to `NEXT_PUBLIC_SUPABASE_URL` and `SUPABASE_URL`.
+   - **Anon Public Key**: Look under **Project API Keys** for the key labeled `anon` / `public`. Copy this string. This maps to `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+   - **Service Role Secret Key**: Look under **Project API Keys** for the key labeled `service_role` / `secret`. Click **Reveal** and copy it. This maps to `SUPABASE_SERVICE_ROLE_KEY`. *Do not expose this key to the frontend client.*
+
+---
 
 ### 1. Frontend Configuration
 
-Create a file named `frontend/.env.local` and configure your public Supabase credentials:
+Create/update a file named `frontend/.env.local` containing:
 
 ```env
-# URL of your Supabase project (found in Project Settings > API)
-NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
+# Project Settings > API > Project URL
+NEXT_PUBLIC_SUPABASE_URL=
 
-# Anon/Public key of your Supabase project (found in Project Settings > API)
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-public-key
+# Project Settings > API > Project API Keys (anon public)
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
 
-# Base URL of the FastAPI backend service
+# Base URL of the local FastAPI backend service
 NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
 ```
 
 ### 2. Backend Configuration
 
-Create a file named `backend/.env` and configure the database service credentials:
+Create/update a file named `backend/.env` containing:
 
 ```env
-# URL of your Supabase project (matches the frontend URL)
-SUPABASE_URL=https://your-project-id.supabase.co
+# Project Settings > API > Project URL
+SUPABASE_URL=
 
-# Service role secret key of your Supabase project (found in Project Settings > API)
-# WARNING: Keep this secret; it bypasses Row Level Security (RLS)
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+# Project Settings > API > Project API Keys (service_role secret)
+SUPABASE_SERVICE_ROLE_KEY=
 
-# Allowed origins for CORS (default is the Next.js dev server)
+# Allowed origins for CORS (Next.js client)
 ALLOWED_ORIGINS=http://localhost:3000
 ```
 
 Never commit these files or publish real secrets to version control.
 
+---
 
 ## Current Scope
 
-Foundation setup only:
+Phase 1 development is in progress:
 
-- Project structure.
-- Documentation.
-- Frontend configuration.
-- Backend configuration.
-- Minimal health route.
+- **Implemented**: Project structure, database services, user registration UI (`/register`), user login UI (`/login`), user logout flow, protected dashboard UI shell (`/dashboard`), and backend JWT Bearer token verification (`/api/auth/me`).
+- **Pending Implementation**: Topic generation, browser recording, speech-to-text, Gemini AI feedback analysis, and speeches history metrics.
 
-No authentication, recording, Gemini analysis, dashboard, history, or payment features are implemented yet.
-
-## Current Local Project Location
-
-The active project folder has been moved to:
-
-```text
-C:\Users\Ayan Hussain\Desktop\speech-coach
-```
-
-Git has been initialized in this folder. The first commit is pending because Git needs a repository author name and email before it can create commits.
