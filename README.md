@@ -113,26 +113,43 @@ Default local URLs:
 - Backend: `http://localhost:8000`
 - Backend health check: `http://localhost:8000/health`
 
-## Environment Variables
+## Environment Variables & Supabase Auth Setup
 
-Frontend variables will be stored in `frontend/.env.local`:
+To run the authentication feature, you must configure the following local configuration files. If these variables are not configured, the applications will show a clear configuration error on startup or render.
+
+### 1. Frontend Configuration
+
+Create a file named `frontend/.env.local` and configure your public Supabase credentials:
 
 ```env
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
+# URL of your Supabase project (found in Project Settings > API)
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
+
+# Anon/Public key of your Supabase project (found in Project Settings > API)
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-public-key
+
+# Base URL of the FastAPI backend service
 NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
 ```
 
-Backend variables will be stored in `backend/.env`:
+### 2. Backend Configuration
+
+Create a file named `backend/.env` and configure the database service credentials:
 
 ```env
-SUPABASE_URL=
-SUPABASE_SERVICE_ROLE_KEY=
-GEMINI_API_KEY=
+# URL of your Supabase project (matches the frontend URL)
+SUPABASE_URL=https://your-project-id.supabase.co
+
+# Service role secret key of your Supabase project (found in Project Settings > API)
+# WARNING: Keep this secret; it bypasses Row Level Security (RLS)
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+
+# Allowed origins for CORS (default is the Next.js dev server)
 ALLOWED_ORIGINS=http://localhost:3000
 ```
 
-Do not commit real secrets.
+Never commit these files or publish real secrets to version control.
+
 
 ## Current Scope
 
@@ -145,3 +162,13 @@ Foundation setup only:
 - Minimal health route.
 
 No authentication, recording, Gemini analysis, dashboard, history, or payment features are implemented yet.
+
+## Current Local Project Location
+
+The active project folder has been moved to:
+
+```text
+C:\Users\Ayan Hussain\Desktop\speech-coach
+```
+
+Git has been initialized in this folder. The first commit is pending because Git needs a repository author name and email before it can create commits.
