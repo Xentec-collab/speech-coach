@@ -16,17 +16,18 @@
 - [x] Foundation approval.
 - [x] Authentication feature with Supabase Auth.
 - [x] Dashboard shell.
+- [x] Topic generation feature (Gemini prompt & dashboard trigger).
+- [x] Supabase database schema for `topics` table.
 
 ## In Review
 
-- [ ] Authentication feature approval.
+- [ ] Topic generation feature approval.
 
 ## Next
 
-- [ ] Topic generation feature (Gemini prompt & dashboard trigger).
 - [ ] Browser speech recording (Audio API capture & save/convert).
 - [ ] Speech transcript submission & Gemini analysis endpoint.
-- [ ] Supabase database schema for Speeches.
+- [ ] Supabase database schema for `speeches` table.
 - [ ] Speech history logs & analytics.
 
 ## Future

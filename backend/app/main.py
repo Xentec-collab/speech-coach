@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
 from app.routes.auth import router as auth_router
+from app.routes.topics import router as topics_router
 
 app = FastAPI(
     title="AI Public Speaking Coach API",
@@ -19,6 +20,8 @@ app.add_middleware(
 )
 
 app.include_router(auth_router, prefix="/api/auth", tags=["auth"])
+app.include_router(topics_router, prefix="/api/topics", tags=["topics"])
+
 
 
 @app.get("/health")

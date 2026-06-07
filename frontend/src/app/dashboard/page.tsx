@@ -4,12 +4,26 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 
+interface GeneratedTopic {
+  title: string;
+  prompt: string;
+  context: string;
+  suggested_points: string[];
+}
+
 export default function DashboardPage() {
   const router = useRouter();
   const { user, session, supabase, loading } = useAuth();
   const [logoutLoading, setLogoutLoading] = useState(false);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [backendStatus, setBackendStatus] = useState<string | null>(null);
+
+  // Topic Generator State
+  const [category, setCategory] = useState("impromptu");
+  const [difficulty, setDifficulty] = useState("medium");
+  const [topics, setTopics] = useState<GeneratedTopic[]>([]);
+  const [topicLoading, setTopicLoading] = useState(false);
+  const [topicError, setTopicError] = useState<string | null>(null);
 
   // Protected route logic
   useEffect(() => {
@@ -61,6 +75,39 @@ export default function DashboardPage() {
     }
   };
 
+  const handleGenerateTopic = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!session) return;
+
+    setTopicLoading(true);
+    setTopicError(null);
+
+    try {
+      const response = await fetch(
+        `http://localhost:8000/api/topics/generate?category=${category}&difficulty=${difficulty}`,
+        {
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || `Error: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      if (data && data.topics) {
+        setTopics(data.topics);
+      }
+    } catch (err: any) {
+      setTopicError(err.message || "Failed to generate topic.");
+    } finally {
+      setTopicLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
@@ -72,6 +119,9 @@ export default function DashboardPage() {
   if (!user) {
     return null; // Will redirect via useEffect
   }
+
+  // Get active topic (index 0) for display
+  const activeTopic = topics.length > 0 ? topics[0] : null;
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800">
@@ -107,7 +157,8 @@ export default function DashboardPage() {
           </p>
         </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Section 1: Setup & Tests */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {/* User Profile Card */}
           <section className="bg-white border border-slate-200 rounded-lg p-6 shadow-sm col-span-1">
             <h2 className="font-bold text-slate-900 mb-4">Account Information</h2>
@@ -145,12 +196,14 @@ export default function DashboardPage() {
               </div>
             )}
 
-            <button
-              onClick={testBackendTokenVerification}
-              className="bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold py-2 px-4 rounded transition-colors"
-            >
-              Test Auth Token on Backend
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={testBackendTokenVerification}
+                className="bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold py-2 px-4 rounded transition-colors"
+              >
+                Test Auth Token on Backend
+              </button>
+            </div>
 
             {backendStatus && (
               <div className="mt-4 p-3 bg-slate-50 border border-slate-200 rounded font-mono text-xs text-slate-700">
@@ -160,11 +213,106 @@ export default function DashboardPage() {
           </section>
         </div>
 
-        {/* Feature Placeholders */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+        {/* Section 2: Topic Generator (New feature!) */}
+        <section className="bg-white border border-slate-200 rounded-lg p-6 shadow-sm mb-8">
+          <h2 className="text-xl font-bold text-slate-900 mb-4">AI Speaking Topic Generator</h2>
+          <p className="text-sm text-slate-600 mb-6 leading-relaxed">
+            Generate a custom topic using Gemini. Each topic is stored in your personal history and comes with suggested talking points.
+          </p>
+
+          <form onSubmit={handleGenerateTopic} className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div>
+              <label className="block text-xs font-semibold uppercase text-slate-400 mb-1" htmlFor="category">
+                Category
+              </label>
+              <select
+                id="category"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="w-full px-3 py-2 border border-slate-300 rounded text-slate-950 text-sm focus:outline-none focus:ring-1 focus:ring-brand-500"
+              >
+                <option value="impromptu">Impromptu Speaking</option>
+                <option value="interview">Job Interview Practice</option>
+                <option value="persuasive">Persuasive Argument</option>
+                <option value="warmup">Icebreaker & Warmup</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold uppercase text-slate-400 mb-1" htmlFor="difficulty">
+                Difficulty
+              </label>
+              <select
+                id="difficulty"
+                value={difficulty}
+                onChange={(e) => setDifficulty(e.target.value)}
+                className="w-full px-3 py-2 border border-slate-300 rounded text-slate-950 text-sm focus:outline-none focus:ring-1 focus:ring-brand-500"
+              >
+                <option value="easy">Easy</option>
+                <option value="medium">Medium</option>
+                <option value="hard">Hard</option>
+              </select>
+            </div>
+
+            <div className="flex items-end">
+              <button
+                type="submit"
+                disabled={topicLoading}
+                className="w-full bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold py-2 px-4 rounded transition-colors disabled:opacity-50"
+              >
+                {topicLoading ? "Generating Topic..." : "Generate speaking prompt"}
+              </button>
+            </div>
+          </form>
+
+          {topicError && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded text-sm text-red-600 mb-6">
+              {topicError}
+            </div>
+          )}
+
+          {activeTopic && (
+            <div className="border border-brand-100 bg-brand-50/20 rounded-lg p-6">
+              <div className="flex justify-between items-start mb-2">
+                <h3 className="text-lg font-bold text-slate-900">{activeTopic.title}</h3>
+                <span className="text-xs bg-brand-100 text-brand-700 font-semibold px-2 py-0.5 rounded capitalize">
+                  {difficulty}
+                </span>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <p className="text-xs text-slate-400 font-semibold uppercase">Speaking Prompt</p>
+                  <p className="text-slate-800 text-sm mt-1 leading-relaxed font-medium">{activeTopic.prompt}</p>
+                </div>
+                
+                {activeTopic.context && (
+                  <div>
+                    <p className="text-xs text-slate-400 font-semibold uppercase">Scenario Context</p>
+                    <p className="text-slate-600 text-sm mt-1 leading-relaxed">{activeTopic.context}</p>
+                  </div>
+                )}
+                
+                {activeTopic.suggested_points && activeTopic.suggested_points.length > 0 && (
+                  <div>
+                    <p className="text-xs text-slate-400 font-semibold uppercase mb-1">Suggested Talking Points</p>
+                    <ul className="list-disc pl-5 text-sm text-slate-600 space-y-1">
+                      {activeTopic.suggested_points.map((point, index) => (
+                        <li key={index}>{point}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </section>
+
+        {/* Section 3: Feature Placeholders */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-white border border-slate-200 border-dashed rounded-lg p-8 text-center">
-            <h3 className="font-bold text-slate-400 mb-2">Speak & Record</h3>
-            <p className="text-sm text-slate-400">Generate a speaking topic and record your speech to get instant evaluation.</p>
+            <h3 className="font-bold text-slate-400 mb-2">Speech Recording</h3>
+            <p className="text-sm text-slate-400">Record your speech directly in the browser to receive transcription and coaching feedback.</p>
             <div className="mt-4 inline-block px-3 py-1 bg-slate-100 rounded text-xs text-slate-500 font-semibold">
               Coming in Next Feature Task
             </div>

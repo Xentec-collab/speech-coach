@@ -5,19 +5,18 @@ All notable project changes will be documented in this file.
 ## 2026-06-07
 
 ### Added
+- **Task 3: Topic Generation (Gemini Integration)**:
+  - Created Gemini service in `backend/app/services/gemini.py` that interfaces with the `google-generativeai` SDK.
+  - Implemented structured output mapping using Pydantic models (`TopicListResponse` and `GeneratedTopic`) to ensure type safety and allow future multiple-topic scaling.
+  - Created protected API endpoint `GET /api/topics/generate` verifying user JWTs.
+  - Integrated the `topics` Supabase PostgreSQL table with a foreign key referencing `auth.users(id)` and strict Row Level Security (RLS) policies.
+  - Automatically save generated topic logs to the database on success.
+  - Designed the dashboard Topic Generator UI with category/difficulty controls, loading indicators, error reporting, and prompt cards.
 - **Git Identity & Initial Commit**: Configured local repository author identity (`Ayan Hussain`) and created the first commit containing the foundation scaffolds.
 - **Supabase Auth Integration**:
   - Implemented Client-side `AuthContext` to manage auth session, user profile, and loading states.
-  - Implemented error handling displaying a developer setup screen if Supabase variables are unconfigured.
-  - Created Login page at `/login` with clean, responsive forms and credentials validation.
-  - Created Register page at `/register` supporting custom full name, email, and password.
-  - Created a protected Dashboard shell at `/dashboard` that redirects unauthorized users to `/login`.
-  - Updated the landing page `/` to conditionally link to `/dashboard` or authentication pages.
-- **Backend API JWT Verification**:
-  - Setup Supabase Python SDK client in `backend/app/services/supabase.py`.
-  - Implemented `get_current_user` dependency to parse the `Authorization` header and verify JWTs using `supabase.auth.get_user`.
-  - Created `/api/auth/me` endpoint to test and retrieve current authenticated user details.
-- **Documentation**: Updated `README.md` to detail environment variable files (`.env` and `.env.local`) and step-by-step Supabase Auth setup.
+  - Created Login, Register, and protected Dashboard routes.
+  - Implemented Backend JWT verification dependency (`get_current_user`) and test endpoint (`/api/auth/me`).
 
 ## 2026-06-06
 
