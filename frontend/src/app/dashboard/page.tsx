@@ -25,6 +25,9 @@ export default function DashboardPage() {
   const [topics, setTopics] = useState<GeneratedTopic[]>([]);
   const [topicLoading, setTopicLoading] = useState(false);
   const [topicError, setTopicError] = useState<string | null>(null);
+  
+  // Guide State
+  const [showGuide, setShowGuide] = useState(false);
 
   // Protected route logic
   useEffect(() => {
@@ -218,10 +221,57 @@ export default function DashboardPage() {
 
         {/* Section 2: Topic Generator */}
         <section className="bg-white border border-slate-200 rounded-lg p-6 shadow-sm mb-8">
-          <h2 className="text-xl font-bold text-slate-900 mb-4">AI Speaking Topic Generator</h2>
+          <div className="flex items-center space-x-2 mb-4">
+            <h2 className="text-xl font-bold text-slate-900">AI Speaking Topic Generator</h2>
+            <button
+              onClick={() => setShowGuide(!showGuide)}
+              title="View Guide"
+              className="w-5 h-5 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-700 text-xs font-bold transition-colors border border-slate-200"
+            >
+              ?
+            </button>
+          </div>
+          
           <p className="text-sm text-slate-600 mb-6 leading-relaxed">
             Generate a custom topic using Gemini. You can let the AI generate a random topic, or provide your own theme and have Gemini build structured coaching materials around it.
           </p>
+
+          {showGuide && (
+            <div className="mb-6 p-5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 space-y-4">
+              <h3 className="font-bold text-slate-900">Guide & Descriptions</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <h4 className="font-semibold text-slate-800 mb-1">Own Topic or Theme (Optional)</h4>
+                  <p className="text-xs text-slate-600 leading-relaxed">
+                    Type a custom theme (e.g., a presentation topic you are preparing for work) to have Gemini build custom coaching guidelines, scenario contexts, and talking points specifically for that topic. If left blank, the AI generates a random prompt.
+                  </p>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-slate-800 mb-1">Categories</h4>
+                  <ul className="text-xs text-slate-600 space-y-2 leading-relaxed">
+                    <li>
+                      <strong>Impromptu Speaking:</strong> Practice thinking on your feet. Generates abstract or creative prompts with no preparation time.
+                    </li>
+                    <li>
+                      <strong>Job Interview Practice:</strong> Practice behavioral questions to prepare for real-world hiring processes.
+                    </li>
+                    <li>
+                      <strong>Persuasive Argument:</strong> Practice structuring analytical arguments to convince or sway an audience.
+                    </li>
+                    <li>
+                      <strong>Icebreaker & Warmup:</strong> Low-pressure, lighthearted topics to warm up your voice.
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-slate-800 mb-1">Difficulty</h4>
+                  <p className="text-xs text-slate-600 leading-relaxed">
+                    Determines the conceptual complexity and analytical depth required to address the prompt. Easy prompts are straightforward and personal; Hard prompts require structured, multi-dimensional answers.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           <form onSubmit={handleGenerateTopic} className="space-y-4 mb-6">
             <div>
