@@ -1,0 +1,21 @@
+Starting script...
+Env loaded.
+Sys path updated.
+evaluate_speech_session imported.
+--- TEST 1: Impromptu Mode Evaluation ---
+Evaluating impromptu speech via Gemini Flash...
+Test 1 SUCCESS! Overall Score: 65
+Lexicon Score: 50
+Suggestions count: 3
+  - Original: 'nice' -> Upgrade: 'rewarding'
+  - Original: 'thing' -> Upgrade: 'action'
+  - Original: 'very good' -> Upgrade: 'effective'
+--- TEST 2: Debate Mode Evaluation ---
+Evaluating debate speech via Gemini Flash...
+Test 2 SUCCESS! Overall Score: 70
+Counter Argument: While your concerns regarding human agency are valid, AI is arguably an opportunity that functions a...
+Questions count: 3
+  - Question: Could AI be viewed as a tool that lowers the barrier to entry, allowing people without traditional technical skills to express their creativity?
+  - Question: How does your stance account for the historical resistance to other artistic technological shifts, such as the introduction of the camera to painting or digital synthesizers to music?
+  - Question: If AI is restricted, how do we distinguish between helpful assistance and genuine creative effort in a way that is fair and enforceable?
+Script completed successfully.

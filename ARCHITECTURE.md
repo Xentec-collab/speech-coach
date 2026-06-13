@@ -24,9 +24,12 @@ Technology:
 Responsibilities:
 - User interface.
 - Authentication screens and client-side auth state.
-- Dashboard and practice experience (e.g., topic configuration and generation).
-- Browser audio recording.
-- Calls to the FastAPI backend.
+- Dashboard and practice experience (topic configuration, generation, and selection).
+- Browser audio recording terminal (MediaRecorder API).
+- Interactive dashboard statistics panel rendering current/longest daily streaks, score improvements, and trend indicators.
+- Type safety schemas enforcing models for speech history, details, and evaluation feedback.
+- Client-side dynamic SVG charting layout.
+- Paginated sidebar navigation loading historical attempts to the scorecard view.
 
 The frontend does not call Gemini directly. AI keys must remain server-side.
 
@@ -45,6 +48,9 @@ Responsibilities:
 - Authentication verification (validates Supabase bearer JWTs).
 - Database interface (Supabase PostgreSQL client).
 - Gemini API integration (prompts generation and response schema structure validation).
+- Asynchronous speech processing background task workers.
+- **SQL Range Pagination**: Performs efficient offset pagination using `.range(start, end)` calculations on `GET /api/speeches` to support custom pages/limits.
+- **Dynamic Stats Aggregation**: Calculates historical attempts, averages, maximums, and streaks (current and longest daily) dynamically on `GET /api/speeches/stats` using calendar day difference analysis.
 
 The backend owns privileged secrets such as the Supabase service role key and Gemini API key.
 
@@ -74,7 +80,41 @@ The `topics` table has RLS enabled with the following security policies:
 - **INSERT Policy**: `auth.uid() = user_id` ensures users can only save topics under their own authenticated user ID.
 
 ### Table Schema: `speeches`
-- Planned table for session audio recordings, transcriptions, and coach feedback records (deferred for the next milestone).
+Records the practice speech sessions, references the generated topics, retains metadata, transcripts, and evaluation feedback.
+```sql
+CREATE TABLE public.speeches (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    topic_id UUID REFERENCES public.topics(id) ON DELETE SET NULL,
+    storage_path TEXT NOT NULL,
+    original_filename TEXT NOT NULL,
+    mime_type TEXT NOT NULL,
+    duration_seconds INTEGER NOT NULL,
+    status TEXT NOT NULL DEFAULT 'uploaded',
+    transcript TEXT,
+    feedback JSONB, -- Stores written_feedback, lexicon_suggestions, counter_argument, and challenge_questions
+    overall_score INTEGER,
+    pronunciation_score INTEGER,
+    fluency_score INTEGER,
+    grammar_score INTEGER,
+    content_score INTEGER,
+    lexicon_score INTEGER, -- NEW Dedicated database column
+    retry_count INTEGER NOT NULL DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    CONSTRAINT check_status CHECK (status IN ('uploaded', 'transcribing', 'analyzing', 'completed', 'failed')),
+    CONSTRAINT check_overall CHECK (overall_score >= 0 AND overall_score <= 100),
+    CONSTRAINT check_pronunciation CHECK (pronunciation_score >= 0 AND pronunciation_score <= 100),
+    CONSTRAINT check_fluency CHECK (fluency_score >= 0 AND fluency_score <= 100),
+    CONSTRAINT check_grammar CHECK (grammar_score >= 0 AND grammar_score <= 100),
+    CONSTRAINT check_content CHECK (content_score >= 0 AND content_score <= 100),
+    CONSTRAINT check_lexicon CHECK (lexicon_score >= 0 AND lexicon_score <= 100)
+);
+```
+
+#### Row Level Security (RLS)
+The `speeches` table has RLS enabled with the following security policies:
+- **SELECT Policy**: `auth.uid() = user_id` ensures users can only read their own speech records.
+- **INSERT Policy**: `auth.uid() = user_id` ensures users can only insert speeches for themselves.
 
 ## Authentication
 

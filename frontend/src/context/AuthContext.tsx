@@ -1,8 +1,23 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { User, Session, SupabaseClient } from "@supabase/supabase-js";
 import { createSupabaseBrowserClient } from "@/lib/supabase";
+
+export interface UserProfile {
+  email: string | null;
+  is_superuser: boolean;
+  plan: string;
+  is_cute_mode: boolean;
+}
+
+export interface AdConfig {
+  ads_enabled: boolean;
+  provider: string;
+  placements: string[];
+  is_superuser?: boolean;
+  plan?: string;
+}
 
 interface AuthContextType {
   user: User | null;
@@ -10,6 +25,10 @@ interface AuthContextType {
   loading: boolean;
   supabase: SupabaseClient | null;
   error: string | null;
+  profile: UserProfile | null;
+  adConfig: AdConfig | null;
+  refreshProfile: () => Promise<void>;
+  refreshAdConfig: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -18,6 +37,10 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   supabase: null,
   error: null,
+  profile: null,
+  adConfig: null,
+  refreshProfile: async () => {},
+  refreshAdConfig: async () => {},
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -26,6 +49,80 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [adConfig, setAdConfig] = useState<AdConfig | null>(null);
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [adConfigLoading, setAdConfigLoading] = useState(false);
+
+  const fetchProfile = useCallback(async (token: string) => {
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
+      const res = await fetch(`${baseUrl}/api/user/profile`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setProfile(data);
+      } else {
+        setProfile({
+          email: user?.email || "",
+          is_superuser: false,
+          plan: "free",
+          is_cute_mode: false
+        });
+      }
+    } catch {
+      setProfile({
+        email: user?.email || "",
+        is_superuser: false,
+        plan: "free",
+        is_cute_mode: false
+      });
+    } finally {
+      setProfileLoading(false);
+    }
+  }, [user]);
+
+  const fetchAdConfig = useCallback(async (token?: string) => {
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
+      const headers: HeadersInit = {};
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+      const res = await fetch(`${baseUrl}/api/monetization/config`, { headers });
+      if (res.ok) {
+        const data = await res.json();
+        setAdConfig(data);
+      } else {
+        setAdConfig({
+          ads_enabled: true,
+          provider: "placeholder",
+          placements: ["sidebar", "analytics-footer"]
+        });
+      }
+    } catch {
+      setAdConfig({
+        ads_enabled: true,
+        provider: "placeholder",
+        placements: ["sidebar", "analytics-footer"]
+      });
+    } finally {
+      setAdConfigLoading(false);
+    }
+  }, []);
+
+  const refreshProfile = useCallback(async () => {
+    if (session?.access_token) {
+      await fetchProfile(session.access_token);
+    }
+  }, [session, fetchProfile]);
+
+  const refreshAdConfig = useCallback(async () => {
+    await fetchAdConfig(session?.access_token);
+  }, [session, fetchAdConfig]);
 
   useEffect(() => {
     try {
@@ -58,6 +155,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
+  useEffect(() => {
+    if (session) {
+      setProfileLoading(true);
+      setAdConfigLoading(true);
+      fetchProfile(session.access_token);
+      fetchAdConfig(session.access_token);
+    } else if (!loading) {
+      setAdConfigLoading(true);
+      setProfile(null);
+      fetchAdConfig();
+    }
+  }, [session, loading, fetchProfile, fetchAdConfig]);
+
   if (error && error.includes("Supabase frontend environment variables are not configured")) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
@@ -84,8 +194,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
   }
 
+  const contextLoading = loading || profileLoading || adConfigLoading;
+
   return (
-    <AuthContext.Provider value={{ user, session, loading, supabase, error }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      session, 
+      loading: contextLoading, 
+      supabase, 
+      error,
+      profile,
+      adConfig,
+      refreshProfile,
+      refreshAdConfig
+    }}>
       {children}
     </AuthContext.Provider>
   );

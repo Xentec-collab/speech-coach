@@ -1,20 +1,33 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from pydantic import BaseModel
 from app.services.supabase import get_current_user, supabase
 from app.services.gemini import generate_speaking_topics, TopicListResponse
 
 router = APIRouter()
 
 
-@router.get("/generate", response_model=TopicListResponse)
+class DbGeneratedTopic(BaseModel):
+    id: str
+    title: str
+    prompt: str
+    context: str
+    suggested_points: list[str]
+
+
+class DbTopicListResponse(BaseModel):
+    topics: list[DbGeneratedTopic]
+
+
+@router.get("/generate", response_model=DbTopicListResponse)
 def generate_topic(
     category: str = Query("impromptu", description="Speaking category (e.g. impromptu, interview, persuasive, warmup)"),
     difficulty: str = Query("medium", description="Difficulty level (e.g. easy, medium, hard)"),
     custom_topic: str = Query(None, description="Optional custom topic or theme"),
     current_user: dict = Depends(get_current_user),
-) -> TopicListResponse:
+) -> DbTopicListResponse:
     """
     Generates a new coaching topic prompt using Gemini, saves the generated topic
-    to the Supabase database under the user's ID, and returns the response.
+    to the Supabase database under the user's ID, and returns the response with DB IDs.
     """
     # 1. Generate structured topic using Gemini
     topic_list = generate_speaking_topics(
@@ -31,6 +44,7 @@ def generate_topic(
         )
 
     # 2. Persist the generated topic in the database
+    inserted_topics = []
     for topic in topic_list.topics:
         try:
             db_data = {
@@ -48,10 +62,20 @@ def generate_topic(
             
             if not response.data:
                 raise Exception("Empty database insert response data")
+            
+            inserted_topics.append(
+                DbGeneratedTopic(
+                    id=response.data[0]["id"],
+                    title=topic.title,
+                    prompt=topic.prompt,
+                    context=topic.context,
+                    suggested_points=topic.suggested_points
+                )
+            )
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Failed to persist topic to database: {str(e)}"
             )
 
-    return topic_list
+    return DbTopicListResponse(topics=inserted_topics)

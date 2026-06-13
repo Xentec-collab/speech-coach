@@ -48,10 +48,13 @@ def get_current_user(authorization: str = Header(None)) -> dict:
             )
         
         user = response.user
+        email = user.email.lower() if user.email else ""
+        is_super = email in settings.super_users
         return {
             "id": user.id,
             "email": user.email,
             "user_metadata": user.user_metadata,
+            "is_super_user": is_super,
         }
     except Exception as e:
         raise HTTPException(
@@ -59,3 +62,34 @@ def get_current_user(authorization: str = Header(None)) -> dict:
             detail=f"Token verification failed: {str(e)}",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+
+def get_optional_current_user(authorization: str = Header(None)) -> dict | None:
+    """
+    Dependency to optionally verify client requests using the Supabase JWT.
+    Does not raise errors if missing, but returns None.
+    """
+    if not authorization:
+        return None
+
+    parts = authorization.split()
+    if len(parts) != 2 or parts[0].lower() != "bearer":
+        return None
+
+    token = parts[1]
+    try:
+        response = supabase.auth.get_user(token)
+        if not response or not response.user:
+            return None
+        
+        user = response.user
+        email = user.email.lower() if user.email else ""
+        is_super = email in settings.super_users
+        return {
+            "id": user.id,
+            "email": user.email,
+            "user_metadata": user.user_metadata,
+            "is_super_user": is_super,
+        }
+    except Exception:
+        return None

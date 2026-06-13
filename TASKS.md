@@ -17,26 +17,25 @@
 - [x] Authentication feature with Supabase Auth.
 - [x] Dashboard shell.
 - [x] Topic generation feature (Gemini prompt & dashboard trigger).
-- [x] Supabase database schema for `topics` table.
+- [x] Topic generation feature approval.
+- [x] Browser speech recording (Audio API capture & save/convert).
+- [x] Supabase database schema for `speeches` table.
+- [x] Speech transcript submission & Gemini analysis endpoint (Tasks 5 & 6).
+- [x] Speech history logs & analytics (Task 7).
+- [x] Progress graphs.
+- [x] Debate Mode with AI counter-arguments and challenge questions (Phase 2).
+- [x] Lexicon & vocabulary upgrade suggestions (Phase 2).
 
-## In Review
+## Next (Phase 2: Engagement & Premium Expansion)
 
-- [ ] Topic generation feature approval.
-
-## Next
-
-- [ ] Browser speech recording (Audio API capture & save/convert).
-- [ ] Speech transcript submission & Gemini analysis endpoint.
-- [ ] Supabase database schema for `speeches` table.
-- [ ] Speech history logs & analytics.
+- [ ] Daily public speaking challenges.
+- [ ] Speech cohort groups and audio sharing.
+- [ ] Freemium vs Premium subscription tier model.
+- [ ] Razorpay checkout integration.
+- [ ] Superuser accounts for unlimited speech analytics.
 
 ## Future
 
-- [ ] Progress graphs.
-- [ ] Daily challenges.
-- [ ] Subscription plans.
-- [ ] Razorpay integration.
-- [ ] Interview practice.
-- [ ] IELTS practice.
-- [ ] Group practice.
-- [ ] Leaderboards.
+- [ ] Interview practice simulator.
+- [ ] IELTS speaking section preparation.
+- [ ] Global public speaking leaderboards.
