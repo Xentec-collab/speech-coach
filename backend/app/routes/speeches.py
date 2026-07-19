@@ -33,12 +33,20 @@ async def run_speech_processing_pipeline(speech_id: str):
         topic_title = "Impromptu Speech"
         topic_prompt = "Speak on any impromptu theme of your choice."
         topic_category = "impromptu"
+        topic_module_type = "public_speaking"
+        topic_interview_type = None
+        topic_interview_persona = "friendly"
+        topic_evaluation_criteria = None
         if topic_id:
-            topic_res = supabase.table("topics").select("title", "prompt", "category").eq("id", topic_id).execute()
+            topic_res = supabase.table("topics").select("title", "prompt", "category", "module_type", "interview_type", "interview_persona", "evaluation_criteria").eq("id", topic_id).execute()
             if topic_res.data:
                 topic_title = topic_res.data[0]["title"]
                 topic_prompt = topic_res.data[0]["prompt"]
                 topic_category = topic_res.data[0].get("category", "impromptu")
+                topic_module_type = topic_res.data[0].get("module_type", "public_speaking")
+                topic_interview_type = topic_res.data[0].get("interview_type")
+                topic_interview_persona = topic_res.data[0].get("interview_persona", "friendly")
+                topic_evaluation_criteria = topic_res.data[0].get("evaluation_criteria")
 
         # 3. Update status to 'transcribing'
         supabase.table("speeches").update({"status": "transcribing"}).eq("id", speech_id).execute()
@@ -61,7 +69,16 @@ async def run_speech_processing_pipeline(speech_id: str):
         }).eq("id", speech_id).execute()
 
         # 7. Evaluate using Gemini (0-100 scale)
-        eval_result = evaluate_speech_session(transcript, topic_title, topic_prompt, topic_category)
+        eval_result = evaluate_speech_session(
+            transcript=transcript,
+            topic_title=topic_title,
+            topic_prompt=topic_prompt,
+            category=topic_category,
+            module_type=topic_module_type,
+            interview_type=topic_interview_type,
+            interview_persona=topic_interview_persona,
+            evaluation_criteria=topic_evaluation_criteria
+        )
 
         # 8. Save scores and feedback, set status to 'completed'
         update_payload = {
@@ -74,7 +91,9 @@ async def run_speech_processing_pipeline(speech_id: str):
                 "written_feedback": eval_result.written_feedback,
                 "lexicon_suggestions": [s.model_dump() for s in eval_result.lexicon_suggestions],
                 "counter_argument": eval_result.counter_argument,
-                "challenge_questions": eval_result.challenge_questions
+                "challenge_questions": eval_result.challenge_questions,
+                "interview_metrics": eval_result.interview_metrics.model_dump() if eval_result.interview_metrics else None,
+                "follow_up_question": eval_result.follow_up_question
             },
             "status": "completed"
         }
@@ -89,6 +108,13 @@ async def run_speech_processing_pipeline(speech_id: str):
                 supabase.table("speeches").update(update_payload).eq("id", speech_id).execute()
             else:
                 raise db_err
+
+        # Trigger AI Coach Snapshot generation/regeneration
+        try:
+            from app.routes.ai_coach import generate_and_save_coach_snapshot
+            await generate_and_save_coach_snapshot(speech["user_id"])
+        except Exception as snap_err:
+            print(f"Error updating coach snapshot on speech completion: {snap_err}")
 
         # 9. Clean up / delete temporary audio file from private storage
         try:
@@ -223,6 +249,22 @@ async def upload_speech(
         )
 
 
+def get_display_name(interview_type: str) -> str:
+    display_names = {
+        "cat_gdpi": "CAT GDPI",
+        "mba_admissions": "MBA Admissions",
+        "university_admissions": "University Admissions",
+        "scholarship_interview": "Scholarship Interview",
+        "campus_placement": "Campus Placement",
+        "hr_interview": "HR Interview",
+        "software_engineering_interview": "Software Engineering Interview",
+        "banking_interview": "Banking Interview",
+        "upsc_interview": "UPSC Interview",
+        "ssc_interview": "SSC Interview",
+    }
+    return display_names.get(interview_type, interview_type.replace("_", " ").title())
+
+
 @router.get("", status_code=status.HTTP_200_OK)
 def list_user_speeches(
     page: int = 1,
@@ -230,35 +272,97 @@ def list_user_speeches(
     current_user: dict = Depends(get_current_user)
 ):
     """
-    Lists all speech attempts for the current authenticated user with pagination.
+    Lists all speech attempts and completed/active interview sessions for the current authenticated user with pagination.
     """
     if page < 1:
         page = 1
     if limit < 1:
         limit = 20
     
-    start_range = (page - 1) * limit
-    end_range = page * limit - 1
-    
     try:
-        res = supabase.table("speeches") \
+        # 1. Fetch speeches
+        speeches_res = supabase.table("speeches") \
             .select("*, topics(*)") \
             .eq("user_id", current_user["id"]) \
-            .order("created_at", desc=True) \
-            .range(start_range, end_range) \
             .execute()
+        speeches = speeches_res.data if speeches_res.data else []
         
-        data = res.data if res.data else []
-        for speech in data:
+        # 2. Fetch sessions
+        sessions_res = supabase.table("interview_sessions") \
+            .select("*") \
+            .eq("user_id", current_user["id"]) \
+            .execute()
+        sessions = sessions_res.data if sessions_res.data else []
+        
+        # 3. Format speeches
+        formatted_items = []
+        for speech in speeches:
             if speech.get("lexicon_score") is None:
                 feedback_obj = speech.get("feedback")
                 if isinstance(feedback_obj, dict):
                     speech["lexicon_score"] = feedback_obj.get("lexicon_score")
-        return data
+            speech["is_session"] = False
+            formatted_items.append(speech)
+            
+        # 4. Format sessions
+        for session in sessions:
+            eval_data = session.get("final_evaluation") or {}
+            display_title = get_display_name(session["interview_type"])
+            
+            duration = 0
+            if session.get("completed_at"):
+                try:
+                    created_dt = datetime.fromisoformat(session["created_at"].replace("Z", "+00:00"))
+                    completed_dt = datetime.fromisoformat(session["completed_at"].replace("Z", "+00:00"))
+                    duration = max(0, int((completed_dt - created_dt).total_seconds()))
+                except Exception:
+                    pass
+            
+            formatted_session = {
+                "id": session["id"],
+                "user_id": session["user_id"],
+                "topic_id": None,
+                "storage_path": "",
+                "original_filename": f"Interview Session ({session['interview_type']})",
+                "mime_type": "",
+                "duration_seconds": duration,
+                "status": session["status"],
+                "transcript": None,
+                "feedback": None,
+                "overall_score": eval_data.get("overall_score"),
+                "pronunciation_score": None,
+                "fluency_score": None,
+                "grammar_score": None,
+                "content_score": None,
+                "lexicon_score": None,
+                "created_at": session["created_at"],
+                "is_session": True,
+                "topics": {
+                    "id": "",
+                    "title": display_title,
+                    "prompt": session.get("roadmap_step", ""),
+                    "category": session.get("roadmap_step", ""),
+                    "module_type": "interview_preparation",
+                    "difficulty": session.get("difficulty", "medium"),
+                    "interview_type": session["interview_type"],
+                    "interview_persona": session["interview_persona"]
+                }
+            }
+            formatted_items.append(formatted_session)
+            
+        # 5. Sort by created_at descending
+        formatted_items.sort(key=lambda x: x["created_at"], reverse=True)
+        
+        # 6. Slice range
+        start_range = (page - 1) * limit
+        end_range = page * limit
+        paginated_items = formatted_items[start_range:end_range]
+        
+        return paginated_items
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to retrieve speech history: {str(e)}"
+            detail=f"Failed to retrieve combined history: {str(e)}"
         )
 
 
@@ -266,24 +370,153 @@ def list_user_speeches(
 def get_user_speech_stats(current_user: dict = Depends(get_current_user)):
     """
     Calculates totals, averages, best scores, improvement trends, and streaks
-    for the authenticated user.
+    for the authenticated user, split by public speaking and interview preparation.
     """
     try:
-        # Fetch all speeches for statistics calculation (sorted chronologically)
-        # Select * to avoid Postgres failing if lexicon_score column doesn't exist yet
-        res = supabase.table("speeches") \
+        # Fetch speeches
+        speeches_res = supabase.table("speeches") \
+            .select("*, topics(*)") \
+            .eq("user_id", current_user["id"]) \
+            .order("created_at", desc=False) \
+            .execute()
+        speeches = speeches_res.data if speeches_res.data else []
+        
+        # Fetch sessions
+        sessions_res = supabase.table("interview_sessions") \
             .select("*") \
             .eq("user_id", current_user["id"]) \
             .order("created_at", desc=False) \
             .execute()
-        
-        speeches = res.data if res.data else []
-        
-        total_speeches = len(speeches)
-        completed_speeches = [s for s in speeches if s["status"] == "completed" and s["overall_score"] is not None]
-        completed_count = len(completed_speeches)
-        
-        # Defaults
+        sessions = sessions_res.data if sessions_res.data else []
+
+        # Get all completed exchanges for the user's sessions to compute lexicon scores
+        session_ids = [sess["id"] for sess in sessions]
+        exchanges_by_session = {}
+        if session_ids:
+            exch_res = supabase.table("interview_exchanges") \
+                .select("session_id, feedback, status") \
+                .in_("session_id", session_ids) \
+                .execute()
+            
+            for row in (exch_res.data or []):
+                sess_id = row["session_id"]
+                if sess_id not in exchanges_by_session:
+                    exchanges_by_session[sess_id] = []
+                exchanges_by_session[sess_id].append(row)
+
+        # Map sessions for stats helper
+        formatted_sessions = []
+        for sess in sessions:
+            eval_data = sess.get("final_evaluation") or {}
+            sess_id = sess["id"]
+            
+            # Compute average lexicon score from completed exchanges
+            lex_scores = []
+            if sess_id in exchanges_by_session:
+                for exch in exchanges_by_session[sess_id]:
+                    if exch["status"] == "completed" and exch.get("feedback"):
+                        val = exch["feedback"].get("lexicon_score")
+                        if val is not None:
+                            lex_scores.append(val)
+            
+            avg_lex = round(sum(lex_scores) / len(lex_scores)) if lex_scores else None
+            
+            formatted_sessions.append({
+                "status": sess["status"],
+                "overall_score": eval_data.get("overall_score"),
+                "lexicon_score": avg_lex,
+                "created_at": sess["created_at"]
+            })
+
+        # Check if the user is the cute superuser
+        is_cute_mode = False
+        email = current_user.get("email", "").strip().lower() if current_user else ""
+        cute_email = settings.superuser_cute_email.strip().lower()
+        if cute_email and email == cute_email:
+            is_cute_mode = True
+
+        # Split stats helper
+        def compute_sub_stats(items_list: list) -> dict:
+            completed_sub = [s for s in items_list if s["status"] == "completed" and s["overall_score"] is not None]
+            count_sub = len(completed_sub)
+            
+            avg_score_sub = 0
+            best_score_sub = 0
+            latest_score_sub = 0
+            avg_lexicon_sub = 0
+            best_lexicon_sub = 0
+            latest_lexicon_sub = 0
+            delta_first_sub = 0
+            delta_prev_sub = 0
+            percent_improvement_sub = 0
+            
+            if count_sub > 0:
+                scores_sub = [s["overall_score"] for s in completed_sub]
+                avg_score_sub = round(sum(scores_sub) / count_sub)
+                best_score_sub = max(scores_sub)
+                latest_score_sub = scores_sub[-1]
+                
+                first_score_sub = scores_sub[0]
+                delta_first_sub = latest_score_sub - first_score_sub
+                
+                if count_sub > 1:
+                    prev_score_sub = scores_sub[-2]
+                    delta_prev_sub = latest_score_sub - prev_score_sub
+                else:
+                    delta_prev_sub = 0
+                    
+                if first_score_sub > 0:
+                    percent_improvement_sub = round((delta_first_sub / first_score_sub) * 100)
+                    
+                # Lexicon calculations
+                lexicon_scores_sub = [s["lexicon_score"] for s in completed_sub if s.get("lexicon_score") is not None]
+                        
+                if lexicon_scores_sub:
+                    avg_lexicon_sub = round(sum(lexicon_scores_sub) / len(lexicon_scores_sub))
+                    best_lexicon_sub = max(lexicon_scores_sub)
+                    latest_lexicon_sub = lexicon_scores_sub[-1]
+                    
+            return {
+                "total_speeches": len(items_list),
+                "completed_speeches": count_sub,
+                "average_overall_score": avg_score_sub,
+                "best_overall_score": best_score_sub,
+                "latest_overall_score": latest_score_sub,
+                "average_lexicon_score": avg_lexicon_sub,
+                "best_lexicon_score": best_lexicon_sub,
+                "latest_lexicon_score": latest_lexicon_sub,
+                "score_delta_first": delta_first_sub,
+                "score_delta_prev": delta_prev_sub,
+                "percent_improvement": percent_improvement_sub
+            }
+
+        # Filter subsets
+        pub_speeches_raw = [
+            s for s in speeches 
+            if not s.get("topics") or s["topics"].get("module_type", "public_speaking") == "public_speaking"
+        ]
+        # format pub speeches raw
+        pub_speeches = []
+        for s in pub_speeches_raw:
+            lex_val = s.get("lexicon_score")
+            if lex_val is None:
+                feedback_obj = s.get("feedback")
+                if isinstance(feedback_obj, dict):
+                    lex_val = feedback_obj.get("lexicon_score")
+            pub_speeches.append({
+                "status": s["status"],
+                "overall_score": s["overall_score"],
+                "lexicon_score": lex_val,
+                "created_at": s["created_at"]
+            })
+
+        # Calculate Overall Stats (combining public_speaking and interview_preparation)
+        total_items = len(pub_speeches) + len(formatted_sessions)
+        completed_pub = [s for s in pub_speeches if s["status"] == "completed" and s["overall_score"] is not None]
+        completed_sess = [s for s in formatted_sessions if s["status"] == "completed" and s["overall_score"] is not None]
+        completed_items = completed_pub + completed_sess
+        completed_count = len(completed_items)
+
         avg_score = 0
         best_score = 0
         latest_score = 0
@@ -295,9 +528,10 @@ def get_user_speech_stats(current_user: dict = Depends(get_current_user)):
         percent_improvement = 0
         current_streak = 0
         longest_streak = 0
-        
+
         if completed_count > 0:
-            scores = [s["overall_score"] for s in completed_speeches]
+            completed_items.sort(key=lambda x: x["created_at"])
+            scores = [x["overall_score"] for x in completed_items]
             avg_score = round(sum(scores) / completed_count)
             best_score = max(scores)
             latest_score = scores[-1]
@@ -315,35 +549,26 @@ def get_user_speech_stats(current_user: dict = Depends(get_current_user)):
                 percent_improvement = round((delta_first / first_score) * 100)
             
             # Lexicon calculations
-            lexicon_scores = []
-            for s in completed_speeches:
-                val = s.get("lexicon_score")
-                if val is None:
-                    feedback_obj = s.get("feedback")
-                    if isinstance(feedback_obj, dict):
-                        val = feedback_obj.get("lexicon_score")
-                if val is not None:
-                    lexicon_scores.append(val)
+            lexicon_scores = [x["lexicon_score"] for x in completed_items if x["lexicon_score"] is not None]
             
             if lexicon_scores:
                 avg_lexicon = round(sum(lexicon_scores) / len(lexicon_scores))
                 best_lexicon = max(lexicon_scores)
                 latest_lexicon = lexicon_scores[-1]
-                
-        # Calculate Streaks based on created_at timestamps
-        if total_speeches > 0:
-            speech_dates = set()
-            for s in speeches:
-                # Standardize UTC timestamp to local date comparison
-                # Speeches display UTC time formatted (e.g. 2026-06-07T12:00:00+00:00)
+
+        # Calculate Combined Streak based on created_at timestamps
+        all_attempts = pub_speeches + formatted_sessions
+        if len(all_attempts) > 0:
+            attempt_dates = set()
+            for s in all_attempts:
                 try:
                     iso_str = s["created_at"].replace("Z", "+00:00")
                     dt = datetime.fromisoformat(iso_str)
-                    speech_dates.add(dt.date())
+                    attempt_dates.add(dt.date())
                 except Exception:
                     pass
             
-            sorted_dates = sorted(list(speech_dates), reverse=True)
+            sorted_dates = sorted(list(attempt_dates), reverse=True)
             
             if len(sorted_dates) > 0:
                 today = date.today()
@@ -359,7 +584,6 @@ def get_user_speech_stats(current_user: dict = Depends(get_current_user)):
                             current_streak += 1
                             streak_idx += 1
                         elif diff.days == 0:
-                            # Safeguard duplicate dates
                             streak_idx += 1
                         else:
                             break
@@ -367,7 +591,7 @@ def get_user_speech_stats(current_user: dict = Depends(get_current_user)):
                     current_streak = 0
                     
                 # Calculate longest streak
-                chron_dates = sorted(list(speech_dates))
+                chron_dates = sorted(list(attempt_dates))
                 if len(chron_dates) > 0:
                     longest_streak = 1
                     temp_streak = 1
@@ -381,16 +605,9 @@ def get_user_speech_stats(current_user: dict = Depends(get_current_user)):
                             temp_streak = 1
                 else:
                     longest_streak = 0
-        
-        # Check if the user is the cute superuser
-        is_cute_mode = False
-        email = current_user.get("email", "").strip().lower() if current_user else ""
-        cute_email = settings.superuser_cute_email.strip().lower()
-        if cute_email and email == cute_email:
-            is_cute_mode = True
 
         return {
-            "total_speeches": total_speeches,
+            "total_speeches": total_items,
             "completed_speeches": completed_count,
             "average_overall_score": avg_score,
             "best_overall_score": best_score,
@@ -405,7 +622,11 @@ def get_user_speech_stats(current_user: dict = Depends(get_current_user)):
             "percent_improvement": percent_improvement,
             "current_streak": current_streak,
             "longest_streak": longest_streak,
-            "is_cute_mode": is_cute_mode
+            "is_cute_mode": is_cute_mode,
+            
+            # Split stats
+            "public_speaking": compute_sub_stats(pub_speeches),
+            "interview_preparation": compute_sub_stats(formatted_sessions)
         }
     except Exception as e:
         raise HTTPException(
@@ -420,35 +641,83 @@ def get_speech_details(
     current_user: dict = Depends(get_current_user)
 ):
     """
-    Retrieves the speech record containing transcript, feedback, and scores.
-    Enforces that the user can only fetch their own speech.
+    Retrieves the speech record containing transcript, feedback, and scores, or interview session details.
+    Enforces that the user can only fetch their own records.
     """
     try:
+        # First check speeches
         res = supabase.table("speeches").select("*, topics(*)").eq("id", speech_id).execute()
-        if not res.data:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Speech record not found."
-            )
-        speech = res.data[0]
-        
-        # Security authorization check
-        if speech["user_id"] != current_user["id"]:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="You do not have permission to view this speech record."
-            )
+        if res.data:
+            speech = res.data[0]
+            # Security authorization check
+            if speech["user_id"] != current_user["id"]:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="You do not have permission to view this speech record."
+                )
+            if speech.get("lexicon_score") is None:
+                feedback_obj = speech.get("feedback")
+                if isinstance(feedback_obj, dict):
+                    speech["lexicon_score"] = feedback_obj.get("lexicon_score")
+            speech["is_session"] = False
+            return speech
             
-        if speech.get("lexicon_score") is None:
-            feedback_obj = speech.get("feedback")
-            if isinstance(feedback_obj, dict):
-                speech["lexicon_score"] = feedback_obj.get("lexicon_score")
-                
-        return speech
+        # Check interview_sessions
+        session_res = supabase.table("interview_sessions").select("*").eq("id", speech_id).execute()
+        if session_res.data:
+            session = session_res.data[0]
+            if session["user_id"] != current_user["id"]:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="You do not have permission to view this session record."
+                )
+            
+            # Fetch exchanges
+            exch_res = supabase.table("interview_exchanges") \
+                .select("*") \
+                .eq("session_id", speech_id) \
+                .order("round_number", desc=False) \
+                .execute()
+            
+            display_title = get_display_name(session["interview_type"])
+            
+            duration = 0
+            if session.get("completed_at"):
+                try:
+                    created_dt = datetime.fromisoformat(session["created_at"].replace("Z", "+00:00"))
+                    completed_dt = datetime.fromisoformat(session["completed_at"].replace("Z", "+00:00"))
+                    duration = max(0, int((completed_dt - created_dt).total_seconds()))
+                except Exception:
+                    pass
+
+            formatted = {
+                **session,
+                "is_session": True,
+                "exchanges": exch_res.data or [],
+                "duration_seconds": duration,
+                "topics": {
+                    "id": "",
+                    "title": display_title,
+                    "prompt": session.get("roadmap_step", ""),
+                    "category": session.get("roadmap_step", ""),
+                    "module_type": "interview_preparation",
+                    "difficulty": session.get("difficulty", "medium"),
+                    "interview_type": session["interview_type"],
+                    "interview_persona": session["interview_persona"]
+                }
+            }
+            if session.get("final_evaluation"):
+                formatted["overall_score"] = session["final_evaluation"].get("overall_score")
+            return formatted
+            
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Speech or session record not found."
+        )
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to retrieve speech details: {str(e)}"
+            detail=f"Failed to retrieve details: {str(e)}"
         )

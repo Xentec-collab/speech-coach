@@ -70,6 +70,9 @@ CREATE TABLE public.topics (
     prompt TEXT NOT NULL,
     context TEXT NOT NULL,
     suggested_points JSONB NOT NULL DEFAULT '[]'::jsonb,
+    module_type TEXT NOT NULL DEFAULT 'public_speaking',
+    interview_type TEXT NULL,
+    interview_persona TEXT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 ```

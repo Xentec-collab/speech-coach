@@ -7,7 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardTitle, CardDescription } from "@/components/ui/card";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -51,67 +51,50 @@ export default function LoginPage() {
 
   if (authLoading) {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-[#fffdf9]">
+      <main className="min-h-screen flex items-center justify-center bg-[#09090b]">
         <div className="flex flex-col items-center gap-3">
-          <span className="w-8 h-8 border-2 border-[#fb7185]/20 border-t-[#fb7185] rounded-full animate-spin"/>
-          <p className="text-xs text-[#2d5a37]/80 font-bold tracking-wide">Verifying session...</p>
+          <span className="w-8 h-8 border-2 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"/>
+          <p className="text-xs text-zinc-400 font-semibold tracking-wide">Verifying session...</p>
         </div>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gradient-to-tr from-[#fffdf9] via-[#fef3e9] to-[#ffe4e6] px-4 py-12 font-sans relative overflow-hidden theme-cute">
-      {/* Soft light spots (blobs) */}
-      <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-[#fef9c3]/20 blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full bg-[#fbcfe8]/15 blur-[120px] pointer-events-none" />
+    <main className="min-h-screen flex items-center justify-center bg-[#09090b] px-4 py-12 font-sans relative overflow-hidden dark">
+      {/* Sleek professional background glow */}
+      <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] rounded-full bg-blue-500/10 blur-[150px] pointer-events-none" />
+      <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-cyan-500/5 blur-[150px] pointer-events-none" />
+      
+      {/* Subtly animated grid pattern */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f1f23_1px,transparent_1px),linear-gradient(to_bottom,#1f1f23_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-30 pointer-events-none" />
 
-      {/* Drifting leaves and flower petals in the background */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-        {/* Leaf 1 */}
-        <svg className="absolute w-5 h-5 text-[#568764]/15 animate-float-leaf top-[15%] left-[25%]" style={{ "--duration": "14s", "--delay": "0s" } as any} viewBox="0 0 24 24" fill="currentColor">
-          <path d="M21 2c-5.5 0-10 4.5-10 10 0 1.2.2 2.3.6 3.4L2 22l6.6-.6c1.1.4 2.2.6 3.4.6 5.5 0 10-4.5 10-10V2h-1z" />
-        </svg>
-        {/* Leaf 2 */}
-        <svg className="absolute w-6 h-6 text-[#2d5a37]/10 animate-float-leaf top-[65%] left-[75%]" style={{ "--duration": "18s", "--delay": "4s" } as any} viewBox="0 0 24 24" fill="currentColor">
-          <path d="M21 2c-5.5 0-10 4.5-10 10 0 1.2.2 2.3.6 3.4L2 22l6.6-.6c1.1.4 2.2.6 3.4.6 5.5 0 10-4.5 10-10V2h-1z" />
-        </svg>
-        {/* Petal 1 */}
-        <svg className="absolute w-4 h-4 text-[#eab308]/20 animate-float-flower top-[35%] right-[20%]" style={{ "--duration": "15s", "--delay": "1s" } as any} viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 2C9.5 5 9.5 9.5 12 12c2.5-2.5 2.5-7 0-10z" />
-        </svg>
-        {/* Petal 2 */}
-        <svg className="absolute w-3.5 h-3.5 text-[#fbbf24]/15 animate-float-flower top-[75%] left-[15%]" style={{ "--duration": "12s", "--delay": "5s" } as any} viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 2C9.5 5 9.5 9.5 12 12c2.5-2.5 2.5-7 0-10z" />
-        </svg>
-      </div>
-
-      {/* Card container with a 1px cozy border */}
-      <div className="relative w-full max-w-md p-[1px] rounded-2xl bg-gradient-to-br from-[#fbbf24]/30 via-[rgba(21,46,27,0.15)] to-[#fb7185]/30 shadow-2xl z-10">
-        <Card className="w-full bg-white/45 backdrop-blur-xl border border-[rgba(86,135,100,0.18)] rounded-[15px] p-6 space-y-6">
-          <CardHeader className="text-center space-y-3 p-0 pt-2">
-            {/* Logo Badge */}
-            <div className="mx-auto w-12 h-12 rounded-xl bg-gradient-to-br from-[#fbbf24] to-[#fb7185] flex items-center justify-center text-white font-black text-xl shadow-md shadow-[#fb7185]/10 select-none animate-float-flower" style={{ "--duration": "10s" } as any}>
+      {/* Card */}
+      <div className="relative w-full max-w-md p-[1px] rounded-2xl bg-gradient-to-b from-zinc-800 to-transparent shadow-2xl z-10 anim-scalein">
+        <div className="w-full bg-zinc-900/60 backdrop-blur-2xl border border-zinc-800/50 rounded-[15px] p-8 space-y-6">
+          <div className="text-center space-y-3">
+            {/* Logo */}
+            <div className="mx-auto w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-blue-500/20 select-none">
               S
             </div>
             <div>
-              <CardTitle className="text-2xl font-black tracking-tight text-[#112615]">Welcome Back</CardTitle>
-              <CardDescription className="text-xs text-[#2d5a37]/80 mt-1.5 font-extrabold tracking-wide leading-relaxed uppercase">
+              <CardTitle className="text-2xl font-bold tracking-tight text-zinc-100">Welcome Back</CardTitle>
+              <CardDescription className="text-xs text-zinc-400 mt-1.5 font-medium leading-relaxed uppercase tracking-wider">
                 Evaluate & Perfect Your Speech
               </CardDescription>
             </div>
-          </CardHeader>
+          </div>
 
-          <CardContent className="p-0 space-y-6">
+          <div className="p-0 space-y-6">
             {errorMsg && (
-              <div className="p-3 bg-red-50/70 border border-red-200 rounded-lg text-xs font-semibold text-red-700">
+              <div className="p-3.5 bg-red-950/40 border border-red-900/50 rounded-xl text-xs font-semibold text-red-400 anim-fadeup">
                 {errorMsg}
               </div>
             )}
 
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div className="space-y-1.5">
-                <Label htmlFor="email" className="text-[10px] text-[#2d5a37]/80 font-extrabold uppercase tracking-wider">
+            <form onSubmit={handleLogin} className="space-y-5">
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-xs text-zinc-400 font-bold uppercase tracking-wider">
                   Email Address
                 </Label>
                 <Input
@@ -120,13 +103,13 @@ export default function LoginPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="text-sm h-11 border-[rgba(21,46,27,0.18)] bg-white/60 text-[#112615] placeholder:text-[#2d5a37]/35 focus-visible:ring-[#fb7185] rounded-lg transition-all focus:border-[#fb7185]/50"
+                  className="text-sm h-11 border-zinc-800 bg-zinc-950/80 text-zinc-100 placeholder:text-zinc-600 rounded-xl transition-all focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30"
                   placeholder="name@example.com"
                 />
               </div>
 
-              <div className="space-y-1.5">
-                <Label htmlFor="password" className="text-[10px] text-[#2d5a37]/80 font-extrabold uppercase tracking-wider">
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-xs text-zinc-400 font-bold uppercase tracking-wider">
                   Password
                 </Label>
                 <Input
@@ -135,7 +118,7 @@ export default function LoginPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="text-sm h-11 border-[rgba(21,46,27,0.18)] bg-white/60 text-[#112615] placeholder:text-[#2d5a37]/35 focus-visible:ring-[#fb7185] rounded-lg transition-all focus:border-[#fb7185]/50"
+                  className="text-sm h-11 border-zinc-800 bg-zinc-950/80 text-zinc-100 placeholder:text-zinc-600 rounded-xl transition-all focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30"
                   placeholder="••••••••"
                 />
               </div>
@@ -143,20 +126,20 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-[#fb7185] text-white font-extrabold text-sm h-11 mt-4 rounded-lg hover:bg-[#f43f5e] transition-all shadow-md shadow-[#fb7185]/15 hover:scale-[1.02] active:scale-[0.98]"
+                className="w-full bg-blue-600 text-white font-semibold text-sm h-11 mt-2 rounded-xl hover:bg-blue-500 transition-all shadow-lg shadow-blue-600/10 hover:shadow-blue-600/20 hover:scale-[1.01] active:scale-[0.99]"
               >
                 {loading ? "Signing in..." : "Log In"}
               </Button>
             </form>
 
-            <div className="text-center text-xs text-[#2d5a37]/75">
+            <div className="text-center text-sm text-zinc-500">
               Don&apos;t have an account?{" "}
-              <Link href="/register" className="text-[#fb7185] hover:underline font-bold transition-all ml-1">
+              <Link href="/register" className="text-blue-400 hover:text-blue-300 hover:underline font-semibold transition-all ml-1">
                 Sign up
               </Link>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </main>
   );

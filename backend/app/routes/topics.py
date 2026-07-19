@@ -12,6 +12,8 @@ class DbGeneratedTopic(BaseModel):
     prompt: str
     context: str
     suggested_points: list[str]
+    evaluation_criteria: str | None = None
+    follow_up_question: str | None = None
 
 
 class DbTopicListResponse(BaseModel):
@@ -20,21 +22,74 @@ class DbTopicListResponse(BaseModel):
 
 @router.get("/generate", response_model=DbTopicListResponse)
 def generate_topic(
-    category: str = Query("impromptu", description="Speaking category (e.g. impromptu, interview, persuasive, warmup)"),
+    module_type: str = Query("public_speaking", description="Coaching module (public_speaking or interview_preparation)"),
+    category: str = Query(None, description="Speaking category (required for public_speaking, optional roadmap stage for interview)"),
+    interview_type: str = Query(None, description="Interview type (required for interview_preparation)"),
+    interview_persona: str = Query("friendly", description="Interview persona (friendly, strict, corporate, government_panel, ivy_league, mba_panel)"),
     difficulty: str = Query("medium", description="Difficulty level (e.g. easy, medium, hard)"),
     custom_topic: str = Query(None, description="Optional custom topic or theme"),
     current_user: dict = Depends(get_current_user),
 ) -> DbTopicListResponse:
     """
-    Generates a new coaching topic prompt using Gemini, saves the generated topic
-    to the Supabase database under the user's ID, and returns the response with DB IDs.
+    Generates a new coaching topic prompt using Gemini (optionally enriched from the curated question bank),
+    saves the generated topic to the Supabase database, and returns it.
     """
+    curated_question = None
+    curated_context = None
+    expected_topics = None
+
+    # Normalize inputs
+    if module_type == "interview_preparation":
+        if not interview_type:
+            interview_type = "cat_gdpi"
+        category_val = category if category else "interview"
+
+        # Pull random question from curated question bank if not custom topic
+        if not custom_topic:
+            try:
+                query = supabase.table("interview_question_bank").select("*").eq("interview_type", interview_type)
+                if category_val != "interview":
+                    query = query.eq("category", category_val)
+                if difficulty:
+                    query = query.eq("difficulty", difficulty.lower())
+                
+                res = query.execute()
+                questions = res.data if res.data else []
+
+                # Fallback: ignore difficulty if no questions found matching difficulty
+                if not questions and difficulty:
+                    query_fallback = supabase.table("interview_question_bank").select("*").eq("interview_type", interview_type)
+                    if category_val != "interview":
+                        query_fallback = query_fallback.eq("category", category_val)
+                    res_fallback = query_fallback.execute()
+                    questions = res_fallback.data if res_fallback.data else []
+
+                if questions:
+                    import random
+                    selected_q = random.choice(questions)
+                    curated_question = selected_q["question"]
+                    curated_context = selected_q.get("context")
+                    expected_topics = selected_q.get("expected_topics")
+                    category_val = selected_q["category"]
+            except Exception as e:
+                print(f"Warning: failed to query interview bank, fallback to AI generation: {e}")
+    else:
+        if not category:
+            category = "impromptu"
+        category_val = category
+
     # 1. Generate structured topic using Gemini
     topic_list = generate_speaking_topics(
-        category=category,
+        category=category_val,
         difficulty=difficulty,
         count=1,
-        custom_topic=custom_topic
+        custom_topic=custom_topic,
+        module_type=module_type,
+        interview_type=interview_type,
+        interview_persona=interview_persona,
+        curated_question=curated_question,
+        curated_context=curated_context,
+        expected_topics=expected_topics
     )
 
     if not topic_list.topics:
@@ -49,12 +104,17 @@ def generate_topic(
         try:
             db_data = {
                 "user_id": current_user["id"],
-                "category": category,
+                "category": category_val,
                 "difficulty": difficulty,
                 "title": topic.title,
                 "prompt": topic.prompt,
                 "context": topic.context,
                 "suggested_points": topic.suggested_points,
+                "module_type": module_type,
+                "interview_type": interview_type if module_type == "interview_preparation" else None,
+                "interview_persona": interview_persona if module_type == "interview_preparation" else None,
+                "evaluation_criteria": topic.evaluation_criteria if module_type == "interview_preparation" else None,
+                "follow_up_question": topic.follow_up_question if module_type == "interview_preparation" else None
             }
             
             # Execute database insert
@@ -69,7 +129,9 @@ def generate_topic(
                     title=topic.title,
                     prompt=topic.prompt,
                     context=topic.context,
-                    suggested_points=topic.suggested_points
+                    suggested_points=topic.suggested_points,
+                    evaluation_criteria=topic.evaluation_criteria,
+                    follow_up_question=topic.follow_up_question
                 )
             )
         except Exception as e:
