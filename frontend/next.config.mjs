@@ -9,12 +9,7 @@ const nextConfig = {
   },
   async rewrites() {
     if (process.env.VERCEL) {
-      return [
-        {
-          source: '/api/:path*',
-          destination: '/api'
-        }
-      ];
+      return [];
     }
     return [
       {
