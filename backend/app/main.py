@@ -20,7 +20,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origin_regex=r"https?://.*",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -37,13 +37,11 @@ app.include_router(knowledge_router, prefix="/api/knowledge", tags=["knowledge"]
 app.include_router(ai_coach_router, prefix="/api/coach", tags=["coach"])
 
 
-
 @app.get("/")
-def root() -> dict[str, str]:
-    return {"status": "ok", "message": "AI Public Speaking Coach Backend API is online!"}
+def read_root():
+    return {"status": "healthy", "service": "AI Public Speaking Coach API"}
 
 
 @app.get("/health")
-def health_check() -> dict[str, str]:
+def health_check():
     return {"status": "ok"}
-
