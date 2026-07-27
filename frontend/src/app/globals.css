@@ -27,6 +27,9 @@
     --input:             214.3 31.8% 91.4%;
     --ring:              221.2 83.2% 53.3%;
     --radius:            0.5rem;
+    --ease-out:          cubic-bezier(0.23, 1, 0.32, 1);
+    --ease-in-out:       cubic-bezier(0.77, 0, 0.175, 1);
+    --ease-drawer:       cubic-bezier(0.32, 0.72, 0, 1);
   }
 
   .dark {
@@ -88,6 +91,7 @@
   --accent-hover:   #1d4ed8;
   --accent-bg:      rgba(37, 99, 235, 0.06);
   --accent-border:  rgba(37, 99, 235, 0.15);
+  --accent-hover-border: rgba(37, 99, 235, 0.40);
   --accent-text:    #1d4ed8;
   --progress-bg:    #f1f5f9;
   --progress-bar:   #2563eb;
@@ -99,6 +103,7 @@
   --sidebar-hover-bg:      rgba(15, 23, 42, 0.03);
   --sidebar-active-text:   #1d4ed8;
   --sidebar-text:          #334155;
+  --sidebar-text-muted:    rgba(51, 65, 85, 0.7);
   --sidebar-text-hover:    #0f172a;
   --sidebar-subtext:       #64748b;
   --logo-gradient:         linear-gradient(135deg, #2563eb, #06b6d4);
@@ -110,7 +115,7 @@
   --transcript-bg:      #f1f5f9;
   --stat-card-bg:       #ffffff;
   --transcript-text:     #0f172a;
-  --transcript-muted:    #64748b;
+  --transcript-muted:    #475569;
   --transcript-border:   #e2e8f0;
 }
 
@@ -149,6 +154,7 @@
   --accent-hover:   #2563eb;
   --accent-bg:      rgba(59, 130, 246, 0.08);
   --accent-border:  rgba(59, 130, 246, 0.20);
+  --accent-hover-border: rgba(59, 130, 246, 0.40);
   --accent-text:    #60a5fa;
   --progress-bg:    #18181b;
   --progress-bar:   #3b82f6;
@@ -160,6 +166,7 @@
   --sidebar-hover-bg:      rgba(255, 255, 255, 0.02);
   --sidebar-active-text:   #60a5fa;
   --sidebar-text:          #a1a1aa;
+  --sidebar-text-muted:    rgba(161, 161, 170, 0.7);
   --sidebar-text-hover:    #f4f4f5;
   --sidebar-subtext:       #71717a;
   --logo-gradient:         linear-gradient(135deg, #3b82f6, #06b6d4);
@@ -224,8 +231,11 @@ input:focus, textarea:focus, [role=combobox]:focus {
 }
 
 /* Buttons */
-button[data-slot="button"] {
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+button[data-slot="button"],
+.btn-tactile,
+aside button,
+[role="tab"] {
+  transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1), border-color 150ms cubic-bezier(0.4, 0, 0.2, 1), color 150ms cubic-bezier(0.4, 0, 0.2, 1), transform 100ms cubic-bezier(0.23, 1, 0.32, 1) !important;
 }
 
 button[data-slot="button"].bg-primary {
@@ -236,6 +246,15 @@ button[data-slot="button"].bg-primary {
 
 button[data-slot="button"].bg-primary:hover {
   background-color: var(--accent-hover) !important;
+}
+
+/* Tactile Active Press Feedback */
+button:active, 
+.button:active, 
+[role="tab"]:active,
+aside button:active,
+button[data-slot="button"]:active {
+  transform: scale(0.97) !important;
 }
 
 /* ── Base ─────────────────────────────────────────────────────────────────── */

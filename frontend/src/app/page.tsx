@@ -132,59 +132,129 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── Feature Highlights ──────────────────────────────────────────── */}
+        {/* ── Feature Highlights (Bento Grid) ─────────────────────────────── */}
         <section className="px-6 md:px-12 max-w-6xl mx-auto w-full pb-28">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-black tracking-tight mb-4">Everything You Need</h2>
             <p className="text-sm text-[var(--text-secondary)] max-w-lg mx-auto leading-relaxed">Comprehensive tools to transform your speaking skills from good to extraordinary.</p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             
-            {/* Feature 1 */}
-            <div className="group relative p-[1px] rounded-2xl bg-gradient-to-b from-[var(--border-color)] to-transparent hover:from-[var(--accent-color)]/30 hover:to-[var(--accent-color)]/5 transition-all duration-500">
-              <div className="relative bg-[var(--bg-card)] rounded-[15px] p-8 h-full overflow-hidden border border-[var(--border-color)]">
+            {/* Cell 1: Practice Terminal (Wide 2-col) */}
+            <div className="md:col-span-2 group relative p-[1px] rounded-2xl bg-gradient-to-b from-[var(--border-color)] to-transparent hover:from-[var(--accent-color)]/30 hover:to-[var(--accent-color)]/5 transition-all duration-500">
+              <div className="relative bg-[var(--bg-card)] rounded-[15px] p-8 h-full overflow-hidden border border-[var(--border-color)] flex flex-col md:flex-row gap-6">
                 <div className="absolute inset-0 bg-gradient-to-br from-[var(--accent-color)]/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <div className="relative z-10">
-                  <div className="w-12 h-12 rounded-xl bg-[var(--accent-bg)] border border-[var(--accent-border)] flex items-center justify-center text-[var(--accent-color)] mb-6 group-hover:scale-110 transition-transform duration-300">
-                    <Mic className="w-5 h-5" />
+                <div className="relative z-10 flex-1 flex flex-col justify-between">
+                  <div>
+                    <div className="w-12 h-12 rounded-xl bg-[var(--accent-bg)] border border-[var(--accent-border)] flex items-center justify-center text-[var(--accent-color)] mb-6 group-hover:scale-105 transition-transform duration-300">
+                      <Mic className="w-5 h-5" />
+                    </div>
+                    <CardTitle className="text-xl font-black tracking-tight mb-3">Speech Practice Terminal</CardTitle>
+                    <p className="text-sm text-[var(--text-secondary)] leading-relaxed max-w-[32ch]">
+                      Record responses directly in your browser. Composes live wave shapes, precise timers, and instant speech transcription annotations.
+                    </p>
                   </div>
-                  <CardTitle className="text-lg font-bold tracking-tight mb-3">Practice Terminal</CardTitle>
-                  <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
-                    Record directly in your browser with real-time feedback. Includes integrated timers, pause options, and immediate audio transcription.
-                  </p>
+                  <div className="mt-6">
+                    <span className="text-[10px] font-black uppercase text-[var(--accent-text)] tracking-wider">Practice Console →</span>
+                  </div>
+                </div>
+                {/* Visual Terminal Panel */}
+                <div className="relative flex-1 bg-muted/30 dark:bg-zinc-900/40 rounded-xl border border-border/60 p-4 font-mono text-[11px] overflow-hidden min-h-[140px] flex flex-col justify-between select-none">
+                  <div className="flex items-center gap-1.5 pb-2 border-b border-border/40 shrink-0">
+                    <span className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-500/80" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80" />
+                    <span className="text-[10px] text-muted-foreground/60 ml-2">terminal.sh</span>
+                  </div>
+                  <div className="space-y-1.5 flex-1 pt-3 text-muted-foreground">
+                    <p className="text-[var(--accent-text)] font-semibold">$ speak-coach --listen</p>
+                    <p className="text-foreground leading-normal">
+                      "I believe that <span className="px-1.5 py-0.5 rounded bg-red-500/10 text-red-600 dark:text-red-400 font-bold border border-red-500/20 font-sans">uh</span> mental health is <span className="px-1 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold border border-amber-500/20 font-sans">like</span> a critical topic..."
+                    </p>
+                  </div>
+                  <div className="text-[10px] text-emerald-500 font-bold shrink-0 pt-2 flex justify-between items-center">
+                    <span>• Evaluation active</span>
+                    <span>1m 25s</span>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Feature 2 */}
+            {/* Cell 2: Structure-First Feedback (1-col) */}
             <div className="group relative p-[1px] rounded-2xl bg-gradient-to-b from-[var(--border-color)] to-transparent hover:from-[var(--accent-color)]/30 hover:to-[var(--accent-color)]/5 transition-all duration-500">
-              <div className="relative bg-[var(--bg-card)] rounded-[15px] p-8 h-full overflow-hidden border border-[var(--border-color)]">
+              <div className="relative bg-[var(--bg-card)] rounded-[15px] p-8 h-full overflow-hidden border border-[var(--border-color)] flex flex-col justify-between">
                 <div className="absolute inset-0 bg-gradient-to-br from-[var(--accent-color)]/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <div className="relative z-10">
-                  <div className="w-12 h-12 rounded-xl bg-[var(--accent-bg)] border border-[var(--accent-border)] flex items-center justify-center text-[var(--accent-color)] mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <div className="w-12 h-12 rounded-xl bg-[var(--accent-bg)] border border-[var(--accent-border)] flex items-center justify-center text-[var(--accent-color)] mb-6 group-hover:scale-105 transition-transform duration-300">
                     <ShieldCheck className="w-5 h-5" />
                   </div>
-                  <CardTitle className="text-lg font-bold tracking-tight mb-3">Structure-First Feedback</CardTitle>
+                  <CardTitle className="text-lg font-black tracking-tight mb-3">AI Coach Evaluations</CardTitle>
                   <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
-                    Get scored on clarity, pacing, grammar, content structure, and vocabulary. Automatically highlights and flags common filler words.
+                    Evaluates clarity, pacing, vocabulary quality, and sentence structures. Identifies exact moments where filler words and unnecessary pauses occur.
                   </p>
+                </div>
+                <div className="mt-6 z-10">
+                  <span className="text-[10px] font-black uppercase text-[var(--accent-text)] tracking-wider">Coach Core →</span>
                 </div>
               </div>
             </div>
 
-            {/* Feature 3 */}
+            {/* Cell 3: Dashboard Analytics (1-col) */}
             <div className="group relative p-[1px] rounded-2xl bg-gradient-to-b from-[var(--border-color)] to-transparent hover:from-[var(--accent-color)]/30 hover:to-[var(--accent-color)]/5 transition-all duration-500">
-              <div className="relative bg-[var(--bg-card)] rounded-[15px] p-8 h-full overflow-hidden border border-[var(--border-color)]">
+              <div className="relative bg-[var(--bg-card)] rounded-[15px] p-8 h-full overflow-hidden border border-[var(--border-color)] flex flex-col justify-between">
                 <div className="absolute inset-0 bg-gradient-to-br from-[var(--accent-color)]/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <div className="relative z-10">
-                  <div className="w-12 h-12 rounded-xl bg-[var(--accent-bg)] border border-[var(--accent-border)] flex items-center justify-center text-[var(--accent-color)] mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <div className="w-12 h-12 rounded-xl bg-[var(--accent-bg)] border border-[var(--accent-border)] flex items-center justify-center text-[var(--accent-color)] mb-6 group-hover:scale-105 transition-transform duration-300">
                     <BarChart2 className="w-5 h-5" />
                   </div>
-                  <CardTitle className="text-lg font-bold tracking-tight mb-3">Cohesive Dashboard</CardTitle>
+                  <CardTitle className="text-lg font-black tracking-tight mb-3">Cohesive Dashboard</CardTitle>
                   <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
-                    Visualize improvement analytics, best scores, streak calendars, and vocabulary upgrades. Includes dual theme skins for customization.
+                    Track overall scores, vocabulary improvements, and daily practice streaks. Switch dynamically between premium light and dark workspace themes.
                   </p>
+                </div>
+                <div className="mt-6 z-10">
+                  <span className="text-[10px] font-black uppercase text-[var(--accent-text)] tracking-wider">Analytics →</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Cell 4: Interview Pathways (Wide 2-col) */}
+            <div className="md:col-span-2 group relative p-[1px] rounded-2xl bg-gradient-to-b from-[var(--border-color)] to-transparent hover:from-[var(--accent-color)]/30 hover:to-[var(--accent-color)]/5 transition-all duration-500">
+              <div className="relative bg-[var(--bg-card)] rounded-[15px] p-8 h-full overflow-hidden border border-[var(--border-color)] flex flex-col md:flex-row gap-6">
+                <div className="absolute inset-0 bg-gradient-to-br from-[var(--accent-color)]/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="relative z-10 flex-1 flex flex-col justify-between">
+                  <div>
+                    <div className="w-12 h-12 rounded-xl bg-[var(--accent-bg)] border border-[var(--accent-border)] flex items-center justify-center text-[var(--accent-color)] mb-6 group-hover:scale-105 transition-transform duration-300">
+                      <Sparkles className="w-5 h-5" />
+                    </div>
+                    <CardTitle className="text-xl font-black tracking-tight mb-3">Interview Pathway Roadmaps</CardTitle>
+                    <p className="text-sm text-[var(--text-secondary)] leading-relaxed max-w-[32ch]">
+                      Practice pathways like Behavioral Prep, Software Engineering, or Public Speaking. Advance through difficulties and unlock milestones.
+                    </p>
+                  </div>
+                  <div className="mt-6">
+                    <span className="text-[10px] font-black uppercase text-[var(--accent-text)] tracking-wider">Pathways →</span>
+                  </div>
+                </div>
+                {/* Visual Pathway Nodes */}
+                <div className="relative flex-1 bg-muted/30 dark:bg-zinc-900/40 rounded-xl border border-border/60 p-4 overflow-hidden min-h-[140px] flex flex-col justify-center gap-3 select-none">
+                  {[
+                    { label: "Level 1: Tell Me About Yourself", status: "completed", color: "bg-emerald-500" },
+                    { label: "Level 2: Handling Conflict", status: "active", color: "bg-blue-500 animate-pulse" },
+                    { label: "Level 3: Behavioral Analysis", status: "locked", color: "bg-muted-foreground/30" }
+                  ].map((lvl, index) => (
+                    <div key={index} className="flex items-center gap-3 relative z-10">
+                      <span className={`w-3.5 h-3.5 rounded-full shrink-0 flex items-center justify-center text-[8px] font-bold text-white ${lvl.color}`}>
+                        {lvl.status === "completed" ? "✓" : index + 1}
+                      </span>
+                      <span className="text-xs font-semibold text-foreground truncate">{lvl.label}</span>
+                      <span className={`text-[8.5px] font-extrabold uppercase px-1.5 py-0.5 rounded border ml-auto ${
+                        lvl.status === "completed" ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-600" :
+                        lvl.status === "active" ? "bg-blue-500/10 border-blue-500/20 text-blue-600" : "bg-muted border-border text-muted-foreground"
+                      }`}>{lvl.status}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>

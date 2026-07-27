@@ -61,7 +61,7 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-[#09090b] px-4 py-12 font-sans relative overflow-hidden dark">
+    <main className="min-h-screen flex items-center justify-center bg-[#09090b] px-4 py-12 font-sans relative overflow-hidden theme-dark dark">
       {/* Sleek professional background glow */}
       <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] rounded-full bg-blue-500/10 blur-[150px] pointer-events-none" />
       <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-cyan-500/5 blur-[150px] pointer-events-none" />
@@ -126,7 +126,7 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-blue-600 text-white font-semibold text-sm h-11 mt-2 rounded-xl hover:bg-blue-500 transition-all shadow-lg shadow-blue-600/10 hover:shadow-blue-600/20 hover:scale-[1.01] active:scale-[0.99]"
+                className="w-full bg-primary text-primary-foreground font-semibold text-sm h-11 mt-2 rounded-xl hover:opacity-90 transition-all shadow-lg shadow-primary/10 hover:shadow-primary/20"
               >
                 {loading ? "Signing in..." : "Log In"}
               </Button>
