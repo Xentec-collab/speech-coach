@@ -81,11 +81,20 @@ export default function HomePage() {
 
       {/* ── Hero Section ─────────────────────────────────────────────────── */}
       <main className="flex-1 flex flex-col z-10">
-        <section className="relative py-24 md:py-36 lg:py-44 px-6 md:px-12 text-center max-w-5xl mx-auto flex flex-col items-center">
+        <section className="relative py-20 md:py-32 lg:py-40 px-6 md:px-12 text-center max-w-5xl mx-auto flex flex-col items-center">
           
-          <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[11px] font-bold bg-[var(--accent-bg)] border border-[var(--accent-border)] text-[var(--accent-text)] uppercase tracking-[0.15em] mb-10 anim-fadeup select-none">
-            <Sparkles className="w-3.5 h-3.5" /> AI-Powered Speech Training
-          </span>
+          {/* Ambient Glow */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-blue-500/10 dark:bg-blue-500/15 blur-[120px] rounded-full pointer-events-none -z-10" />
+
+          {/* Top Pill Badge */}
+          <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full text-xs font-semibold bg-blue-500/[0.08] dark:bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 backdrop-blur-md mb-8 shadow-[0_0_20px_rgba(59,130,246,0.12)] transition-all hover:border-blue-500/40 select-none anim-fadeup">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+            </span>
+            <span className="tracking-wide">AI-Powered Speech Training</span>
+            <Sparkles className="w-3.5 h-3.5 opacity-70 ml-0.5" />
+          </div>
           
           <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-[-0.035em] leading-[1.05] mb-8 anim-fadeup" style={{ animationDelay: '0.1s' }}>
             Master the Art of{' '}
@@ -99,22 +108,22 @@ export default function HomePage() {
             Record speeches, receive instant structure-first AI feedback on clarity, fluency, and lexicon. Track metrics over time with interactive dashboards and custom speech roadmaps.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center w-full max-w-sm sm:max-w-none anim-fadeup" style={{ animationDelay: '0.3s' }}>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center w-full max-w-sm sm:max-w-none anim-fadeup" style={{ animationDelay: '0.3s' }}>
             {user ? (
               <Link href="/dashboard" className="w-full sm:w-auto">
-                <Button size="lg" className="bg-primary text-primary-foreground font-extrabold px-10 w-full h-13 rounded-xl hover:opacity-90 transition-all gap-2.5 shadow-xl shadow-primary/20 text-sm">
+                <Button size="lg" className="bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-bold h-12 px-8 rounded-full shadow-[0_0_25px_rgba(37,99,235,0.3)] hover:shadow-[0_0_35px_rgba(37,99,235,0.5)] transition-all duration-300 hover:scale-[1.02] flex items-center justify-center gap-2.5 text-sm w-full sm:w-auto">
                   Go to Dashboard <ArrowRight className="w-4 h-4" />
                 </Button>
               </Link>
             ) : (
               <>
                 <Link href="/register" className="w-full sm:w-auto">
-                  <Button size="lg" className="bg-primary text-primary-foreground font-extrabold px-10 w-full h-13 rounded-xl hover:opacity-90 transition-all shadow-xl shadow-primary/20 text-sm">
-                    Start Practicing Free
+                  <Button size="lg" className="bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-bold h-12 px-8 rounded-full shadow-[0_0_25px_rgba(37,99,235,0.3)] hover:shadow-[0_0_35px_rgba(37,99,235,0.5)] transition-all duration-300 hover:scale-[1.02] flex items-center justify-center gap-2 text-sm w-full sm:w-auto group">
+                    Start Practicing Free <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                   </Button>
                 </Link>
                 <Link href="/login" className="w-full sm:w-auto">
-                  <Button size="lg" variant="outline" className="border-[var(--border-color)] bg-[var(--bg-card)]/50 text-[var(--text-primary)] hover:bg-[var(--bg-card)] w-full h-13 rounded-xl font-bold transition-all text-sm backdrop-blur-sm">
+                  <Button size="lg" variant="outline" className="h-12 px-8 rounded-full font-semibold border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 bg-slate-100/80 dark:bg-white/[0.04] hover:bg-slate-200/80 dark:hover:bg-white/[0.08] text-slate-800 dark:text-zinc-200 hover:text-slate-900 dark:hover:text-white transition-all duration-300 backdrop-blur-md flex items-center justify-center text-sm w-full sm:w-auto">
                     Sign In
                   </Button>
                 </Link>
@@ -123,8 +132,8 @@ export default function HomePage() {
           </div>
 
           {/* Subtle trust indicators */}
-          <div className="flex items-center gap-6 mt-14 text-[11px] text-[var(--text-secondary)]/60 font-medium anim-fadeup" style={{ animationDelay: '0.5s' }}>
-            <span className="flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5" /> Privacy-First</span>
+          <div className="flex items-center justify-center gap-6 mt-14 text-[11px] text-[var(--text-secondary)]/70 font-medium anim-fadeup" style={{ animationDelay: '0.4s' }}>
+            <span className="flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 text-blue-500" /> Privacy-First</span>
             <span className="w-1 h-1 rounded-full bg-[var(--text-secondary)]/30" />
             <span>No Credit Card</span>
             <span className="w-1 h-1 rounded-full bg-[var(--text-secondary)]/30" />
