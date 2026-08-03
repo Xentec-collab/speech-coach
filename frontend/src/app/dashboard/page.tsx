@@ -16,7 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
-import { Sun, Moon, BarChart2 } from "lucide-react";
+import { Sun, Moon, BarChart2, Menu, X, History, Mic, Layers, BookOpen, Bot } from "lucide-react";
 
 // ── Interfaces ────────────────────────────────────────────────────────────────
 interface GeneratedTopic {
@@ -602,6 +602,7 @@ export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState<"console" | "tracks" | "library" | "coach">("console");
   const [cachedIsCute, setCachedIsCute] = useState<boolean>(false);
   const [showDrawer, setShowDrawer] = useState(false);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [showWelcomeOverlay, setShowWelcomeOverlay] = useState(false);
   const [historyFilter, setHistoryFilter] = useState<"all" | "speaking" | "interview">("all");
   const [activeSession, setActiveSession] = useState<any | null>(null);
@@ -3021,9 +3022,10 @@ export default function DashboardPage() {
           : "bg-card border-l border-border"
         }`}
         style={{
-          width:"460px",
-          transform:showDrawer?"translateX(0)":"translateX(100%)",
-          transition:"transform 0.28s cubic-bezier(0.32,0.72,0,1), background-color 0.3s, border-color 0.3s"
+          width: "min(460px, 100vw)",
+          maxWidth: "100vw",
+          transform: showDrawer ? "translateX(0)" : "translateX(100%)",
+          transition: "transform 0.28s cubic-bezier(0.32,0.72,0,1), background-color 0.3s, border-color 0.3s"
         }}
       >
         {/* Living Garden Backdrop for Drawer */}
@@ -3321,8 +3323,8 @@ export default function DashboardPage() {
       {/* ── Dashboard Layout ─────────────────────────────────────────────── */}
       <div className="flex flex-1 overflow-hidden z-10 w-full h-full">
 
-        {/* ── LEFT SIDEBAR ───────────────────────────────────────────────── */}
-        <aside className="w-[260px] shrink-0 border-r border-[var(--border-sidebar)] bg-[var(--bg-sidebar)] flex flex-col overflow-hidden backdrop-blur-md">
+        {/* ── LEFT SIDEBAR (DESKTOP) ─────────────────────────────────────── */}
+        <aside className="hidden md:flex w-[260px] shrink-0 border-r border-[var(--border-sidebar)] bg-[var(--bg-sidebar)] flex-col overflow-hidden backdrop-blur-md">
           {/* Logo Area */}
           <div className="p-4 border-b border-[var(--border-sidebar)]/60 flex items-center justify-between flex-shrink-0 bg-transparent">
             <div className="flex items-center gap-2 select-none">
@@ -3539,32 +3541,53 @@ export default function DashboardPage() {
         </aside>
 
         {/* ── CENTER PANEL ───────────────────────────────────────────────── */}
-        <main className={`flex-1 overflow-y-auto flex flex-col ${isCute ? "bg-transparent" : "bg-background"}`}>
+        <main className={`flex-1 overflow-y-auto flex flex-col pb-20 md:pb-0 ${isCute ? "bg-transparent" : "bg-background"}`}>
           {/* Top Breadcrumb Bar */}
           {!activeSession && (
-            <header className="h-14 border-b border-[var(--border-sidebar)]/60 bg-[var(--bg-sidebar)]/85 backdrop-blur-md flex items-center justify-between px-6 flex-shrink-0 z-10 sticky top-0">
-              <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground select-none">
-                <span>Dashboard</span>
-                <span className="text-[10px] text-muted-foreground/50">/</span>
+            <header className="h-14 border-b border-[var(--border-sidebar)]/60 bg-[var(--bg-sidebar)]/85 backdrop-blur-md flex items-center justify-between px-4 sm:px-6 flex-shrink-0 z-10 sticky top-0">
+              <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground select-none min-w-0">
+                <button
+                  onClick={() => setMobileSidebarOpen(true)}
+                  className="md:hidden p-1.5 -ml-1 text-foreground hover:bg-muted/60 rounded-lg shrink-0"
+                  aria-label="Open menu"
+                >
+                  <Menu className="w-5 h-5" />
+                </button>
+                <span className="hidden sm:inline">Dashboard</span>
+                <span className="hidden sm:inline text-[10px] text-muted-foreground/50">/</span>
                 {uploadSuccess && polledSpeechDetails ? (
-                  <span className="text-foreground truncate max-w-[200px]">
+                  <span className="text-foreground truncate max-w-[150px] sm:max-w-[200px]">
                     {polledSpeechDetails?.topics?.title || "Speech Evaluation"}
                   </span>
                 ) : (
-                  <span className="text-foreground">
+                  <span className="text-foreground truncate">
                     {activeTab === "console" ? "Practice Console" :
                      activeTab === "tracks" ? "Interview Tracks" :
                      activeTab === "library" ? "Knowledge Library" : "AI Coach"}
                   </span>
                 )}
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 sm:gap-3 shrink-0">
                 {uploadSuccess && polledSpeechDetails?.overall_score !== null && (
                   <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--accent-bg)] text-[var(--accent-text)] border border-[var(--accent-border)] text-[10px] font-extrabold uppercase tracking-wide">
                     <span>Score:</span>
                     <span className="tabular-nums">{polledSpeechDetails?.overall_score}/100</span>
                   </div>
                 )}
+                {/* Mobile Theme Toggle */}
+                <button 
+                  onClick={() => {
+                    const newTheme = normalTheme === "light" ? "default" : "light";
+                    setNormalTheme(newTheme);
+                    if (typeof window !== "undefined") {
+                      localStorage.setItem("normal_theme", newTheme);
+                    }
+                  }}
+                  className="md:hidden p-1.5 text-muted-foreground hover:text-foreground rounded-lg"
+                  aria-label="Toggle theme"
+                >
+                  {normalTheme === "light" ? <Sun className="w-4 h-4 text-amber-500" /> : <Moon className="w-4 h-4 text-indigo-400" />}
+                </button>
               </div>
             </header>
           )}
@@ -4517,9 +4540,9 @@ export default function DashboardPage() {
         )}
       </main>
 
-        {/* ── RIGHT PANEL ────────────────────────────────────────────────── */}
+        {/* ── RIGHT PANEL (DESKTOP) ───────────────────────────────────────── */}
         {(!uploadSuccess && isCute && !activeSession) && (
-          <aside className="w-[320px] shrink-0 border-l border-[var(--border-sidebar)] bg-[var(--bg-sidebar)] flex flex-col overflow-hidden backdrop-blur-md">
+          <aside className="hidden lg:flex w-[320px] shrink-0 border-l border-[var(--border-sidebar)] bg-[var(--bg-sidebar)] flex-col overflow-hidden backdrop-blur-md">
             <div className="p-4 border-b border-[var(--border-sidebar)] flex justify-between items-center bg-transparent flex-shrink-0">
               <span className="font-bold text-[10px] uppercase tracking-wider text-[var(--sidebar-subtext)]/80">Gardening Stats</span>
             </div>
@@ -4535,8 +4558,8 @@ export default function DashboardPage() {
         )}
       {/* Selected Article Drawer/Modal Overlay */}
       {selectedArticle && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-fade-in">
-          <Card className="w-full max-w-2xl max-h-[85vh] flex flex-col border-border/80 bg-card shadow-2xl overflow-hidden animate-zoom-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 bg-background/80 backdrop-blur-sm animate-fade-in">
+          <Card className="w-full sm:max-w-2xl h-full sm:h-auto max-h-[100dvh] sm:max-h-[85vh] flex flex-col border-0 sm:border border-border/80 bg-card shadow-2xl overflow-hidden rounded-none sm:rounded-2xl animate-zoom-in">
             {/* Header */}
             <div className="p-5 border-b border-border/40 flex justify-between items-start gap-4">
               <div className="space-y-1">
@@ -4607,6 +4630,161 @@ export default function DashboardPage() {
               </div>
             </div>
           </Card>
+        </div>
+      )}
+      {/* ── MOBILE BOTTOM NAVIGATION BAR ─────────────────────────────────── */}
+      <nav className="fixed bottom-0 left-0 right-0 h-16 bg-[var(--bg-sidebar)]/95 backdrop-blur-xl border-t border-[var(--border-sidebar)]/80 flex items-center justify-around z-40 md:hidden pb-safe px-2">
+        {[
+          { id: "console", label: "Console", icon: <Mic className="w-5 h-5" /> },
+          { id: "tracks", label: "Tracks", icon: <Layers className="w-5 h-5" />, onSelect: () => { setModuleType("interview_preparation"); fetchTrackStats(); } },
+          { id: "library", label: "Library", icon: <BookOpen className="w-5 h-5" /> },
+          { id: "coach", label: "Coach", icon: <Bot className="w-5 h-5" /> },
+        ].map(tab => {
+          const active = !uploadSuccess && activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => {
+                setActiveTab(tab.id as any);
+                setUploadSuccess(false);
+                setPolledSpeechId(null);
+                setPolledSpeechDetails(null);
+                if (tab.onSelect) tab.onSelect();
+              }}
+              className={`flex flex-col items-center justify-center gap-0.5 py-1 px-3 rounded-xl transition-all ${
+                active
+                  ? "text-blue-500 dark:text-blue-400 font-extrabold"
+                  : "text-muted-foreground hover:text-foreground font-medium"
+              }`}
+            >
+              {tab.icon}
+              <span className="text-[10px] tracking-tight">{tab.label}</span>
+            </button>
+          );
+        })}
+        <button
+          onClick={() => setMobileSidebarOpen(true)}
+          className="flex flex-col items-center justify-center gap-0.5 py-1 px-3 rounded-xl text-muted-foreground hover:text-foreground font-medium transition-all"
+        >
+          <History className="w-5 h-5" />
+          <span className="text-[10px] tracking-tight">History</span>
+        </button>
+      </nav>
+
+      {/* ── MOBILE SIDEBAR DRAWER OVERLAY ─────────────────────────────────── */}
+      {mobileSidebarOpen && (
+        <div className="fixed inset-0 z-50 md:hidden flex">
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-xs animate-fade-in" onClick={() => setMobileSidebarOpen(false)} />
+          <aside className="relative z-10 w-[290px] max-w-[85vw] h-full bg-[var(--bg-sidebar)] flex flex-col shadow-2xl border-r border-[var(--border-sidebar)] animate-in slide-in-from-left duration-200">
+            {/* Drawer Header */}
+            <div className="p-4 border-b border-[var(--border-sidebar)]/60 flex items-center justify-between flex-shrink-0">
+              <div className="flex items-center gap-2 select-none">
+                <div className="w-6 h-6 rounded-md flex items-center justify-center text-white font-black text-xs shadow-md" style={{ background: 'var(--logo-gradient)' }}>
+                  S
+                </div>
+                <span className="font-black text-sm tracking-tight shrink-0 bg-clip-text text-transparent" style={{backgroundImage: "var(--logo-gradient)"}}>
+                  SpeakAI Coach
+                </span>
+              </div>
+              <button onClick={() => setMobileSidebarOpen(false)} className="p-1.5 text-muted-foreground hover:text-foreground rounded-lg">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Nav Links */}
+            <div className="px-3 py-3 border-b border-[var(--border-sidebar)]/60 flex-shrink-0 space-y-1">
+              {[
+                { id: "console", label: "Practice Console", icon: <Mic className="w-4 h-4 shrink-0" /> },
+                { id: "tracks", label: "Interview Tracks", icon: <Layers className="w-4 h-4 shrink-0" />, onSelect: () => { setModuleType("interview_preparation"); fetchTrackStats(); } },
+                { id: "library", label: "Knowledge Library", icon: <BookOpen className="w-4 h-4 shrink-0" /> },
+                { id: "coach", label: "AI Coach", icon: <Bot className="w-4 h-4 shrink-0" /> }
+              ].map(tab => {
+                const active = !uploadSuccess && activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => {
+                      setActiveTab(tab.id as any);
+                      setUploadSuccess(false);
+                      setPolledSpeechId(null);
+                      setPolledSpeechDetails(null);
+                      setMobileSidebarOpen(false);
+                      if (tab.onSelect) tab.onSelect();
+                    }}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-bold transition-all ${
+                      active
+                        ? "bg-[var(--sidebar-active-bg)] text-[var(--sidebar-active-text)]"
+                        : "text-[var(--sidebar-text)] hover:bg-[var(--sidebar-hover-bg)] hover:text-[var(--sidebar-text-hover)]"
+                    }`}
+                  >
+                    {tab.icon}
+                    <span>{tab.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Practice History List */}
+            <div className="p-3 pb-1.5 flex justify-between items-center flex-shrink-0">
+              <span className="font-bold text-[10px] uppercase tracking-wider text-[var(--sidebar-subtext)]">Practice History</span>
+              <span className="text-[10px] font-bold tracking-wide px-2 py-0.5 rounded-full bg-[var(--sidebar-active-bg)] border border-[var(--border-sidebar)] text-[var(--sidebar-active-text)]">
+                {historyList.length} {historyList.length === 1 ? "session" : "sessions"}
+              </span>
+            </div>
+
+            <div className="flex-1 overflow-y-auto pr-1">
+              <div className="p-3 space-y-3">
+                {historyList.length === 0 ? (
+                  <p className="text-xs text-[var(--sidebar-subtext)] text-center py-8">No sessions yet. Start practicing.</p>
+                ) : (
+                  getGroupedHistory().map(group => (
+                    <div key={group.label} className="space-y-1">
+                      <p className="text-[10px] font-extrabold tracking-widest text-muted-foreground/80 uppercase px-2 pt-2 pb-0.5">{group.label}</p>
+                      {group.items.map(item => {
+                        const sel = polledSpeechId === item.id;
+                        return (
+                          <button key={item.id}
+                            onClick={()=>{
+                              if (pollingRef.current) {
+                                clearInterval(pollingRef.current);
+                                pollingRef.current = null;
+                              }
+                              setPolledSpeechId(item.id);
+                              fetchCompletedSessionDetails(item.id);
+                              setMobileSidebarOpen(false);
+                            }}
+                            className={`w-full text-left px-2.5 py-2 rounded-md transition-all flex flex-col gap-1 ${
+                              sel ? "bg-[var(--sidebar-active-bg)] text-[var(--sidebar-active-text)]" : "text-[var(--sidebar-text)]"
+                            }`}
+                          >
+                            <div className="flex items-center justify-between gap-2 w-full">
+                              <span className="text-xs font-semibold truncate">{item.topics?.title || "Speech Session"}</span>
+                              {item.overall_score !== null && <span className="text-xs font-bold">{item.overall_score}</span>}
+                            </div>
+                            <span className="text-[10px] text-muted-foreground">{fd(item.duration_seconds)} • {fTime(item.created_at)}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            {/* Drawer Footer */}
+            <div className="p-3 border-t border-[var(--border-sidebar)] flex items-center justify-between flex-shrink-0">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={handleLogout} 
+                disabled={logoutLoading} 
+                className="text-xs gap-1.5 text-[var(--sidebar-text-muted)] hover:text-[var(--sidebar-text-hover)] transition-all h-8 px-2.5 rounded-lg"
+              >
+                <Ic.LogOut />
+                {logoutLoading ? "..." : "Sign out"}
+              </Button>
+            </div>
+          </aside>
         </div>
       )}
     </div>

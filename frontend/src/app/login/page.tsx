@@ -122,7 +122,7 @@ export default function LoginPage() {
                 variant="outline"
                 disabled={!!oauthLoading || loading}
                 onClick={() => handleOAuthLogin("google")}
-                className="h-11 border-zinc-800 bg-zinc-950/80 hover:bg-zinc-800/60 text-zinc-200 font-semibold text-xs rounded-xl transition-all flex items-center justify-center gap-2.5"
+                className="h-12 border-zinc-800 bg-zinc-950/80 hover:bg-zinc-800/60 text-zinc-200 font-semibold text-xs rounded-xl transition-all flex items-center justify-center gap-2.5"
               >
                 {oauthLoading === "google" ? (
                   <span className="w-4 h-4 border-2 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"/>
@@ -142,7 +142,7 @@ export default function LoginPage() {
                 variant="outline"
                 disabled={!!oauthLoading || loading}
                 onClick={() => handleOAuthLogin("github")}
-                className="h-11 border-zinc-800 bg-zinc-950/80 hover:bg-zinc-800/60 text-zinc-200 font-semibold text-xs rounded-xl transition-all flex items-center justify-center gap-2.5"
+                className="h-12 border-zinc-800 bg-zinc-950/80 hover:bg-zinc-800/60 text-zinc-200 font-semibold text-xs rounded-xl transition-all flex items-center justify-center gap-2.5"
               >
                 {oauthLoading === "github" ? (
                   <span className="w-4 h-4 border-2 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"/>
@@ -174,7 +174,7 @@ export default function LoginPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="text-sm h-11 border-zinc-800 bg-zinc-950/80 text-zinc-100 placeholder:text-zinc-600 rounded-xl transition-all focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30"
+                  className="text-sm h-12 border-zinc-800 bg-zinc-950/80 text-zinc-100 placeholder:text-zinc-600 rounded-xl transition-all focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30"
                   placeholder="name@example.com"
                 />
               </div>
@@ -194,7 +194,7 @@ export default function LoginPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="text-sm h-11 border-zinc-800 bg-zinc-950/80 text-zinc-100 placeholder:text-zinc-600 rounded-xl transition-all focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30"
+                  className="text-sm h-12 border-zinc-800 bg-zinc-950/80 text-zinc-100 placeholder:text-zinc-600 rounded-xl transition-all focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30"
                   placeholder="••••••••"
                 />
               </div>
@@ -202,7 +202,7 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 disabled={loading || !!oauthLoading}
-                className="w-full bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-bold text-sm h-11 mt-2 rounded-xl transition-all shadow-lg shadow-blue-500/20"
+                className="w-full bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-bold text-sm h-12 mt-2 rounded-xl transition-all shadow-lg shadow-blue-500/20"
               >
                 {loading ? "Signing in..." : "Log In"}
               </Button>
