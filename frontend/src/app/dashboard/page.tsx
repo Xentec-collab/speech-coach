@@ -1071,14 +1071,14 @@ export default function DashboardPage() {
     const currentRound = activeSession.exchanges?.find((e: any) => e.round_number === activeSession.current_round);
     
     return (
-      <div className="p-6 max-w-2xl mx-auto space-y-6 animate-bloom">
-        <div className="flex justify-between items-center border-b border-[var(--border-color)] pb-3.5">
-          <div>
-            <div className="flex items-center gap-2">
+      <div className="p-4 sm:p-6 max-w-2xl mx-auto space-y-6 animate-bloom">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[var(--border-color)] pb-3.5 gap-3">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
               <span className="text-xs font-black uppercase tracking-wider text-muted-foreground">Mock Interview Session</span>
               {getDifficultyBadge(activeSession.difficulty)}
             </div>
-            <h1 className="text-base font-black text-foreground tracking-tight mt-1">
+            <h1 className="text-sm sm:text-base font-black text-foreground tracking-tight mt-1 break-words">
               {activeTrackName} · {activeStepName}
             </h1>
             <p className="text-[10px] text-muted-foreground mt-0.5">
@@ -1089,7 +1089,7 @@ export default function DashboardPage() {
             variant="outline" 
             size="sm" 
             onClick={handleEndInterviewEarly} 
-            className="h-8 px-3 text-xs font-bold text-red-600 dark:text-red-400 bg-red-500/5 hover:bg-red-500/15 border-red-500/20 hover:border-red-500/35 rounded-lg transition-all shadow-xs gap-1.5 shrink-0"
+            className="h-8 px-3 text-xs font-bold text-red-600 dark:text-red-400 bg-red-500/5 hover:bg-red-500/15 border-red-500/20 hover:border-red-500/35 rounded-lg transition-all shadow-xs gap-1.5 shrink-0 self-start sm:self-auto"
           >
             <span className="w-2 h-2 rounded-xs bg-red-500 shrink-0" />
             End Interview Early
@@ -1267,19 +1267,19 @@ export default function DashboardPage() {
     };
 
     return (
-      <div className="p-8 max-w-3xl space-y-6">
+      <div className="p-4 sm:p-8 max-w-3xl space-y-6">
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1">
           <span>History</span><Ic.Chevron/><span className="text-foreground font-medium">{activeTrackName} ({activeStepName})</span>
         </div>
 
-        <div className="flex justify-between items-start gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
           <div className="min-w-0">
-            <h1 className="text-2xl font-black text-foreground tracking-tight mb-1">{activeTrackName} Session</h1>
-            <p className="text-sm text-muted-foreground">
+            <h1 className="text-xl sm:text-2xl font-black text-foreground tracking-tight mb-1 break-words">{activeTrackName} Session</h1>
+            <p className="text-xs sm:text-sm text-muted-foreground">
               {activeStepName} · {activePersonaName} Persona · {fLong(sessionData.created_at)}
             </p>
           </div>
-          <div className="flex gap-2 shrink-0">
+          <div className="flex gap-2 shrink-0 w-full sm:w-auto">
             <Button 
               variant="outline" 
               onClick={() => {
@@ -1287,7 +1287,7 @@ export default function DashboardPage() {
                 setPolledSpeechId(null);
                 setPolledSpeechDetails(null);
               }} 
-              className="gap-1.5 text-xs h-9 border-[var(--accent-color)] text-[var(--accent-color)] hover:bg-[var(--accent-color)]/10 font-bold"
+              className="gap-1.5 text-xs h-9 border-[var(--accent-color)] text-[var(--accent-color)] hover:bg-[var(--accent-color)]/10 font-bold w-full sm:w-auto"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
               Back to Console
@@ -2250,7 +2250,7 @@ export default function DashboardPage() {
                 { label: "Best Score", value: statsForTrack?.best_score ? `${statsForTrack.best_score}%` : "—", color: "text-emerald-600" },
                 { label: "Weak Areas", value: statsForTrack?.weak_areas && statsForTrack.weak_areas.length > 0 ? statsForTrack.weak_areas.join(", ") : "None detected", color: "text-amber-600" }
               ].map(stat => (
-                <div key={stat.label} className="space-y-0.5 border-r last:border-0 border-border/50 pr-2">
+                <div key={stat.label} className="space-y-0.5 sm:border-r sm:last:border-0 border-border/50 pr-2">
                   <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">{stat.label}</p>
                   <p className={`text-sm font-black tracking-tight ${stat.color}`}>{stat.value}</p>
                 </div>
@@ -2296,7 +2296,7 @@ export default function DashboardPage() {
                         </div>
                         
                         <div className="min-w-0">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1.5 flex-wrap">
                             <p className="text-xs font-bold text-foreground truncate">{stage.label}</p>
                             <span className={`text-[8px] font-black uppercase px-1.5 py-0.5 rounded-full border ${
                               stage.difficulty === "easy" 
@@ -2735,28 +2735,28 @@ export default function DashboardPage() {
 
         {/* Skill Highlights Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className={`p-4 shadow-sm flex flex-col justify-between h-20 ${isCute ? "border-[rgba(21,46,27,0.14)] bg-white/40" : "border-border/85 bg-card"}`}>
+          <Card className={`p-4 shadow-sm flex flex-col justify-between min-h-[80px] h-auto ${isCute ? "border-[rgba(21,46,27,0.14)] bg-white/40" : "border-border/85 bg-card"}`}>
             <div>
               <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Strongest Skill</p>
-              <p className="text-xs font-black text-foreground mt-1">{report.strongest_skill || "Not Analyzed"}</p>
+              <p className="text-xs font-black text-foreground mt-1 break-words">{report.strongest_skill || "Not Analyzed"}</p>
             </div>
-            <div className="text-[9px] text-emerald-600 font-extrabold flex items-center gap-1">
+            <div className="text-[9px] text-emerald-600 font-extrabold flex items-center gap-1 mt-2">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> Peak Area
             </div>
           </Card>
-          <Card className={`p-4 shadow-sm flex flex-col justify-between h-20 ${isCute ? "border-[rgba(21,46,27,0.14)] bg-white/40" : "border-border/85 bg-card"}`}>
+          <Card className={`p-4 shadow-sm flex flex-col justify-between min-h-[80px] h-auto ${isCute ? "border-[rgba(21,46,27,0.14)] bg-white/40" : "border-border/85 bg-card"}`}>
             <div>
               <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Weakest Skill</p>
-              <p className="text-xs font-black text-rose-600 mt-1">{report.weakest_skill || "Not Analyzed"}</p>
+              <p className="text-xs font-black text-rose-600 mt-1 break-words">{report.weakest_skill || "Not Analyzed"}</p>
             </div>
-            <div className="text-[9px] text-rose-500 font-extrabold flex items-center gap-1">
+            <div className="text-[9px] text-rose-500 font-extrabold flex items-center gap-1 mt-2">
               <span className="h-1.5 w-1.5 rounded-full bg-rose-400" /> Focus Target
             </div>
           </Card>
-          <Card className={`p-4 shadow-sm flex flex-col justify-between h-20 ${isCute ? "border-[rgba(21,46,27,0.14)] bg-white/40" : "border-border/85 bg-card"}`}>
+          <Card className={`p-4 shadow-sm flex flex-col justify-between min-h-[80px] h-auto ${isCute ? "border-[rgba(21,46,27,0.14)] bg-white/40" : "border-border/85 bg-card"}`}>
             <div>
               <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Most Improved</p>
-              <p className="text-xs font-black text-emerald-600 mt-1">{report.most_improved_skill || "Not Analyzed"}</p>
+              <p className="text-xs font-black text-emerald-600 mt-1 break-words">{report.most_improved_skill || "Not Analyzed"}</p>
             </div>
             <div className="text-[9px] text-indigo-500 font-extrabold flex items-center gap-1">
               <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" /> Upward Trend
@@ -3598,11 +3598,11 @@ export default function DashboardPage() {
             <>
               {/* Welcome */}
               {!uploadSuccess&&(
-            <div className="p-6 max-w-2xl mx-auto space-y-6 animate-bloom">
+            <div className="p-4 sm:p-6 max-w-2xl mx-auto space-y-6 animate-bloom">
               {/* Header */}
               <div className="flex justify-between items-center border-b border-[var(--border-color)] pb-3">
                 <div className="flex-grow min-w-0">
-                  <div className="flex justify-between items-center w-full gap-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between w-full gap-3">
                     <div>
                       {moduleType === "interview_preparation" ? (
                         activeTrack ? (
@@ -3626,7 +3626,7 @@ export default function DashboardPage() {
                         )
                       ) : (
                         <>
-                          <h1 className="text-base font-black text-foreground tracking-tight flex items-center gap-1.5">
+                          <h1 className="text-base font-black text-foreground tracking-tight flex items-center gap-1.5 break-words">
                             {isCute ? (
                               <span className="flex items-center gap-2">
                                 Good morning, {user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Speaker"}! 🌸
@@ -3642,7 +3642,7 @@ export default function DashboardPage() {
                       )}
                     </div>
 
-                    <div className="flex p-0.5 rounded-lg bg-muted/60 text-[10px] gap-0.5 shrink-0 border border-border/10 backdrop-blur-sm">
+                    <div className="flex flex-wrap p-0.5 rounded-lg bg-muted/60 text-[10px] gap-0.5 shrink-0 border border-border/10 backdrop-blur-sm self-start sm:self-auto">
                       <button
                         onClick={() => setActiveTab("console")}
                         className={`px-3 py-1 rounded-md font-semibold transition-all ${activeTab === "console" ? "bg-card text-foreground shadow-sm scale-[1.02]" : "text-muted-foreground hover:text-foreground hover:bg-muted/30"}`}
@@ -3953,12 +3953,12 @@ export default function DashboardPage() {
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-5">
                 <span>History</span><Ic.Chevron/><span className="text-foreground font-medium">{speech.topics?.title||"Impromptu Speech"}</span>
               </div>
-              <div className="flex justify-between items-start mb-6 gap-4">
-                <div>
-                  <h1 className="text-2xl font-black text-foreground mb-1 tracking-tight">{speech.topics?.title||"Impromptu Speech"}</h1>
-                  <p className="text-sm text-muted-foreground">{fLong(speech.created_at)} · {fd(speech.duration_seconds)}</p>
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between mb-6 gap-3">
+                <div className="min-w-0">
+                  <h1 className="text-xl sm:text-2xl font-black text-foreground mb-1 tracking-tight break-words">{speech.topics?.title||"Impromptu Speech"}</h1>
+                  <p className="text-xs sm:text-sm text-muted-foreground">{fLong(speech.created_at)} · {fd(speech.duration_seconds)}</p>
                 </div>
-                <div className="flex gap-2 shrink-0">
+                <div className="flex flex-wrap gap-2 shrink-0 w-full sm:w-auto">
                   {activeTopic && (
                     <Button 
                       variant="outline" 
@@ -3967,17 +3967,17 @@ export default function DashboardPage() {
                         setPolledSpeechId(null);
                         setPolledSpeechDetails(null);
                       }} 
-                      className="gap-1.5 text-xs h-9 border-[var(--accent-color)] text-[var(--accent-color)] hover:bg-[var(--accent-color)]/10 font-bold"
+                      className="gap-1.5 text-xs h-9 border-[var(--accent-color)] text-[var(--accent-color)] hover:bg-[var(--accent-color)]/10 font-bold flex-1 sm:flex-initial"
                     >
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
                       Back to Practice
                     </Button>
                   )}
-                  <Button variant="outline" onClick={() => { setTopics([]); setShowDrawer(true); }} className="gap-1.5 text-xs h-9">
+                  <Button variant="outline" onClick={() => { setTopics([]); setShowDrawer(true); }} className="gap-1.5 text-xs h-9 flex-1 sm:flex-initial">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                     New Topic
                   </Button>
-                  <Button onClick={()=>setShowDrawer(true)} className="gap-2 shrink-0" style={primaryBtnStyle}><Ic.Mic/>Practice Again</Button>
+                  <Button onClick={()=>setShowDrawer(true)} className="gap-2 shrink-0 flex-1 sm:flex-initial" style={primaryBtnStyle}><Ic.Mic/>Practice Again</Button>
                 </div>
               </div>
               <Card className="border-destructive/20 bg-destructive/5 text-center rounded-xl">
@@ -3998,18 +3998,18 @@ export default function DashboardPage() {
                 speech.is_session ? (
                   renderInterviewReplayScreen(speech)
                 ) : (
-                  <div className="flex flex-col lg:flex-row gap-6 p-6 md:p-8 max-w-6xl w-full mx-auto relative z-10 flex-1 overflow-y-auto">
+                  <div className="flex flex-col lg:flex-row gap-6 p-4 sm:p-6 md:p-8 max-w-6xl w-full mx-auto relative z-10 flex-1 overflow-y-auto">
                     
                     {/* Left Column: Core Speech Info & Transcript (65% width) */}
                     <div className="flex-1 min-w-0 space-y-6 animate-bloom">
                       
                       {/* Header */}
-                      <div className="flex justify-between items-start gap-4">
+                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                         <div className="min-w-0">
-                          <h1 className="text-2xl font-black text-foreground tracking-tight mb-1">{speech.topics?.title||"Impromptu Speech"}</h1>
-                          <p className="text-sm text-muted-foreground">Recorded {fLong(speech.created_at)} · {fd(speech.duration_seconds)} duration</p>
+                          <h1 className="text-xl sm:text-2xl font-black text-foreground tracking-tight mb-1 break-words">{speech.topics?.title||"Impromptu Speech"}</h1>
+                          <p className="text-xs sm:text-sm text-muted-foreground">Recorded {fLong(speech.created_at)} · {fd(speech.duration_seconds)} duration</p>
                         </div>
-                        <div className="flex gap-2 shrink-0">
+                        <div className="flex flex-wrap gap-2 shrink-0 w-full sm:w-auto">
                           {activeTopic && (
                             <Button 
                               variant="outline" 
@@ -4018,17 +4018,17 @@ export default function DashboardPage() {
                                 setPolledSpeechId(null);
                                 setPolledSpeechDetails(null);
                               }} 
-                              className="gap-1.5 text-xs h-9 border-[var(--accent-color)] text-[var(--accent-color)] hover:bg-[var(--accent-color)]/10 font-bold"
+                              className="gap-1.5 text-xs h-9 border-[var(--accent-color)] text-[var(--accent-color)] hover:bg-[var(--accent-color)]/10 font-bold flex-1 sm:flex-initial"
                             >
                               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
                               Back to Practice
                             </Button>
                           )}
-                          <Button variant="outline" onClick={() => { setTopics([]); setShowDrawer(true); }} className="gap-1.5 text-xs h-9">
+                          <Button variant="outline" onClick={() => { setTopics([]); setShowDrawer(true); }} className="gap-1.5 text-xs h-9 flex-1 sm:flex-initial">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                             New Topic
                           </Button>
-                          <Button onClick={()=>setShowDrawer(true)} className="gap-2 shrink-0" style={primaryBtnStyle}><Ic.Mic/>Practice Again</Button>
+                          <Button onClick={()=>setShowDrawer(true)} className="gap-2 shrink-0 flex-1 sm:flex-initial" style={primaryBtnStyle}><Ic.Mic/>Practice Again</Button>
                         </div>
                       </div>
 
@@ -4154,11 +4154,11 @@ export default function DashboardPage() {
 
                         return (
                           <div className="py-6 px-0 bg-transparent flex flex-col font-sans" style={{ color: "var(--transcript-text)" }}>
-                            <div className="flex items-center justify-between mb-4">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mb-4">
                               <span className="text-[10px] font-semibold tracking-[0.12em] uppercase select-none" style={{ color: "var(--transcript-muted)" }}>
                                 SPOKEN TRANSCRIPT
                               </span>
-                              <div className="flex items-center gap-2 ml-auto mr-4">
+                              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 sm:ml-auto">
                                 <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-red-500/[0.04] border border-red-500/10 text-[10px] font-bold text-red-500/90 select-none dark:bg-red-950/[0.15]">
                                   <span className="w-1.5 h-1.5 rounded-full bg-[#E24B4A] animate-pulse" />
                                   Filler words
@@ -4176,22 +4176,22 @@ export default function DashboardPage() {
                                 variant="outline" 
                                 size="xs"
                                 onClick={handleCopy}
-                                className="gap-1.5 text-xs font-semibold"
+                                className="gap-1.5 text-xs font-semibold self-start sm:self-auto"
                               >
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg>
                                 <span>{copied ? "Copied ✓" : "Copy"}</span>
                               </Button>
                             </div>
-                            <div className="border-[0.5px] rounded-[12px] py-5 px-6 max-h-[320px] overflow-y-auto" style={{ backgroundColor: "var(--transcript-bg)", borderColor: "var(--transcript-border)" }}>
+                            <div className="border-[0.5px] rounded-[12px] py-5 px-4 sm:px-6 max-h-[320px] overflow-y-auto" style={{ backgroundColor: "var(--transcript-bg)", borderColor: "var(--transcript-border)" }}>
                               <p 
                                 onDoubleClick={handleTextDoubleClick}
-                                className="text-[15px] font-normal whitespace-pre-wrap cursor-pointer select-text"
+                                className="text-[14px] sm:text-[15px] font-normal whitespace-pre-wrap cursor-pointer select-text"
                                 style={{ color: "var(--transcript-text)", lineHeight: "2.0" }}
                               >
                                 {renderSpokenText()}
                               </p>
                             </div>
-                            <div className="grid grid-cols-3 gap-3 mt-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
                               {/* Filler Words Card */}
                               <div className="border border-border/50 border-l-4 border-l-red-500 rounded-r-lg py-3 px-4 flex flex-col justify-between bg-red-500/[0.02] dark:bg-red-950/[0.1] transition-all hover:shadow-sm">
                                 <span className="text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground/90 select-none">Filler words</span>
