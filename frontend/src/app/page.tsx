@@ -85,7 +85,7 @@ export default function HomePage() {
 
       {/* ── Hero Section ─────────────────────────────────────────────────── */}
       <main className="flex-1 flex flex-col z-10">
-        <section className="relative pt-6 md:pt-10 lg:pt-14 pb-16 md:pb-24 px-6 md:px-12 text-center max-w-5xl mx-auto flex flex-col items-center">
+        <section className="relative pt-12 md:pt-16 lg:pt-20 pb-16 md:pb-24 px-6 md:px-12 text-center max-w-5xl mx-auto flex flex-col items-center">
           
           {/* Ambient Glow */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-blue-500/10 dark:bg-blue-500/15 blur-[120px] rounded-full pointer-events-none -z-10" />
