@@ -53,7 +53,7 @@ export default function HomePage() {
           <button 
             onClick={toggleTheme} 
             aria-label="Toggle Theme" 
-            className="w-9 h-9 rounded-full flex items-center justify-center border border-slate-200 dark:border-white/10 bg-slate-100/80 dark:bg-white/[0.06] text-slate-700 dark:text-zinc-200 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/80 dark:hover:bg-white/[0.12] transition-all duration-200 backdrop-blur-md shadow-sm outline-none cursor-pointer shrink-0"
+            className="w-10 h-10 sm:w-9 sm:h-9 rounded-full flex items-center justify-center border border-slate-200 dark:border-white/10 bg-slate-100/80 dark:bg-white/[0.06] text-slate-700 dark:text-zinc-200 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/80 dark:hover:bg-white/[0.12] transition-all duration-200 backdrop-blur-md shadow-sm outline-none cursor-pointer shrink-0"
           >
             {theme === "dark" ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-700" />}
           </button>

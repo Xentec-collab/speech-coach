@@ -940,6 +940,7 @@ export default function DashboardPage() {
 
   const startPollingRound = (sessionId: string, roundNumber: number) => {
     if (pollingRef.current) clearInterval(pollingRef.current);
+    let failures = 0;
     
     pollingRef.current = setInterval(async () => {
       if (!session) return;
@@ -950,8 +951,9 @@ export default function DashboardPage() {
             headers: { Authorization: `Bearer ${session.access_token}` }
           }
         );
-        if (!res.ok) throw new Error();
+        if (!res.ok) throw new Error("Round status fetch failed");
         const data = await res.json();
+        failures = 0;
         
         if (data.status === "completed" || data.status === "failed") {
           clearInterval(pollingRef.current);
@@ -3527,14 +3529,14 @@ export default function DashboardPage() {
         </aside>
 
         {/* ── CENTER PANEL ───────────────────────────────────────────────── */}
-        <main className={`flex-1 overflow-y-auto flex flex-col pb-20 md:pb-0 ${isCute ? "bg-transparent" : "bg-background"}`}>
+        <main className={`flex-1 overflow-y-auto flex flex-col pb-28 md:pb-0 ${isCute ? "bg-transparent" : "bg-background"}`}>
           {/* Top Breadcrumb Bar */}
           {!activeSession && (
             <header className="h-14 border-b border-[var(--border-sidebar)]/60 bg-[var(--bg-sidebar)]/85 backdrop-blur-md flex items-center justify-between px-4 sm:px-6 flex-shrink-0 z-10 sticky top-0">
               <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground select-none min-w-0">
                 <button
                   onClick={() => setMobileSidebarOpen(true)}
-                  className="md:hidden p-1.5 -ml-1 text-foreground hover:bg-muted/60 rounded-lg shrink-0"
+                  className="md:hidden p-2 -ml-1 h-10 w-10 flex items-center justify-center text-foreground hover:bg-muted/60 rounded-lg shrink-0"
                   aria-label="Open menu"
                 >
                   <Menu className="w-5 h-5" />
