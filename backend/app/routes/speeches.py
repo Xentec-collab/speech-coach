@@ -479,11 +479,21 @@ def list_user_speeches(
     query_speeches = type is None or type == "all" or type == "speaking"
     query_sessions = type is None or type == "all" or type == "interview"
     
+    start = (page - 1) * limit
+    end = start + limit - 1
+
     if query_speeches:
         try:
+            explicit_speech_cols = (
+                "id, user_id, topic_id, duration_seconds, status, created_at, "
+                "overall_score, pronunciation_score, fluency_score, lexicon_score, "
+                "filler_words, word_count, speech_pace_wpm, feedback, topics(id, title, prompt, category, module_type)"
+            )
             speeches_res = supabase.table("speeches") \
-                .select("*, topics(*)") \
+                .select(explicit_speech_cols) \
                 .eq("user_id", current_user["id"]) \
+                .order("created_at", desc=True) \
+                .range(start, end) \
                 .execute()
             speeches = speeches_res.data if speeches_res.data else []
         except Exception as e:
@@ -498,9 +508,12 @@ def list_user_speeches(
                 
     if not supabase_failed and query_sessions:
         try:
+            explicit_session_cols = "id, user_id, interview_type, roadmap_step, difficulty, status, final_evaluation, created_at, completed_at"
             sessions_res = supabase.table("interview_sessions") \
-                .select("*") \
+                .select(explicit_session_cols) \
                 .eq("user_id", current_user["id"]) \
+                .order("created_at", desc=True) \
+                .range(start, end) \
                 .execute()
             sessions = sessions_res.data if sessions_res.data else []
         except Exception as e:

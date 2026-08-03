@@ -3,7 +3,7 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status
 from app.services.supabase import get_current_user, supabase
 
-router = APIRouter()
+COACH_HISTORY_LIMIT = 20
 
 async def generate_and_save_coach_snapshot(user_id: str):
     """
@@ -11,20 +11,28 @@ async def generate_and_save_coach_snapshot(user_id: str):
     """
     try:
         # 1. Fetch completed speeches
+        speeches_cols = (
+            "id, duration_seconds, status, created_at, overall_score, "
+            "pronunciation_score, fluency_score, lexicon_score, filler_words, "
+            "word_count, speech_pace_wpm, feedback, topics(id, title, prompt, category, module_type)"
+        )
         speeches_res = supabase.table("speeches") \
-            .select("*, topics(*)") \
+            .select(speeches_cols) \
             .eq("user_id", user_id) \
             .eq("status", "completed") \
-            .order("created_at", desc=False) \
+            .order("created_at", desc=True) \
+            .limit(COACH_HISTORY_LIMIT) \
             .execute()
         speeches = speeches_res.data or []
 
         # 2. Fetch completed interview sessions
+        sessions_cols = "id, interview_type, roadmap_step, difficulty, status, final_evaluation, created_at, completed_at"
         sessions_res = supabase.table("interview_sessions") \
-            .select("*") \
+            .select(sessions_cols) \
             .eq("user_id", user_id) \
             .eq("status", "completed") \
-            .order("created_at", desc=False) \
+            .order("created_at", desc=True) \
+            .limit(COACH_HISTORY_LIMIT) \
             .execute()
         sessions = sessions_res.data or []
 
@@ -37,7 +45,8 @@ async def generate_and_save_coach_snapshot(user_id: str):
             return None
 
         # 3. Fetch articles catalog
-        art_res = supabase.table("knowledge_articles").select("*").execute()
+        art_cols = "id, title, track_slug, category_slug, summary, tags"
+        art_res = supabase.table("knowledge_articles").select(art_cols).execute()
         articles = art_res.data or []
 
         # 4. Fetch article progress

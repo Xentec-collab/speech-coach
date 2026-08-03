@@ -405,8 +405,13 @@ def get_interview_session_details(session_id: str, current_user: dict = Depends(
     Returns full details of an interview session, including all exchange rounds.
     """
     try:
-        # Fetch session
-        sess_res = supabase.table("interview_sessions").select("*").eq("id", session_id).execute()
+        # Fetch session with nested exchanges in a single query
+        session_cols = (
+            "id, user_id, interview_type, roadmap_step, difficulty, status, "
+            "total_rounds, current_round, final_evaluation, created_at, completed_at, "
+            "interview_exchanges(id, session_id, round_number, interviewer_question, user_transcript, feedback, status, storage_path, duration_seconds)"
+        )
+        sess_res = supabase.table("interview_sessions").select(session_cols).eq("id", session_id).execute()
         if not sess_res.data:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Session not found.")
         
@@ -414,16 +419,13 @@ def get_interview_session_details(session_id: str, current_user: dict = Depends(
         if session["user_id"] != current_user["id"]:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied.")
         
-        # Fetch exchanges
-        exch_res = supabase.table("interview_exchanges") \
-            .select("*") \
-            .eq("session_id", session_id) \
-            .order("round_number", desc=False) \
-            .execute()
+        exchanges = session.pop("interview_exchanges", [])
+        if isinstance(exchanges, list):
+            exchanges.sort(key=lambda x: x.get("round_number", 0))
         
         return {
             **session,
-            "exchanges": exch_res.data or []
+            "exchanges": exchanges
         }
     except HTTPException:
         raise
@@ -515,8 +517,9 @@ def get_round_status(session_id: str, round_number: int, current_user: dict = De
     """
     try:
         # Fetch exchange
+        explicit_exch_cols = "id, status, user_transcript, feedback, interviewer_question, storage_path"
         exch_res = supabase.table("interview_exchanges") \
-            .select("*") \
+            .select(explicit_exch_cols) \
             .eq("session_id", session_id) \
             .eq("round_number", round_number) \
             .execute()
