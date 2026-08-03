@@ -48,29 +48,33 @@ export default function HomePage() {
           </span>
         </div>
         
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
           {/* Light/Dark Toggle */}
-          <Button variant="ghost" size="icon" onClick={toggleTheme} className="p-2 rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--accent-bg)] transition-all outline-none">
-            {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-          </Button>
+          <button 
+            onClick={toggleTheme} 
+            aria-label="Toggle Theme" 
+            className="w-9 h-9 rounded-full flex items-center justify-center border border-slate-200 dark:border-white/10 bg-slate-100/80 dark:bg-white/[0.06] text-slate-700 dark:text-zinc-200 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/80 dark:hover:bg-white/[0.12] transition-all duration-200 backdrop-blur-md shadow-sm outline-none cursor-pointer"
+          >
+            {theme === "dark" ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-700" />}
+          </button>
 
           {loading ? (
             <span className="text-xs text-[var(--text-secondary)] font-medium tracking-wide">Checking session...</span>
           ) : user ? (
             <Link href="/dashboard">
-              <Button size="sm" className="bg-primary text-primary-foreground font-bold shadow-lg shadow-primary/20 hover:shadow-primary/30 hover:opacity-90 transition-all h-9 px-5">
+              <Button size="sm" className="bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-bold rounded-full h-9 px-5 text-xs shadow-[0_0_15px_rgba(37,99,235,0.25)] hover:shadow-[0_0_22px_rgba(37,99,235,0.45)] transition-all duration-300 hover:scale-[1.02]">
                 Go to Dashboard
               </Button>
             </Link>
           ) : (
             <>
               <Link href="/login">
-                <Button variant="ghost" size="sm" className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-semibold text-xs transition-all h-9">
+                <Button variant="ghost" size="sm" className="text-slate-700 dark:text-zinc-200 hover:text-slate-900 dark:hover:text-white font-semibold text-xs rounded-full px-4 h-9 hover:bg-slate-200/60 dark:hover:bg-white/10 transition-all">
                   Log In
                 </Button>
               </Link>
               <Link href="/register">
-                <Button size="sm" className="bg-primary text-primary-foreground font-bold shadow-lg shadow-primary/20 hover:shadow-primary/30 hover:opacity-90 transition-all h-9 px-5">
+                <Button size="sm" className="bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-bold rounded-full h-9 px-5 text-xs shadow-[0_0_18px_rgba(37,99,235,0.3)] hover:shadow-[0_0_25px_rgba(37,99,235,0.5)] transition-all duration-300 hover:scale-[1.03] border border-blue-400/20">
                   Sign Up Free
                 </Button>
               </Link>
