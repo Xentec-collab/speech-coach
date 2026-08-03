@@ -2388,27 +2388,18 @@ export default function DashboardPage() {
 
     return (
       <div className="space-y-6">
-        {/* Welcome / Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h2 className="text-base font-black text-foreground tracking-tight">Preparation Library</h2>
-            <p className="text-[10px] text-muted-foreground mt-0.5">
-              Read curated articles, learn preparation frameworks, and practice smarter.
-            </p>
-          </div>
-          {/* Search bar */}
-          <div className="relative w-full sm:w-64">
-            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground">
-              <Ic.Search />
-            </span>
-            <Input
-              type="text"
-              placeholder="Search articles or tags..."
-              value={librarySearch}
-              onChange={e => setLibrarySearch(e.target.value)}
-              className="pl-8 text-xs h-9"
-            />
-          </div>
+        {/* Search bar */}
+        <div className="relative w-full">
+          <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground">
+            <Ic.Search />
+          </span>
+          <Input
+            type="text"
+            placeholder="Search articles or tags..."
+            value={librarySearch}
+            onChange={e => setLibrarySearch(e.target.value)}
+            className="pl-8 text-xs h-9"
+          />
         </div>
 
         {/* Track Pills Filter */}
@@ -2630,32 +2621,22 @@ export default function DashboardPage() {
 
     if (!coachReport || !coachReport.unlocked || !coachReport.report) {
       return (
-        <div className="space-y-6">
-          <div className="flex flex-col gap-1.5">
-            <h2 className="text-base font-black text-foreground tracking-tight flex items-center gap-1.5">
-              {isCute ? "Your AI Coach 🐾" : "AI Coach"}
-            </h2>
-            <p className="text-[10px] text-muted-foreground">
-              Long-term practice analysis, readiness indicators, and targeted improvement pathways.
+        <Card className={`overflow-hidden border-border/85 bg-card max-w-xl mx-auto mt-4 ${isCute ? "border-[rgba(21,46,27,0.14)] bg-white/40" : ""}`}>
+          <CardContent className="p-6 flex flex-col items-center text-center space-y-4">
+            {isCute ? (
+              <img src="/cute_garden_puppy.png" alt="Puppy Coach" className="w-32 h-32 object-contain animate-float-leaf" style={{ "--duration": "8s" } as any} />
+            ) : (
+              <div className="w-16 h-16 rounded-full bg-indigo-50 dark:bg-indigo-950/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24"/><path d="M14.83 9.17a4 4 0 0 0-5.66 5.66"/><path d="m14.83 9.17 4.24-4.24"/><path d="m9.17 14.83-4.24 4.24"/><path d="m14.83 14.83 4.24 4.24"/></svg>
+              </div>
+            )}
+            <h3 className="text-sm font-black text-foreground">{isCute ? "AI Coach is Napping!" : "AI Coach is Locked"}</h3>
+            <p className="text-xs text-muted-foreground max-w-sm">
+              Complete at least one Public Speaking speech or Mock Interview session to unlock your AI Coach. 
+              Your coach needs practice history to analyze your strengths, weaknesses, growth trends, and recommend targeted preparation.
             </p>
-          </div>
-          <Card className={`overflow-hidden border-border/85 bg-card max-w-xl mx-auto mt-8 ${isCute ? "border-[rgba(21,46,27,0.14)] bg-white/40" : ""}`}>
-            <CardContent className="p-6 flex flex-col items-center text-center space-y-4">
-              {isCute ? (
-                <img src="/cute_garden_puppy.png" alt="Puppy Coach" className="w-32 h-32 object-contain animate-float-leaf" style={{ "--duration": "8s" } as any} />
-              ) : (
-                <div className="w-16 h-16 rounded-full bg-indigo-50 dark:bg-indigo-950/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24"/><path d="M14.83 9.17a4 4 0 0 0-5.66 5.66"/><path d="m14.83 9.17 4.24-4.24"/><path d="m9.17 14.83-4.24 4.24"/><path d="m14.83 14.83 4.24 4.24"/></svg>
-                </div>
-              )}
-              <h3 className="text-sm font-black text-foreground">{isCute ? "AI Coach is Napping!" : "AI Coach is Locked"}</h3>
-              <p className="text-xs text-muted-foreground max-w-sm">
-                Complete at least one Public Speaking speech or Mock Interview session to unlock your AI Coach. 
-                Your coach needs practice history to analyze your strengths, weaknesses, growth trends, and recommend targeted preparation.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+          </CardContent>
+        </Card>
       );
     }
 
@@ -2685,51 +2666,56 @@ export default function DashboardPage() {
 
     return (
       <div className="space-y-6 animate-bloom">
-        {/* Header */}
-        <div className="flex flex-col gap-1.5">
-          <h2 className="text-base font-black text-foreground tracking-tight flex items-center gap-1.5">
-            {isCute ? "Your AI Coach 🐾" : "AI Coach"}
-          </h2>
-          <p className="text-[10px] text-muted-foreground">
-            Long-term practice analysis, readiness indicators, and targeted improvement pathways.
-          </p>
-        </div>
-
-        {/* Readiness Indicator */}
+        {/* Readiness Indicator Card */}
         <Card className={`overflow-hidden ${isCute ? "border-[rgba(21,46,27,0.14)] bg-white/40" : "border-border/85 bg-card"}`}>
-          <CardContent className="p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-            <div className="space-y-2 max-w-2xl">
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Interview Readiness</span>
-                <span className={`px-2.5 py-0.5 text-[10px] font-black rounded-full border ${
-                  report.readiness_level?.toLowerCase() === "high" 
-                    ? "text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900/30" 
+          <CardContent className="p-5 md:p-6 space-y-4">
+            {/* Top Header Row */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border/40">
+              <div>
+                <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider block mb-0.5">
+                  Interview Readiness
+                </span>
+                <h3 className="text-base font-black text-foreground">
+                  {isCute ? "Current Status 🌸" : "Current Assessment"}
+                </h3>
+              </div>
+              <div className="self-start sm:self-auto">
+                <span className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-black rounded-full border shadow-sm ${
+                  report.readiness_level?.toLowerCase() === "high" || report.readiness_level?.toLowerCase().includes("ready")
+                    ? "text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-800" 
                     : report.readiness_level?.toLowerCase() === "medium" 
-                      ? "text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/30" 
-                      : "text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/20 border-rose-200 dark:border-rose-900/30"
+                      ? "text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 border-amber-300 dark:border-amber-800" 
+                      : "text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/30 border-rose-300 dark:border-rose-800"
                 }`}>
+                  <span className={`w-2 h-2 rounded-full ${
+                    report.readiness_level?.toLowerCase() === "high" || report.readiness_level?.toLowerCase().includes("ready")
+                      ? "bg-emerald-500"
+                      : report.readiness_level?.toLowerCase() === "medium"
+                        ? "bg-amber-500"
+                        : "bg-rose-500 animate-pulse"
+                  }`} />
                   {report.readiness_level}
                 </span>
               </div>
-              <h3 className="text-sm font-black text-foreground">{isCute ? "Current Status 🌸" : "Current Assessment"}</h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                {report.readiness_description}
-              </p>
-              {report.recommended_focus && (
-                <p className="text-[11px] text-foreground font-semibold flex items-center gap-1.5 mt-2">
-                  <span className="text-primary">✦</span> Recommended Focus: <span className="text-muted-foreground font-medium">{report.recommended_focus}</span>
-                </p>
-              )}
             </div>
-            <div className="shrink-0 flex items-center gap-4">
-              {isCute ? (
-                <img src="/cute_garden_puppy.png" alt="Coach Puppy" className="w-20 h-20 object-contain animate-float-leaf" style={{ "--duration": "9s" } as any} />
-              ) : (
-                <div className="h-16 w-16 rounded-full border-4 border-indigo-100 dark:border-indigo-900/30 flex items-center justify-center bg-indigo-50 dark:bg-indigo-950/25 relative">
-                  <span className="text-sm font-black text-indigo-700 dark:text-indigo-400">{report.readiness_level}</span>
+
+            {/* Assessment Text */}
+            <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+              {report.readiness_description}
+            </p>
+
+            {/* Recommended Focus Box */}
+            {report.recommended_focus && (
+              <div className="p-3.5 rounded-xl bg-muted/30 border border-border/40 text-xs leading-relaxed space-y-1 mt-3">
+                <div className="font-bold text-foreground flex items-center gap-1.5">
+                  <span className="text-primary text-sm">✦</span>
+                  <span>Recommended Focus</span>
                 </div>
-              )}
-            </div>
+                <p className="text-muted-foreground font-medium pl-5 leading-normal">
+                  {report.recommended_focus}
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -3604,39 +3590,68 @@ export default function DashboardPage() {
                 <div className="flex-grow min-w-0">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between w-full gap-3">
                     <div>
-                      {moduleType === "interview_preparation" ? (
-                        activeTrack ? (
-                          <Button 
-                            variant="ghost" 
-                            size="xs" 
-                            onClick={() => setActiveTrack(null)}
-                            className="text-[10px] font-bold h-7 gap-1 p-0 hover:bg-transparent text-muted-foreground hover:text-foreground"
-                          >
-                            ← Back to Pathways
-                          </Button>
+                      {activeTab === "console" ? (
+                        moduleType === "interview_preparation" ? (
+                          activeTrack ? (
+                            <Button 
+                              variant="ghost" 
+                              size="xs" 
+                              onClick={() => setActiveTrack(null)}
+                              className="text-[10px] font-bold h-7 gap-1 p-0 hover:bg-transparent text-muted-foreground hover:text-foreground"
+                            >
+                              ← Back to Pathways
+                            </Button>
+                          ) : (
+                            <>
+                              <h1 className="text-base font-black text-foreground tracking-tight flex items-center gap-1.5">
+                                {isCute ? "Interview Prep Pathway 🎯" : "Interview Preparation"}
+                              </h1>
+                              <p className="text-[10px] text-muted-foreground mt-0.5">
+                                Practice realistic interview questions and follow-ups.
+                              </p>
+                            </>
+                          )
                         ) : (
                           <>
-                            <h1 className="text-base font-black text-foreground tracking-tight flex items-center gap-1.5">
-                              {isCute ? "Interview Prep Pathway 🎯" : "Interview Preparation"}
+                            <h1 className="text-base font-black text-foreground tracking-tight flex items-center gap-1.5 break-words">
+                              {isCute ? (
+                                <span className="flex items-center gap-2">
+                                  Good morning, {user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Speaker"}! 🌸
+                                </span>
+                              ) : (
+                                "Practice Terminal"
+                              )}
                             </h1>
                             <p className="text-[10px] text-muted-foreground mt-0.5">
-                              Practice realistic interview questions and follow-ups.
+                              {isCute ? "Let's grow confidence, one speech at a time." : "Generate a custom topic and record your practice speech inline."}
                             </p>
                           </>
                         )
-                      ) : (
+                      ) : activeTab === "tracks" ? (
                         <>
-                          <h1 className="text-base font-black text-foreground tracking-tight flex items-center gap-1.5 break-words">
-                            {isCute ? (
-                              <span className="flex items-center gap-2">
-                                Good morning, {user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Speaker"}! 🌸
-                              </span>
-                            ) : (
-                              "Practice Terminal"
-                            )}
+                          <h1 className="text-base font-black text-foreground tracking-tight flex items-center gap-1.5">
+                            {isCute ? "Interview Pathways 🎯" : "Interview Pathways"}
                           </h1>
                           <p className="text-[10px] text-muted-foreground mt-0.5">
-                            {isCute ? "Let's grow confidence, one speech at a time." : "Generate a custom topic and record your practice speech inline."}
+                            Structured multi-stage preparation roadmaps.
+                          </p>
+                        </>
+                      ) : activeTab === "library" ? (
+                        <>
+                          <h1 className="text-base font-black text-foreground tracking-tight flex items-center gap-1.5">
+                            {isCute ? "Preparation Library 📚" : "Preparation Library"}
+                          </h1>
+                          <p className="text-[10px] text-muted-foreground mt-0.5">
+                            Curated articles, frameworks, and practice guides.
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <h1 className="text-base font-black text-foreground tracking-tight flex items-center gap-1.5">
+                            {isCute ? "Your AI Coach 🐾" : "AI Coach"}
+                          </h1>
+                          <p className="text-[10px] text-muted-foreground mt-0.5">
+                            Long-term practice analysis, readiness indicators, and targeted improvement pathways.
                           </p>
                         </>
                       )}
