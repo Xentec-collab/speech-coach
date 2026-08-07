@@ -17,6 +17,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
 import { Sun, Moon, BarChart2, Menu, X, History, Mic, Layers, BookOpen, Bot } from "lucide-react";
+import {
+  SidebarHistorySkeleton,
+  PracticeConsoleSkeleton,
+  InterviewTracksSkeleton,
+  KnowledgeLibrarySkeleton,
+  AICoachSkeleton,
+  SpeechEvaluationSkeleton,
+  FullDashboardLayoutSkeleton
+} from "@/components/dashboard/DashboardSkeletons";
 
 // ── Interfaces ────────────────────────────────────────────────────────────────
 interface GeneratedTopic {
@@ -1856,7 +1865,7 @@ export default function DashboardPage() {
     ].filter(group => group.items.length > 0);
   };
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center bg-background"><p className="text-sm text-muted-foreground">Verifying session...</p></div>;
+  if (loading) return <FullDashboardLayoutSkeleton />;
   if (!user) return null;
 
   const isCute       = false;
@@ -2531,10 +2540,7 @@ export default function DashboardPage() {
           </h3>
           
           {libraryLoading ? (
-            <div className="flex flex-col items-center justify-center py-12 gap-3 bg-muted/10 border border-border/50 rounded-xl">
-              <span className="w-5 h-5 border-2 border-[var(--accent-color)]/35 border-t-[var(--accent-color)] rounded-full animate-spin" />
-              <p className="text-[10px] text-muted-foreground font-medium">Loading preparation library...</p>
-            </div>
+            <KnowledgeLibrarySkeleton />
           ) : filteredArticles.length === 0 ? (
             <div className="text-center py-12 border border-dashed border-border rounded-xl">
               <p className="text-xs text-muted-foreground font-medium">No articles found matching filters.</p>
@@ -2604,21 +2610,7 @@ export default function DashboardPage() {
 
   const renderAICoach = () => {
     if (coachLoading) {
-      return (
-        <div className="flex flex-col items-center justify-center py-20 space-y-4">
-          {isCute ? (
-            <>
-              <img src="/cute_sleeping_puppy.png" alt="Sleeping Puppy" className="w-24 h-24 object-contain animate-bounce" />
-              <p className="text-xs text-[#2d5a37] font-bold">Your puppy coach is fetching insights...</p>
-            </>
-          ) : (
-            <>
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-              <p className="text-xs text-muted-foreground animate-pulse">Your coach is analyzing your history...</p>
-            </>
-          )}
-        </div>
-      );
+      return <AICoachSkeleton />;
     }
 
     if (!coachReport || !coachReport.unlocked || !coachReport.report) {
@@ -3390,7 +3382,10 @@ export default function DashboardPage() {
 
           {/* History Scroll List */}
           <div className="flex-1 overflow-y-auto min-h-0 pr-1">
-            <div className="p-3 space-y-4">
+            {historyLoading ? (
+              <SidebarHistorySkeleton />
+            ) : (
+              <div className="p-3 space-y-4">
               {historyError&&<p className="text-xs text-destructive p-2">{historyError}</p>}
               {!historyLoading&&historyList.length===0&&(
                 <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
@@ -3469,6 +3464,7 @@ export default function DashboardPage() {
                 </div>
               ))}
             </div>
+            )}
           </div>
 
           {isCute && (
