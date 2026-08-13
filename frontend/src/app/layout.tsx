@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { AuthProvider } from "@/context/AuthContext";
+import { AnalyticsProvider } from "@/context/AnalyticsContext";
 import "./globals.css";
 import { Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
@@ -27,7 +28,9 @@ export default function RootLayout({
     <html lang="en" className={cn("font-sans", inter.variable)}>
       <body>
         <AuthProvider>
-          {children}
+          <AnalyticsProvider>
+            {children}
+          </AnalyticsProvider>
         </AuthProvider>
       </body>
     </html>

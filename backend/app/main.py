@@ -11,6 +11,7 @@ from app.routes.interview_bank import router as interviews_router
 from app.routes.interview_sessions import router as sessions_router
 from app.routes.knowledge import router as knowledge_router
 from app.routes.ai_coach import router as ai_coach_router
+from app.routes.analytics import router as analytics_router
 
 app = FastAPI(
     title="AI Public Speaking Coach API",
@@ -35,6 +36,7 @@ app.include_router(interviews_router, prefix="/api/interviews", tags=["interview
 app.include_router(sessions_router, prefix="/api/interviews/sessions", tags=["sessions"])
 app.include_router(knowledge_router, prefix="/api/knowledge", tags=["knowledge"])
 app.include_router(ai_coach_router, prefix="/api/coach", tags=["coach"])
+app.include_router(analytics_router, prefix="/api/analytics", tags=["analytics"])
 
 
 @app.get("/")
