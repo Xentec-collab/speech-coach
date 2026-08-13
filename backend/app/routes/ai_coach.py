@@ -14,8 +14,7 @@ async def generate_and_save_coach_snapshot(user_id: str):
         # 1. Fetch completed speeches
         speeches_cols = (
             "id, duration_seconds, status, created_at, overall_score, "
-            "pronunciation_score, fluency_score, lexicon_score, filler_words, "
-            "word_count, speech_pace_wpm, feedback, topics(id, title, prompt, category, module_type)"
+            "pronunciation_score, fluency_score, grammar_score, content_score, feedback, topics(*)"
         )
         speeches_res = supabase.table("speeches") \
             .select(speeches_cols) \

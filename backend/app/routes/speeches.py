@@ -486,8 +486,8 @@ def list_user_speeches(
         try:
             explicit_speech_cols = (
                 "id, user_id, topic_id, duration_seconds, status, created_at, "
-                "overall_score, pronunciation_score, fluency_score, lexicon_score, "
-                "filler_words, word_count, speech_pace_wpm, feedback, topics(id, title, prompt, category, module_type)"
+                "overall_score, pronunciation_score, fluency_score, grammar_score, "
+                "content_score, feedback, topics(*)"
             )
             speeches_res = supabase.table("speeches") \
                 .select(explicit_speech_cols) \
@@ -624,14 +624,9 @@ def list_user_speeches(
                 if not any(f["id"] == speech_id for f in formatted_items):
                     formatted_items.append(item)
 
-    # Sort and slice
+    # Sort and return up to limit
     formatted_items.sort(key=lambda x: x.get("created_at", ""), reverse=True)
-    
-    start_range = (page - 1) * limit
-    end_range = page * limit
-    paginated_items = formatted_items[start_range:end_range]
-    
-    return paginated_items
+    return formatted_items[:limit]
 
 
 @router.get("/stats", status_code=status.HTTP_200_OK)
