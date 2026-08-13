@@ -3,6 +3,7 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status
 from app.services.supabase import get_current_user, supabase
 
+router = APIRouter()
 COACH_HISTORY_LIMIT = 20
 
 async def generate_and_save_coach_snapshot(user_id: str):
