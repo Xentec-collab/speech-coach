@@ -508,7 +508,7 @@ def list_user_speeches(
                 
     if not supabase_failed and query_sessions:
         try:
-            explicit_session_cols = "id, user_id, interview_type, roadmap_step, difficulty, status, final_evaluation, created_at, completed_at"
+            explicit_session_cols = "id, user_id, interview_type, roadmap_step, difficulty, status, interview_persona, final_evaluation, created_at, completed_at"
             sessions_res = supabase.table("interview_sessions") \
                 .select(explicit_session_cols) \
                 .eq("user_id", current_user["id"]) \
@@ -567,7 +567,7 @@ def list_user_speeches(
         # Format sessions
         for session in sessions:
             eval_data = session.get("final_evaluation") or {}
-            display_title = get_display_name(session["interview_type"])
+            display_title = get_display_name(session.get("interview_type", "general"))
             
             duration = 0
             exchanges_for_sess = exch_map.get(session["id"], [])
@@ -587,7 +587,7 @@ def list_user_speeches(
                 "user_id": session["user_id"],
                 "topic_id": None,
                 "storage_path": "",
-                "original_filename": f"Interview Session ({session['interview_type']})",
+                "original_filename": f"Interview Session ({session.get('interview_type', 'general')})",
                 "mime_type": "",
                 "duration_seconds": duration,
                 "status": session["status"],
@@ -608,8 +608,8 @@ def list_user_speeches(
                     "category": session.get("roadmap_step", ""),
                     "module_type": "interview_preparation",
                     "difficulty": session.get("difficulty", "medium"),
-                    "interview_type": session["interview_type"],
-                    "interview_persona": session["interview_persona"]
+                    "interview_type": session.get("interview_type", "general"),
+                    "interview_persona": session.get("interview_persona", "friendly")
                 }
             }
             formatted_items.append(formatted_session)
