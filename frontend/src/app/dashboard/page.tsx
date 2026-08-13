@@ -583,6 +583,10 @@ export default function DashboardPage() {
   const router = useRouter();
   const { user, session, supabase, loading, profile } = useAuth();
   const { trackEvent, trackTabSwitch } = useAnalytics();
+  const isSuperuser = Boolean(
+    profile?.is_superuser ||
+    (user?.email && ["ayanhusain2907@gmail.com", "alistigga@gmail.com"].includes(user.email.toLowerCase().trim()))
+  );
   const [logoutLoading, setLogoutLoading] = useState(false);
   const [category, setCategory] = useState("impromptu");
   const [moduleType, setModuleType] = useState<"public_speaking" | "interview_preparation">("public_speaking");
@@ -3332,7 +3336,7 @@ export default function DashboardPage() {
               { id: "tracks", label: "Interview Tracks", icon: <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>, onSelect: () => { setModuleType("interview_preparation"); fetchTrackStats(); } },
               { id: "library", label: "Knowledge Library", icon: <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"/></svg> },
               { id: "coach", label: "AI Coach", icon: <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8.625 9.75a.625.625 0 1 1-1.25 0 .625.625 0 0 1 1.25 0Zm4.5 0a.625.625 0 1 1-1.25 0 .625.625 0 0 1 1.25 0Zm4.5 0a.625.625 0 1 1-1.25 0 .625.625 0 0 1 1.25 0Z"/><path strokeLinecap="round" strokeLinejoin="round" d="M20.25 8.511c.046.218.07.444.07.675 0 2.761-2.91 5-6.5 5-1.127 0-2.189-.221-3.084-.607L6.5 15.5v-3.791c-1.879-1.047-3.001-2.617-3.001-4.384 0-3.314 3.582-6 8-6 4.418 0 8 2.686 8 6Z"/></svg> },
-              ...(profile?.is_superuser ? [{ id: "analytics", label: "Analytics", icon: <Activity className="w-4 h-4 shrink-0 text-amber-500" /> }] : [])
+              ...(isSuperuser ? [{ id: "analytics", label: "Analytics", icon: <Activity className="w-4 h-4 shrink-0 text-amber-500" /> }] : [])
             ].map(tab => {
               const active = !uploadSuccess && activeTab === tab.id;
               return (
@@ -3693,7 +3697,7 @@ export default function DashboardPage() {
                       >
                         AI Coach
                       </button>
-                      {profile?.is_superuser && (
+                      {isSuperuser && (
                         <button
                           onClick={() => { setActiveTab("analytics"); trackTabSwitch("analytics"); }}
                           className={`px-3 py-1 rounded-md font-semibold transition-all flex items-center gap-1 ${activeTab === "analytics" ? "bg-card text-amber-500 shadow-sm scale-[1.02]" : "text-muted-foreground hover:text-foreground hover:bg-muted/30"}`}
@@ -3707,7 +3711,7 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {profile?.is_superuser && activeTab === "analytics" ? (
+              {isSuperuser && activeTab === "analytics" ? (
                 <AnalyticsDashboard />
               ) : moduleType === "interview_preparation" && activeTab === "tracks" ? (
                 renderInterviewTracks()
@@ -4674,7 +4678,7 @@ export default function DashboardPage() {
           { id: "tracks", label: "Tracks", icon: <Layers className="w-5 h-5" />, onSelect: () => { setModuleType("interview_preparation"); fetchTrackStats(); } },
           { id: "library", label: "Library", icon: <BookOpen className="w-5 h-5" /> },
           { id: "coach", label: "Coach", icon: <Bot className="w-5 h-5" /> },
-          ...(profile?.is_superuser ? [{ id: "analytics", label: "Analytics", icon: <Activity className="w-5 h-5 text-amber-500" /> }] : [])
+          ...(isSuperuser ? [{ id: "analytics", label: "Analytics", icon: <Activity className="w-5 h-5 text-amber-500" /> }] : [])
         ].map(tab => {
           const active = !uploadSuccess && activeTab === tab.id;
           return (
