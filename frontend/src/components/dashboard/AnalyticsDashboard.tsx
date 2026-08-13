@@ -18,15 +18,12 @@ import {
   RefreshCw,
   Search,
   ShieldCheck,
-  ChevronRight,
   TrendingUp,
   Flame,
-  FileText,
   Mic,
   BookOpen,
   Bot,
-  Layers,
-  Sparkles
+  Layers
 } from "lucide-react";
 
 interface AnalyticsOverview {
@@ -82,6 +79,142 @@ export function AnalyticsDashboard() {
     profile?.is_superuser ||
     (user?.email && ["ayanhusain2907@gmail.com", "alistigga@gmail.com"].includes(user.email.toLowerCase().trim()))
   );
+
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const [overview, setOverview] = useState<AnalyticsOverview | null>(null);
+  const [features, setFeatures] = useState<FeatureStat[]>([]);
+  const [exitPages, setExitPages] = useState<ExitPageStat[]>([]);
+  const [dailyTrends, setDailyTrends] = useState<DailyTrend[]>([]);
+  const [usersList, setUsersList] = useState<TrackedUser[]>([]);
+
+  // User Journey explorer
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [userSearch, setUserSearch] = useState("");
+  const [journeyEvents, setJourneyEvents] = useState<JourneyEvent[]>([]);
+  const [journeyLoading, setJourneyLoading] = useState(false);
+
+  const fetchAnalyticsData = useCallback(async () => {
+    if (!session?.access_token) return;
+    setError(null);
+    try {
+      const baseUrl = getApiBaseUrl();
+      const headers = {
+        Authorization: `Bearer ${session.access_token}`,
+      };
+
+      const [ovRes, featRes, exitRes, dauRes, usersRes] = await Promise.all([
+        fetch(`${baseUrl}/api/analytics/overview`, { headers }),
+        fetch(`${baseUrl}/api/analytics/features`, { headers }),
+        fetch(`${baseUrl}/api/analytics/exit-pages`, { headers }),
+        fetch(`${baseUrl}/api/analytics/daily-active`, { headers }),
+        fetch(`${baseUrl}/api/analytics/users`, { headers }),
+      ]);
+
+      if (!ovRes.ok) throw new Error("Failed to fetch overview metrics");
+
+      const [ovData, featData, exitData, dauData, usersData] = await Promise.all([
+        ovRes.json(),
+        featRes.json(),
+        exitRes.json(),
+        dauRes.json(),
+        usersRes.json(),
+      ]);
+
+      setOverview(ovData);
+      setFeatures(featData || []);
+      setExitPages(exitData || []);
+      setDailyTrends(dauData || []);
+      setUsersList(usersData || []);
+
+      if (usersData && usersData.length > 0 && !selectedUserId) {
+        setSelectedUserId(usersData[0].user_id);
+      }
+    } catch (err: any) {
+      setError(err.message || "Failed to load telemetry data.");
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, [session?.access_token, selectedUserId]);
+
+  const fetchUserJourney = useCallback(async (userId: string) => {
+    if (!session?.access_token || !userId) return;
+    setJourneyLoading(true);
+    try {
+      const baseUrl = getApiBaseUrl();
+      const res = await fetch(`${baseUrl}/api/analytics/user-journey/${userId}`, {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setJourneyEvents(data || []);
+      }
+    } catch (err) {
+      console.error("Error fetching user journey:", err);
+    } finally {
+      setJourneyLoading(false);
+    }
+  }, [session?.access_token]);
+
+  useEffect(() => {
+    if (isSuperuser) {
+      fetchAnalyticsData();
+    }
+  }, [fetchAnalyticsData, isSuperuser]);
+
+  useEffect(() => {
+    if (selectedUserId) {
+      fetchUserJourney(selectedUserId);
+    }
+  }, [selectedUserId, fetchUserJourney]);
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    fetchAnalyticsData();
+  };
+
+  const getFeatureIcon = (name: string) => {
+    switch (name.toLowerCase()) {
+      case "console":
+      case "speech_upload":
+      case "topic_generate":
+        return <Mic className="w-4 h-4 text-emerald-500" />;
+      case "tracks":
+      case "interview_start":
+        return <Layers className="w-4 h-4 text-blue-500" />;
+      case "library":
+      case "article_completed":
+        return <BookOpen className="w-4 h-4 text-purple-500" />;
+      case "coach":
+      case "coach_viewed":
+        return <Bot className="w-4 h-4 text-amber-500" />;
+      default:
+        return <Activity className="w-4 h-4 text-zinc-400" />;
+    }
+  };
+
+  const formatSeconds = (sec: number) => {
+    if (!sec || sec <= 0) return "0s";
+    if (sec < 60) return `${Math.round(sec)}s`;
+    const mins = Math.floor(sec / 60);
+    const remainingSec = Math.round(sec % 60);
+    return `${mins}m ${remainingSec}s`;
+  };
+
+  const formatTimestamp = (iso: string) => {
+    if (!iso) return "";
+    try {
+      const d = new Date(iso);
+      return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" }) +
+        " • " +
+        d.toLocaleDateString([], { month: "short", day: "numeric" });
+    } catch {
+      return iso;
+    }
+  };
 
   if (!isSuperuser) {
     return (
