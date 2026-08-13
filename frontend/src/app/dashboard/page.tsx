@@ -3688,11 +3688,20 @@ export default function DashboardPage() {
                         Library
                       </button>
                       <button
-                        onClick={() => { setActiveTab("coach"); }}
+                        onClick={() => { setActiveTab("coach"); trackTabSwitch("coach"); }}
                         className={`px-3 py-1 rounded-md font-semibold transition-all ${activeTab === "coach" ? "bg-card text-foreground shadow-sm scale-[1.02]" : "text-muted-foreground hover:text-foreground hover:bg-muted/30"}`}
                       >
                         AI Coach
                       </button>
+                      {profile?.is_superuser && (
+                        <button
+                          onClick={() => { setActiveTab("analytics"); trackTabSwitch("analytics"); }}
+                          className={`px-3 py-1 rounded-md font-semibold transition-all flex items-center gap-1 ${activeTab === "analytics" ? "bg-card text-amber-500 shadow-sm scale-[1.02]" : "text-muted-foreground hover:text-foreground hover:bg-muted/30"}`}
+                        >
+                          <Activity className="w-3 h-3 text-amber-500" />
+                          Analytics
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>

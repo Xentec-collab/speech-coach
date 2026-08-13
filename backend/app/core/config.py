@@ -7,10 +7,10 @@ class Settings(BaseSettings):
     supabase_url: str = ""
     supabase_service_role_key: str = ""
     gemini_api_key: str = ""
-    superuser_email: str = ""
-    superuser_cute_email: str = ""
-    allowed_origins: str | list[str] = ["http://localhost:3000"]
-    super_users: str | list[str] = []
+    superuser_email: str = "ayanhusain2907@gmail.com"
+    superuser_cute_email: str = "alistigga@gmail.com"
+    allowed_origins: str | list[str] = ["*"]
+    super_users: str | list[str] = ["ayanhusain2907@gmail.com", "alistigga@gmail.com"]
 
     @field_validator("super_users", mode="before")
     @classmethod
