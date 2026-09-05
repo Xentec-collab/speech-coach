@@ -16,9 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
-import { Sun, Moon, BarChart2, Menu, X, History, Mic, Layers, BookOpen, Bot, Activity } from "lucide-react";
-import { useAnalytics } from "@/context/AnalyticsContext";
-import { AnalyticsDashboard } from "@/components/dashboard/AnalyticsDashboard";
+import { Sun, Moon, BarChart2, Menu, X, History, Mic, Layers, BookOpen, Bot } from "lucide-react";
 import {
   SidebarHistorySkeleton,
   PracticeConsoleSkeleton,
@@ -582,7 +580,6 @@ const renderMarkdown = (content: string) => {
 export default function DashboardPage() {
   const router = useRouter();
   const { user, session, supabase, loading, profile } = useAuth();
-  const { trackEvent, trackTabSwitch } = useAnalytics();
   const isSuperuser = Boolean(
     profile?.is_superuser ||
     (user?.email && ["ayanhusain2907@gmail.com", "alistigga@gmail.com"].includes(user.email.toLowerCase().trim()))
@@ -615,7 +612,7 @@ export default function DashboardPage() {
   const [stats, setStats] = useState<SpeechStatistics | null>(null);
   const [activeTrack, setActiveTrack] = useState<string | null>(null);
   const [trackStats, setTrackStats] = useState<any | null>(null);
-  const [activeTab, setActiveTab] = useState<"console" | "tracks" | "library" | "coach" | "analytics">("console");
+  const [activeTab, setActiveTab] = useState<"console" | "tracks" | "library" | "coach">("console");
   const [cachedIsCute, setCachedIsCute] = useState<boolean>(false);
   const [showDrawer, setShowDrawer] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -843,7 +840,6 @@ export default function DashboardPage() {
       const res=await fetch(`${getApiBaseUrl()}/api/speeches/upload`,{method:"POST",headers:{Authorization:`Bearer ${session.access_token}`},body:fd});
       if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.detail||`Error ${res.status}`);}
       const data=await res.json();setUploadSuccess(true);setShowDrawer(false);
-      trackEvent("speech_upload", { duration_seconds: Math.round(recordSeconds), topic_id: activeTopic?.id });
       if(data?.id)startPollingSpeech(data.id);
     }catch(e:any){setUploadError(e.message||"Upload failed.");}
     finally{setIsUploading(false);}
@@ -875,7 +871,6 @@ export default function DashboardPage() {
       const data = await res.json();
       
       discardSpeechAndReset();
-      trackEvent("interview_start", { interview_type: trackId, step: stepCategory, difficulty: stepDifficulty });
       
       setActiveSession({
         session_id: data.session_id,
@@ -930,8 +925,6 @@ export default function DashboardPage() {
         const errData = await res.json().catch(() => ({}));
         throw new Error(errData.detail || "Failed to upload answer.");
       }
-      
-      trackEvent("round_submitted", { session_id: activeSession.session_id, round: activeSession.current_round, duration_seconds: Math.round(recordSeconds) });
       
       setActiveSession((prev: any) => {
         if (!prev) return null;
@@ -1810,7 +1803,6 @@ export default function DashboardPage() {
       }
       const data = await res.json();
       if (data?.topics) setTopics(data.topics);
-      trackEvent("topic_generate", { module: moduleType, difficulty, category: moduleType === "public_speaking" ? category : interviewType });
     } catch (e: any) {
       setTopicError(e.message || "Failed to generate topic.");
     } finally {
@@ -3335,8 +3327,7 @@ export default function DashboardPage() {
               { id: "console", label: "Practice Console", icon: <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 0 0 6-6v-1.5m-6 7.5a6 6 0 0 1-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 0 1-3-3V4.5a3 3 0 1 1 6 0v8.25a3 3 0 0 1-3 3Z"/></svg> },
               { id: "tracks", label: "Interview Tracks", icon: <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>, onSelect: () => { setModuleType("interview_preparation"); fetchTrackStats(); } },
               { id: "library", label: "Knowledge Library", icon: <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"/></svg> },
-              { id: "coach", label: "AI Coach", icon: <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8.625 9.75a.625.625 0 1 1-1.25 0 .625.625 0 0 1 1.25 0Zm4.5 0a.625.625 0 1 1-1.25 0 .625.625 0 0 1 1.25 0Zm4.5 0a.625.625 0 1 1-1.25 0 .625.625 0 0 1 1.25 0Z"/><path strokeLinecap="round" strokeLinejoin="round" d="M20.25 8.511c.046.218.07.444.07.675 0 2.761-2.91 5-6.5 5-1.127 0-2.189-.221-3.084-.607L6.5 15.5v-3.791c-1.879-1.047-3.001-2.617-3.001-4.384 0-3.314 3.582-6 8-6 4.418 0 8 2.686 8 6Z"/></svg> },
-              ...(isSuperuser ? [{ id: "analytics", label: "Analytics", icon: <Activity className="w-4 h-4 shrink-0 text-amber-500" /> }] : [])
+              { id: "coach", label: "AI Coach", icon: <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8.625 9.75a.625.625 0 1 1-1.25 0 .625.625 0 0 1 1.25 0Zm4.5 0a.625.625 0 1 1-1.25 0 .625.625 0 0 1 1.25 0Zm4.5 0a.625.625 0 1 1-1.25 0 .625.625 0 0 1 1.25 0Z"/><path strokeLinecap="round" strokeLinejoin="round" d="M20.25 8.511c.046.218.07.444.07.675 0 2.761-2.91 5-6.5 5-1.127 0-2.189-.221-3.084-.607L6.5 15.5v-3.791c-1.879-1.047-3.001-2.617-3.001-4.384 0-3.314 3.582-6 8-6 4.418 0 8 2.686 8 6Z"/></svg> }
             ].map(tab => {
               const active = !uploadSuccess && activeTab === tab.id;
               return (
@@ -3344,7 +3335,6 @@ export default function DashboardPage() {
                   key={tab.id}
                   onClick={() => {
                     setActiveTab(tab.id as any);
-                    trackTabSwitch(tab.id);
                     setUploadSuccess(false);
                     setPolledSpeechId(null);
                     setPolledSpeechDetails(null);
@@ -3561,8 +3551,7 @@ export default function DashboardPage() {
                   <span className="text-foreground truncate">
                     {activeTab === "console" ? "Practice Console" :
                      activeTab === "tracks" ? "Interview Tracks" :
-                     activeTab === "library" ? "Knowledge Library" :
-                     activeTab === "coach" ? "AI Coach" : "Platform Telemetry"}
+                     activeTab === "library" ? "Knowledge Library" : "AI Coach"}
                   </span>
                 )}
               </div>
@@ -3692,28 +3681,17 @@ export default function DashboardPage() {
                         Library
                       </button>
                       <button
-                        onClick={() => { setActiveTab("coach"); trackTabSwitch("coach"); }}
+                        onClick={() => { setActiveTab("coach"); }}
                         className={`px-3 py-1 rounded-md font-semibold transition-all ${activeTab === "coach" ? "bg-card text-foreground shadow-sm scale-[1.02]" : "text-muted-foreground hover:text-foreground hover:bg-muted/30"}`}
                       >
                         AI Coach
                       </button>
-                      {isSuperuser && (
-                        <button
-                          onClick={() => { setActiveTab("analytics"); trackTabSwitch("analytics"); }}
-                          className={`px-3 py-1 rounded-md font-semibold transition-all flex items-center gap-1 ${activeTab === "analytics" ? "bg-card text-amber-500 shadow-sm scale-[1.02]" : "text-muted-foreground hover:text-foreground hover:bg-muted/30"}`}
-                        >
-                          <Activity className="w-3 h-3 text-amber-500" />
-                          Analytics
-                        </button>
-                      )}
                     </div>
                   </div>
                 </div>
               </div>
 
-              {isSuperuser && activeTab === "analytics" ? (
-                <AnalyticsDashboard />
-              ) : moduleType === "interview_preparation" && activeTab === "tracks" ? (
+              {moduleType === "interview_preparation" && activeTab === "tracks" ? (
                 renderInterviewTracks()
               ) : activeTab === "library" ? (
                 renderKnowledgeLibrary()
@@ -4677,8 +4655,7 @@ export default function DashboardPage() {
           { id: "console", label: "Console", icon: <Mic className="w-5 h-5" /> },
           { id: "tracks", label: "Tracks", icon: <Layers className="w-5 h-5" />, onSelect: () => { setModuleType("interview_preparation"); fetchTrackStats(); } },
           { id: "library", label: "Library", icon: <BookOpen className="w-5 h-5" /> },
-          { id: "coach", label: "Coach", icon: <Bot className="w-5 h-5" /> },
-          ...(isSuperuser ? [{ id: "analytics", label: "Analytics", icon: <Activity className="w-5 h-5 text-amber-500" /> }] : [])
+          { id: "coach", label: "Coach", icon: <Bot className="w-5 h-5" /> }
         ].map(tab => {
           const active = !uploadSuccess && activeTab === tab.id;
           return (
@@ -4686,7 +4663,6 @@ export default function DashboardPage() {
               key={tab.id}
               onClick={() => {
                 setActiveTab(tab.id as any);
-                trackTabSwitch(tab.id);
                 setUploadSuccess(false);
                 setPolledSpeechId(null);
                 setPolledSpeechDetails(null);
