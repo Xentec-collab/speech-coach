@@ -7,7 +7,8 @@ import { useAuth } from "@/context/AuthContext";
 import { 
   Sparkles, Mic, BarChart2, ShieldCheck, Moon, Sun, ArrowRight, 
   Check, X as XIcon, Zap, Heart, MessageSquare, Award, Flame, 
-  Play, Volume2, ThumbsUp, ChevronRight, Lock, Briefcase, Smile
+  Play, Volume2, ThumbsUp, ChevronRight, Lock, Briefcase, Smile,
+  Rocket, Key, Target, AlertTriangle, Users, Coffee, Compass, Coins, Star, Droplets
 } from "lucide-react";
 
 export default function HomePage() {
@@ -32,7 +33,7 @@ export default function HomePage() {
       <div className="bg-black text-white text-[11px] sm:text-xs font-black py-2 px-4 text-center tracking-wide flex items-center justify-center gap-2 select-none border-b-2 border-black">
         <span className="bg-[#FFDE59] text-black px-1.5 py-0.5 rounded text-[10px] font-black uppercase">New</span>
         <span>Meet Rizzkey 2.0: Real-time filler word detection &amp; Charisma Scoring is live!</span>
-        <span className="hidden sm:inline">🚀</span>
+        <Rocket className="w-3.5 h-3.5 hidden sm:inline text-yellow-300 stroke-[2.5]" />
       </div>
 
       {/* ── Neo-Brutalist Hero Header & Section ────────────────────────────── */}
@@ -43,7 +44,7 @@ export default function HomePage() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5 group">
             <div className="bg-white border-[2.5px] border-black rounded-2xl px-3.5 py-1.5 shadow-[3px_3px_0px_0px_#000] flex items-center gap-2 transition-transform group-hover:-rotate-3">
-              <span className="text-xl sm:text-2xl">🔑</span>
+              <Key className="w-5 h-5 sm:w-6 sm:h-6 text-black stroke-[2.5]" />
               <span className="font-black text-xl sm:text-2xl tracking-tight text-black">
                 Rizz<span className="text-blue-600">key</span>
               </span>
@@ -105,7 +106,7 @@ export default function HomePage() {
             
             {/* Top Badge Sticker */}
             <div className="inline-flex items-center gap-2 bg-white border-2 border-black px-3.5 py-1 rounded-full text-xs font-black text-black shadow-[3px_3px_0px_0px_#000] mb-6 -rotate-1">
-              <span>⚡</span>
+              <Zap className="w-3.5 h-3.5 fill-black stroke-black" />
               <span>YOUR PERSONAL AI SPEAKING COACH</span>
             </div>
 
@@ -113,7 +114,7 @@ export default function HomePage() {
             <h1 className="text-4xl sm:text-6xl lg:text-[68px] font-black tracking-tight leading-[1.03] text-black">
               Speak Smooth.<br />
               Sound Smart.<br />
-              Zero Sweat. 💦
+              Zero Sweat. <Droplets className="w-9 h-9 sm:w-14 sm:h-14 inline-block text-blue-500 fill-blue-300 stroke-black stroke-[2.5] -mt-2 align-middle" />
             </h1>
 
             {/* Conversational Subtitle */}
@@ -156,42 +157,54 @@ export default function HomePage() {
               />
             </div>
 
-            {/* Speech Bubble Top-Left: "Ummm... ❌" */}
+            {/* Speech Bubble Top-Left: "Ummm... ✕" */}
             <div className="absolute top-2 sm:top-6 left-1 sm:left-6 z-20 anim-float-left">
               <div className="bg-white border-[2.5px] border-black rounded-2xl px-4 py-2 sm:px-5 sm:py-2.5 shadow-[4px_4px_0px_0px_#000] flex items-center gap-2 relative">
                 <span className="font-black text-sm sm:text-base text-black">Ummm...</span>
-                <span className="w-5 h-5 rounded-full bg-red-500 border border-black flex items-center justify-center text-white font-black text-xs">✕</span>
+                <span className="w-5 h-5 rounded-full bg-red-500 border border-black flex items-center justify-center text-white font-black text-xs">
+                  <XIcon className="w-3 h-3 stroke-[3]" />
+                </span>
                 {/* Comic speech tail */}
                 <div className="absolute -bottom-2 right-6 w-3.5 h-3.5 bg-white border-r-[2.5px] border-b-[2.5px] border-black rotate-45" />
               </div>
             </div>
 
-            {/* Speech Bubble Top-Right: "Nailed it! 🎯" */}
+            {/* Speech Bubble Top-Right: "Nailed it! [Target]" */}
             <div className="absolute top-0 sm:top-8 right-1 sm:right-6 z-20 anim-float-right">
               <div className="bg-[#99F6E4] border-[2.5px] border-black rounded-2xl px-4 py-2 sm:px-5 sm:py-2.5 shadow-[4px_4px_0px_0px_#000] flex items-center gap-2 relative">
-                <span className="font-black text-sm sm:text-base text-black">Nailed it! 🎯</span>
+                <span className="font-black text-sm sm:text-base text-black flex items-center gap-1.5">
+                  Nailed it! <Target className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-700 stroke-[2.5]" />
+                </span>
                 {/* Comic speech tail */}
                 <div className="absolute -bottom-2 left-6 w-3.5 h-3.5 bg-[#99F6E4] border-l-[2.5px] border-b-[2.5px] border-black rotate-[-45deg]" />
               </div>
             </div>
 
-            {/* Sticker Badge Bottom-Left: "0 Filler Words! ⚡" */}
+            {/* Sticker Badge Bottom-Left: "0 Filler Words! [Zap]" */}
             <div className="absolute bottom-2 left-2 sm:left-8 z-20 -rotate-3 hover:rotate-0 transition-transform">
               <div className="bg-[#FBCFE8] border-2 border-black rounded-xl px-3.5 py-1.5 shadow-[3px_3px_0px_0px_#000] flex items-center gap-1.5">
-                <span className="font-black text-xs sm:text-sm text-black">0 Filler Words! ⚡</span>
+                <span className="font-black text-xs sm:text-sm text-black flex items-center gap-1">
+                  0 Filler Words! <Zap className="w-3.5 h-3.5 fill-amber-400 stroke-black stroke-[1.5]" />
+                </span>
               </div>
             </div>
 
-            {/* Sticker Badge Bottom-Right: "94/100 Clarity 🚀" */}
+            {/* Sticker Badge Bottom-Right: "94/100 Clarity [Rocket]" */}
             <div className="absolute bottom-6 right-2 sm:right-10 z-20 rotate-3 hover:rotate-0 transition-transform">
               <div className="bg-[#DDD6FE] border-2 border-black rounded-xl px-3.5 py-1.5 shadow-[3px_3px_0px_0px_#000] flex items-center gap-1.5">
-                <span className="font-black text-xs sm:text-sm text-black">94/100 Clarity 🚀</span>
+                <span className="font-black text-xs sm:text-sm text-black flex items-center gap-1">
+                  94/100 Clarity <Rocket className="w-3.5 h-3.5 text-blue-600 stroke-[2]" />
+                </span>
               </div>
             </div>
 
             {/* Decorative comic elements */}
-            <div className="absolute top-1/2 left-0 text-2xl select-none animate-pulse">✨</div>
-            <div className="absolute top-1/3 right-1 text-2xl select-none animate-bounce">⭐</div>
+            <div className="absolute top-1/2 left-0 select-none animate-pulse">
+              <Sparkles className="w-7 h-7 text-amber-500 fill-amber-300 stroke-black stroke-[1.5]" />
+            </div>
+            <div className="absolute top-1/3 right-1 select-none animate-bounce">
+              <Star className="w-7 h-7 text-amber-400 fill-amber-300 stroke-black stroke-[1.5]" />
+            </div>
           </div>
         </div>
 
@@ -203,8 +216,8 @@ export default function HomePage() {
             <div className="bg-[#A7F3D0] border-[2.5px] border-black rounded-2xl p-5 shadow-[5px_5px_0px_0px_#000] -rotate-1 hover:rotate-0 hover:-translate-y-1 transition-all relative">
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-16 h-5 bg-pink-300/90 border border-black/40 rounded-sm rotate-2" />
               <div className="flex items-center gap-3 mb-2 pt-1">
-                <div className="w-10 h-10 rounded-xl bg-white border-2 border-black flex items-center justify-center text-xl shadow-[2px_2px_0px_0px_#000]">
-                  💼
+                <div className="w-10 h-10 rounded-xl bg-white border-2 border-black flex items-center justify-center shadow-[2px_2px_0px_0px_#000]">
+                  <Briefcase className="w-5 h-5 text-black stroke-[2.5]" />
                 </div>
                 <div>
                   <h3 className="font-black text-sm sm:text-base text-black leading-tight">Job &amp; Campus Interviews</h3>
@@ -220,8 +233,8 @@ export default function HomePage() {
             <div className="bg-[#FEF08A] border-[2.5px] border-black rounded-2xl p-5 shadow-[5px_5px_0px_0px_#000] rotate-1 hover:rotate-0 hover:-translate-y-1 transition-all relative">
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-16 h-5 bg-purple-300/90 border border-black/40 rounded-sm -rotate-2" />
               <div className="flex items-center gap-3 mb-2 pt-1">
-                <div className="w-10 h-10 rounded-xl bg-white border-2 border-black flex items-center justify-center text-xl shadow-[2px_2px_0px_0px_#000]">
-                  🎤
+                <div className="w-10 h-10 rounded-xl bg-white border-2 border-black flex items-center justify-center shadow-[2px_2px_0px_0px_#000]">
+                  <Mic className="w-5 h-5 text-black stroke-[2.5]" />
                 </div>
                 <div>
                   <h3 className="font-black text-sm sm:text-base text-black leading-tight">Presentations &amp; Pitches</h3>
@@ -237,8 +250,8 @@ export default function HomePage() {
             <div className="bg-[#FBCFE8] border-[2.5px] border-black rounded-2xl p-5 shadow-[5px_5px_0px_0px_#000] -rotate-2 hover:rotate-0 hover:-translate-y-1 transition-all relative">
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-16 h-5 bg-yellow-300/90 border border-black/40 rounded-sm rotate-1" />
               <div className="flex items-center gap-3 mb-2 pt-1">
-                <div className="w-10 h-10 rounded-xl bg-white border-2 border-black flex items-center justify-center text-xl shadow-[2px_2px_0px_0px_#000]">
-                  🔥
+                <div className="w-10 h-10 rounded-xl bg-white border-2 border-black flex items-center justify-center shadow-[2px_2px_0px_0px_#000]">
+                  <Flame className="w-5 h-5 text-black fill-amber-400 stroke-black stroke-[1.5]" />
                 </div>
                 <div>
                   <h3 className="font-black text-sm sm:text-base text-black leading-tight">Dates &amp; Social Banter</h3>
@@ -261,7 +274,7 @@ export default function HomePage() {
         {/* ── Why Rizzkey Section ──────────────────────────────────────────── */}
         <section className="px-6 md:px-12 max-w-5xl mx-auto w-full text-center pb-20">
           <div className="inline-flex items-center gap-2 bg-[#FEF08A] border-2 border-black px-3.5 py-1 rounded-full text-xs font-black text-black shadow-[2px_2px_0px_0px_#000] mb-4">
-            <span>✨</span>
+            <Sparkles className="w-3.5 h-3.5 fill-black stroke-black" />
             <span>WHY RIZZKEY?</span>
           </div>
           <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-black mb-4">
@@ -276,7 +289,7 @@ export default function HomePage() {
         <section id="training-modes" className="px-6 md:px-12 max-w-6xl mx-auto w-full pb-24">
           <div className="text-center mb-14">
             <div className="inline-flex items-center gap-2 bg-[#99F6E4] border-2 border-black px-3.5 py-1 rounded-full text-xs font-black text-black shadow-[2px_2px_0px_0px_#000] mb-3">
-              <span>🎯</span>
+              <Target className="w-3.5 h-3.5 text-black stroke-[2.5]" />
               <span>CORE SUPERPOWERS</span>
             </div>
             <h2 className="text-3xl md:text-4xl font-black tracking-tight text-black mb-3">
@@ -293,8 +306,8 @@ export default function HomePage() {
             <div className="md:col-span-2 bg-white border-[2.5px] border-black rounded-3xl p-6 sm:p-8 shadow-[5px_5px_0px_0px_#000] flex flex-col md:flex-row gap-6 justify-between items-center relative overflow-hidden">
               <div className="flex-1 flex flex-col justify-between">
                 <div>
-                  <div className="w-12 h-12 rounded-2xl bg-[#99F6E4] border-2 border-black flex items-center justify-center text-xl shadow-[3px_3px_0px_0px_#000] mb-4">
-                    🎙️
+                  <div className="w-12 h-12 rounded-2xl bg-[#99F6E4] border-2 border-black flex items-center justify-center shadow-[3px_3px_0px_0px_#000] mb-4">
+                    <Mic className="w-6 h-6 text-black stroke-[2.5]" />
                   </div>
                   <h3 className="text-xl sm:text-2xl font-black text-black tracking-tight mb-2">
                     Real-Time Filler Word Stopper
@@ -322,7 +335,7 @@ export default function HomePage() {
                 </div>
                 <div className="space-y-2 py-1">
                   <p className="text-[11px] font-bold text-black/80 leading-relaxed">
-                    &quot;I believe that <span className="bg-red-400 border border-black text-white px-1.5 py-0.5 rounded font-black text-[10px]">um ✕</span> our strategy is <span className="bg-yellow-300 border border-black text-black px-1.5 py-0.5 rounded font-black text-[10px]">like ⚠️</span> completely sound.&quot;
+                    &quot;I believe that <span className="bg-red-400 border border-black text-white px-1.5 py-0.5 rounded font-black text-[10px] inline-flex items-center gap-1">um <XIcon className="w-2.5 h-2.5 stroke-[3]" /></span> our strategy is <span className="bg-yellow-300 border border-black text-black px-1.5 py-0.5 rounded font-black text-[10px] inline-flex items-center gap-1">like <AlertTriangle className="w-2.5 h-2.5 stroke-[2.5]" /></span> completely sound.&quot;
                   </p>
                 </div>
                 <div className="bg-[#A7F3D0] border-2 border-black rounded-xl p-2 flex items-center justify-between text-[11px] font-black text-black">
@@ -336,8 +349,8 @@ export default function HomePage() {
             <div className="bg-[#DDD6FE] border-[2.5px] border-black rounded-3xl p-6 sm:p-8 shadow-[5px_5px_0px_0px_#000] flex flex-col justify-between relative overflow-hidden">
               <div className="absolute -top-3 right-6 w-14 h-5 bg-yellow-300/90 border border-black/30 rounded-sm rotate-6" />
               <div>
-                <div className="w-12 h-12 rounded-2xl bg-white border-2 border-black flex items-center justify-center text-xl shadow-[3px_3px_0px_0px_#000] mb-4">
-                  🔥
+                <div className="w-12 h-12 rounded-2xl bg-white border-2 border-black flex items-center justify-center shadow-[3px_3px_0px_0px_#000] mb-4">
+                  <Award className="w-6 h-6 text-black stroke-[2.5]" />
                 </div>
                 <h3 className="text-xl font-black text-black tracking-tight mb-2">
                   The Charisma Scorecard
@@ -356,8 +369,8 @@ export default function HomePage() {
             <div className="bg-[#FED7AA] border-[2.5px] border-black rounded-3xl p-6 sm:p-8 shadow-[5px_5px_0px_0px_#000] flex flex-col justify-between relative overflow-hidden">
               <div className="absolute -top-3 right-6 w-14 h-5 bg-pink-300/90 border border-black/30 rounded-sm -rotate-3" />
               <div>
-                <div className="w-12 h-12 rounded-2xl bg-white border-2 border-black flex items-center justify-center text-xl shadow-[3px_3px_0px_0px_#000] mb-4">
-                  🎭
+                <div className="w-12 h-12 rounded-2xl bg-white border-2 border-black flex items-center justify-center shadow-[3px_3px_0px_0px_#000] mb-4">
+                  <Users className="w-6 h-6 text-black stroke-[2.5]" />
                 </div>
                 <h3 className="text-xl font-black text-black tracking-tight mb-2">
                   Pick Your Sparring Partner
@@ -368,11 +381,15 @@ export default function HomePage() {
               </div>
               <div className="space-y-2">
                 <div className="bg-white border-2 border-black rounded-xl p-2.5 flex items-center justify-between text-xs font-black shadow-[2px_2px_0px_0px_#000]">
-                  <span>👔 Tough Executive</span>
+                  <span className="flex items-center gap-1.5">
+                    <Briefcase className="w-3.5 h-3.5 text-black stroke-[2.5]" /> Tough Executive
+                  </span>
                   <span className="text-[10px] bg-red-100 border border-black px-1.5 py-0.5 rounded">Hard</span>
                 </div>
                 <div className="bg-white border-2 border-black rounded-xl p-2.5 flex items-center justify-between text-xs font-black shadow-[2px_2px_0px_0px_#000]">
-                  <span>☕ Casual First Date</span>
+                  <span className="flex items-center gap-1.5">
+                    <Coffee className="w-3.5 h-3.5 text-amber-800 stroke-[2.5]" /> Casual First Date
+                  </span>
                   <span className="text-[10px] bg-emerald-100 border border-black px-1.5 py-0.5 rounded">Smooth</span>
                 </div>
               </div>
@@ -381,8 +398,8 @@ export default function HomePage() {
             {/* Cell 4: Gamified Roadmaps (Wide 2-col) */}
             <div className="md:col-span-2 bg-[#BAE6FD] border-[2.5px] border-black rounded-3xl p-6 sm:p-8 shadow-[5px_5px_0px_0px_#000] flex flex-col md:flex-row gap-6 justify-between items-center relative overflow-hidden">
               <div className="flex-1">
-                <div className="w-12 h-12 rounded-2xl bg-white border-2 border-black flex items-center justify-center text-xl shadow-[3px_3px_0px_0px_#000] mb-4">
-                  🗺️
+                <div className="w-12 h-12 rounded-2xl bg-white border-2 border-black flex items-center justify-center shadow-[3px_3px_0px_0px_#000] mb-4">
+                  <Compass className="w-6 h-6 text-black stroke-[2.5]" />
                 </div>
                 <h3 className="text-xl sm:text-2xl font-black text-black tracking-tight mb-2">
                   Level-by-Level Charisma Roadmaps
@@ -403,7 +420,9 @@ export default function HomePage() {
                   <span className="text-[10px] bg-blue-100 font-black px-1.5 py-0.5 rounded border border-black ml-auto">ACTIVE</span>
                 </div>
                 <div className="bg-white/80 border-2 border-black/60 rounded-xl p-3 flex items-center gap-3 shadow-[2px_2px_0px_0px_#000] opacity-80">
-                  <span className="w-6 h-6 rounded-full bg-slate-200 border border-black/60 flex items-center justify-center font-black text-xs">🔒</span>
+                  <span className="w-6 h-6 rounded-full bg-slate-200 border border-black/60 flex items-center justify-center text-black/70">
+                    <Lock className="w-3 h-3 stroke-[2.5]" />
+                  </span>
                   <span className="text-xs font-black text-black/70 truncate">Level 3: Negotiation Tactics</span>
                   <span className="text-[10px] bg-slate-100 font-black px-1.5 py-0.5 rounded border border-black/40 ml-auto">LOCKED</span>
                 </div>
@@ -418,7 +437,7 @@ export default function HomePage() {
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
               <div className="inline-flex items-center gap-2 bg-white border-2 border-black px-3.5 py-1 rounded-full text-xs font-black text-black shadow-[2px_2px_0px_0px_#000] mb-3">
-                <span>⚡</span>
+                <Zap className="w-3.5 h-3.5 fill-black stroke-black" />
                 <span>HOW RIZZKEY WORKS</span>
               </div>
               <h2 className="text-3xl sm:text-5xl font-black text-black tracking-tight mb-3">
@@ -474,7 +493,7 @@ export default function HomePage() {
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-16">
               <div className="inline-flex items-center gap-2 bg-[#FFDE59] border-2 border-black px-3.5 py-1 rounded-full text-xs font-black text-black shadow-[2px_2px_0px_0px_#000] mb-3">
-                <span>💰</span>
+                <Coins className="w-3.5 h-3.5 text-black stroke-[2.5]" />
                 <span>HONEST &amp; TRANSPARENT</span>
               </div>
               <h2 className="text-3xl sm:text-5xl font-black text-black tracking-tight mb-3">
@@ -533,8 +552,9 @@ export default function HomePage() {
 
               {/* Pro Plan */}
               <div className="bg-[#FFDE59] border-[3px] border-black rounded-3xl p-8 shadow-[7px_7px_0px_0px_#000] flex flex-col justify-between relative">
-                <div className="absolute -top-3.5 right-6 bg-[#99F6E4] border-2 border-black px-3 py-1 rounded-full text-[11px] font-black text-black shadow-[2px_2px_0px_0px_#000] uppercase tracking-wider">
-                  Most Popular 🔥
+                <div className="absolute -top-3.5 right-6 bg-[#99F6E4] border-2 border-black px-3 py-1 rounded-full text-[11px] font-black text-black shadow-[2px_2px_0px_0px_#000] uppercase tracking-wider inline-flex items-center gap-1">
+                  <span>Most Popular</span>
+                  <Flame className="w-3 h-3 fill-amber-500 stroke-black stroke-[1.5]" />
                 </div>
                 <div>
                   <div className="mb-4">
@@ -589,8 +609,12 @@ export default function HomePage() {
         {/* ── Giant Bottom Call to Action Banner ────────────────────────────── */}
         <section className="py-20 px-6 md:px-12 max-w-5xl mx-auto w-full">
           <div className="bg-[#FFDE59] border-[3px] border-black rounded-[32px] p-8 sm:p-14 text-center shadow-[8px_8px_0px_0px_#000] relative overflow-hidden">
-            <div className="absolute top-4 left-6 text-2xl select-none animate-bounce">⚡</div>
-            <div className="absolute bottom-4 right-6 text-2xl select-none animate-pulse">✨</div>
+            <div className="absolute top-4 left-6 select-none animate-bounce">
+              <Zap className="w-7 h-7 text-black fill-black" />
+            </div>
+            <div className="absolute bottom-4 right-6 select-none animate-pulse">
+              <Sparkles className="w-7 h-7 text-black fill-black" />
+            </div>
             
             <h2 className="text-3xl sm:text-5xl lg:text-6xl font-black text-black tracking-tight mb-4">
               Speak Smooth. Sound Smart. Zero Sweat.
@@ -620,7 +644,7 @@ export default function HomePage() {
           {/* Logo & Tagline */}
           <div>
             <div className="inline-flex items-center gap-2 bg-white text-black border-2 border-black rounded-xl px-3 py-1 font-black text-lg shadow-[2px_2px_0px_0px_#FFDE59] mb-3">
-              <span>🔑</span>
+              <Key className="w-5 h-5 text-black stroke-[2.5]" />
               <span>Rizzkey</span>
             </div>
             <p className="text-xs font-bold text-zinc-400 max-w-xs">
@@ -639,8 +663,9 @@ export default function HomePage() {
 
           {/* Badge & Copyright */}
           <div className="text-xs text-zinc-400 font-bold flex flex-col items-center md:items-end gap-1.5">
-            <span className="bg-[#FFDE59] text-black px-2 py-0.5 rounded text-[10px] font-black">
-              100% Free of Awkward Pauses 🛡️
+            <span className="bg-[#FFDE59] text-black px-2.5 py-0.5 rounded text-[10px] font-black inline-flex items-center gap-1">
+              <span>100% Free of Awkward Pauses</span>
+              <ShieldCheck className="w-3.5 h-3.5 text-black stroke-[2.5]" />
             </span>
             <span>© {new Date().getFullYear()} Rizzkey. All rights reserved.</span>
           </div>
