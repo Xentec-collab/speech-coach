@@ -7,7 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { 
   Sparkles, Mic, BarChart2, ShieldCheck, Moon, Sun, ArrowRight, 
   Check, X as XIcon, Zap, Heart, MessageSquare, Award, Flame, 
-  Play, Volume2, Star, ThumbsUp, ChevronRight, Lock, Briefcase, Smile
+  Play, Volume2, ThumbsUp, ChevronRight, Lock, Briefcase, Smile
 } from "lucide-react";
 
 export default function HomePage() {
@@ -57,9 +57,6 @@ export default function HomePage() {
             </a>
             <a href="#training-modes" className="hover:underline underline-offset-4 decoration-[2.5px] transition-all">
               Training Modes
-            </a>
-            <a href="#wall-of-rizz" className="hover:underline underline-offset-4 decoration-[2.5px] transition-all">
-              Wall of Rizz
             </a>
             <a href="#pricing" className="hover:underline underline-offset-4 decoration-[2.5px] transition-all">
               Pricing
@@ -471,85 +468,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── Wall of Rizz (Testimonials) ──────────────────────────────────── */}
-        <section id="wall-of-rizz" className="py-24 px-6 md:px-12 max-w-6xl mx-auto w-full">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 bg-[#FBCFE8] border-2 border-black px-3.5 py-1 rounded-full text-xs font-black text-black shadow-[2px_2px_0px_0px_#000] mb-3">
-              <span>⭐</span>
-              <span>WALL OF RIZZ</span>
-            </div>
-            <h2 className="text-3xl sm:text-5xl font-black text-black tracking-tight mb-3">
-              Real People. Zero Awkward Pauses.
-            </h2>
-            <p className="text-sm sm:text-base font-bold text-black/70 max-w-lg mx-auto">
-              See how Rizzkey is turning nervous mumblers into effortlessly smooth communicators.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            
-            {/* Review 1 */}
-            <div className="bg-[#FEF08A] border-[2.5px] border-black rounded-3xl p-6 shadow-[5px_5px_0px_0px_#000] -rotate-1 hover:rotate-0 transition-transform relative">
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-14 h-5 bg-pink-300/90 border border-black/30 rounded-sm rotate-2" />
-              <div className="flex text-amber-500 mb-3 pt-2">
-                {Array(5).fill(0).map((_, i) => (
-                  <Star key={i} className="w-4 h-4 fill-amber-400 stroke-black stroke-[1.5]" />
-                ))}
-              </div>
-              <p className="text-xs sm:text-sm font-bold text-black leading-relaxed mb-5">
-                &quot;Landed my Google Associate Product Manager offer! Rizzkey killed my nervous &apos;umm-ing&apos; in 4 days. The instant breakdown on my structure was game-changing.&quot;
-              </p>
-              <div className="flex items-center gap-2 pt-2 border-t-2 border-black/10">
-                <span className="w-8 h-8 rounded-full bg-white border-2 border-black flex items-center justify-center font-black text-xs">RK</span>
-                <div>
-                  <div className="text-xs font-black text-black">Rohan K.</div>
-                  <div className="text-[10px] font-bold text-black/60">Associate PM @ Google</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Review 2 */}
-            <div className="bg-[#A7F3D0] border-[2.5px] border-black rounded-3xl p-6 shadow-[5px_5px_0px_0px_#000] rotate-1 hover:rotate-0 transition-transform relative">
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-14 h-5 bg-purple-300/90 border border-black/30 rounded-sm -rotate-2" />
-              <div className="flex text-amber-500 mb-3 pt-2">
-                {Array(5).fill(0).map((_, i) => (
-                  <Star key={i} className="w-4 h-4 fill-amber-400 stroke-black stroke-[1.5]" />
-                ))}
-              </div>
-              <p className="text-xs sm:text-sm font-bold text-black leading-relaxed mb-5">
-                &quot;I used to sweat through my shirt on first dates. Practicing conversation starters on Rizzkey gave me so much easy banter. Went on a 2nd date for the first time in 6 months.&quot;
-              </p>
-              <div className="flex items-center gap-2 pt-2 border-t-2 border-black/10">
-                <span className="w-8 h-8 rounded-full bg-white border-2 border-black flex items-center justify-center font-black text-xs">TM</span>
-                <div>
-                  <div className="text-xs font-black text-black">Tyler M.</div>
-                  <div className="text-[10px] font-bold text-black/60">College Senior</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Review 3 */}
-            <div className="bg-[#FBCFE8] border-[2.5px] border-black rounded-3xl p-6 shadow-[5px_5px_0px_0px_#000] -rotate-1 hover:rotate-0 transition-transform relative">
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-14 h-5 bg-yellow-300/90 border border-black/30 rounded-sm rotate-1" />
-              <div className="flex text-amber-500 mb-3 pt-2">
-                {Array(5).fill(0).map((_, i) => (
-                  <Star key={i} className="w-4 h-4 fill-amber-400 stroke-black stroke-[1.5]" />
-                ))}
-              </div>
-              <p className="text-xs sm:text-sm font-bold text-black leading-relaxed mb-5">
-                &quot;My filler words dropped from 42 down to 2 on my MBA capstone pitch. The pacing meter taught me how to actually breathe and pause for emphasis.&quot;
-              </p>
-              <div className="flex items-center gap-2 pt-2 border-t-2 border-black/10">
-                <span className="w-8 h-8 rounded-full bg-white border-2 border-black flex items-center justify-center font-black text-xs">PS</span>
-                <div>
-                  <div className="text-xs font-black text-black">Priya S.</div>
-                  <div className="text-[10px] font-bold text-black/60">MBA Candidate</div>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </section>
 
         {/* ── Neo-Brutalist Pricing ────────────────────────────────────────── */}
         <section id="pricing" className="bg-[#FAF8F5] border-t-[3px] border-black py-24 px-6 md:px-12">
@@ -714,7 +632,6 @@ export default function HomePage() {
           <div className="flex flex-wrap justify-center gap-6 text-xs font-black text-zinc-300">
             <a href="#how-it-works" className="hover:text-yellow-300 transition-colors">How it Works</a>
             <a href="#training-modes" className="hover:text-yellow-300 transition-colors">Training Modes</a>
-            <a href="#wall-of-rizz" className="hover:text-yellow-300 transition-colors">Wall of Rizz</a>
             <a href="#pricing" className="hover:text-yellow-300 transition-colors">Pricing</a>
             <Link href="/login" className="hover:text-yellow-300 transition-colors">Log In</Link>
             <Link href="/register" className="hover:text-yellow-300 transition-colors">Sign Up</Link>
