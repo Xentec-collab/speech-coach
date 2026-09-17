@@ -24,121 +24,230 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col font-sans transition-colors duration-300 relative overflow-hidden bg-background text-foreground">
+    <div className="min-h-screen flex flex-col font-sans bg-background text-foreground">
       
-      {/* ── Animated Background Mesh ──────────────────────────────────────── */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[-25%] left-[-15%] w-[900px] h-[900px] rounded-full bg-blue-500/[0.05] blur-[180px]" />
-        <div className="absolute bottom-[-25%] right-[-15%] w-[800px] h-[800px] rounded-full bg-cyan-500/[0.03] blur-[160px]" />
-      </div>
-
-      {/* ── Navbar ────────────────────────────────────────────────────────── */}
-      <header className="h-16 px-4 md:px-10 lg:px-16 flex items-center justify-between border-b border-[var(--border-color)] bg-[var(--bg-nav)]/70 backdrop-blur-2xl sticky top-0 z-50 transition-colors duration-300">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-black text-sm shadow-lg select-none shrink-0" style={{ background: 'var(--logo-gradient)' }}>
-            S
-          </div>
-          <span className="font-black text-base sm:text-lg tracking-tight truncate">
-            SpeakAI <span className="gradient-text">Coach</span>
-          </span>
-        </div>
+      {/* ── Neo-Brutalist Hero Header & Section ────────────────────────────── */}
+      <div className="bg-[#FFDE59] text-black border-b-[3px] border-black relative">
         
-        <div className="flex items-center gap-2 sm:gap-2.5">
-          {/* Light/Dark Toggle */}
-          <button 
-            onClick={toggleTheme} 
-            aria-label="Toggle Theme" 
-            className="w-10 h-10 sm:w-9 sm:h-9 rounded-full flex items-center justify-center border border-slate-200 dark:border-white/10 bg-slate-100/80 dark:bg-white/[0.06] text-slate-700 dark:text-zinc-200 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/80 dark:hover:bg-white/[0.12] transition-all duration-200 backdrop-blur-md shadow-sm outline-none cursor-pointer shrink-0"
-          >
-            {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-700" />}
-          </button>
+        {/* ── Navbar ────────────────────────────────────────────────────────── */}
+        <header className="px-5 sm:px-10 lg:px-16 py-4 flex items-center justify-between border-b-[2.5px] border-black max-w-7xl mx-auto">
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-2 group">
+            <div className="bg-white border-2 border-black rounded-xl px-3 py-1.5 shadow-[3px_3px_0px_0px_#000] flex items-center gap-1.5 transition-transform group-hover:-rotate-2">
+              <span className="text-xl">🎙️</span>
+              <span className="font-black text-lg sm:text-xl tracking-tight text-black">
+                Speak<span className="text-blue-600">AI</span>
+              </span>
+            </div>
+          </Link>
 
-          {loading ? (
-            <span className="text-xs text-[var(--text-secondary)] font-medium tracking-wide">...</span>
-          ) : user ? (
-            <Link href="/dashboard">
-              <Button size="sm" className="bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-bold rounded-full h-9 px-4 sm:px-5 text-xs shadow-[0_0_15px_rgba(37,99,235,0.25)] hover:shadow-[0_0_22px_rgba(37,99,235,0.45)] transition-all duration-300 hover:scale-[1.02]">
-                Dashboard
-              </Button>
-            </Link>
-          ) : (
-            <>
-              <Link href="/login">
-                <Button variant="ghost" size="sm" className="text-slate-700 dark:text-zinc-200 hover:text-slate-900 dark:hover:text-white font-semibold text-xs rounded-full px-2.5 sm:px-4 h-9 hover:bg-slate-200/60 dark:hover:bg-white/10 transition-all">
-                  Log In
-                </Button>
-              </Link>
-              <Link href="/register">
-                <Button size="sm" className="bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-bold rounded-full h-9 px-3.5 sm:px-5 text-xs shadow-[0_0_18px_rgba(37,99,235,0.3)] hover:shadow-[0_0_25px_rgba(37,99,235,0.5)] transition-all duration-300 hover:scale-[1.03] border border-blue-400/20">
-                  Sign Up Free
-                </Button>
-              </Link>
-            </>
-          )}
-        </div>
-      </header>
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center gap-8 text-sm font-black text-black">
+            <a href="#how-it-works" className="hover:underline underline-offset-4 decoration-[2.5px] transition-all">
+              How it Works
+            </a>
+            <a href="#features" className="hover:underline underline-offset-4 decoration-[2.5px] transition-all">
+              Training Modes
+            </a>
+            <a href="#pricing" className="hover:underline underline-offset-4 decoration-[2.5px] transition-all">
+              Pricing
+            </a>
+          </nav>
 
-      {/* ── Hero Section ─────────────────────────────────────────────────── */}
-      <main className="flex-1 flex flex-col z-10">
-        <section className="relative pt-10 md:pt-16 lg:pt-20 pb-16 md:pb-24 px-4 md:px-12 text-center max-w-5xl mx-auto flex flex-col items-center">
-          
-          {/* Ambient Glow */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-blue-500/10 dark:bg-blue-500/15 blur-[120px] rounded-full pointer-events-none -z-10" />
+          {/* Action Buttons */}
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            {/* Neo-Brutalist Theme Toggle */}
+            <button 
+              onClick={toggleTheme}
+              aria-label="Toggle Theme" 
+              className="w-10 h-10 rounded-xl bg-white border-2 border-black shadow-[3px_3px_0px_0px_#000] hover:shadow-[1px_1px_0px_0px_#000] hover:translate-x-[2px] hover:translate-y-[2px] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none flex items-center justify-center transition-all cursor-pointer shrink-0"
+            >
+              {isDark ? <Sun className="w-4 h-4 text-amber-500" /> : <Moon className="w-4 h-4 text-slate-800" />}
+            </button>
 
-          {/* Top Pill Badge */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-blue-500/[0.08] dark:bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 backdrop-blur-md mb-5 shadow-[0_0_20px_rgba(59,130,246,0.12)] transition-all hover:border-blue-500/40 select-none anim-fadeup">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-            </span>
-            <span className="tracking-wide">AI-Powered Speech Training</span>
-            <Sparkles className="w-3.5 h-3.5 opacity-70 ml-0.5" />
-          </div>
-          
-          <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-[-0.035em] leading-[1.08] mb-5 anim-fadeup" style={{ animationDelay: '0.1s' }}>
-            Master the Art of{' '}
-            <br className="hidden sm:inline" />
-            <span className="gradient-text">
-              Public Speaking
-            </span>
-          </h1>
-          
-          <p className="text-xs sm:text-sm md:text-base text-[var(--text-secondary)] max-w-2xl leading-relaxed mb-7 font-medium anim-fadeup px-2" style={{ animationDelay: '0.2s' }}>
-            Record speeches, receive instant structure-first AI feedback on clarity, fluency, and lexicon. Track metrics over time with interactive dashboards and custom speech roadmaps.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-3 justify-center items-center w-full max-w-xs sm:max-w-none anim-fadeup" style={{ animationDelay: '0.3s' }}>
-            {user ? (
-              <Link href="/dashboard" className="w-full sm:w-auto">
-                <Button size="lg" className="bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-bold h-11 px-8 rounded-full shadow-[0_0_25px_rgba(37,99,235,0.3)] hover:shadow-[0_0_35px_rgba(37,99,235,0.5)] transition-all duration-300 hover:scale-[1.02] flex items-center justify-center gap-2.5 text-sm w-full sm:w-auto">
-                  Go to Dashboard <ArrowRight className="w-4 h-4" />
-                </Button>
+            {loading ? (
+              <span className="text-xs font-bold text-black/60">...</span>
+            ) : user ? (
+              <Link href="/dashboard">
+                <button className="neo-btn bg-[#99F6E4] px-4 sm:px-5 py-2.5 rounded-xl font-black text-xs sm:text-sm text-black flex items-center gap-1.5 cursor-pointer">
+                  [ Go to Dashboard ➔ ]
+                </button>
               </Link>
             ) : (
               <>
-                <Link href="/register" className="w-full sm:w-auto">
-                  <Button size="lg" className="bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-bold h-11 px-8 rounded-full shadow-[0_0_25px_rgba(37,99,235,0.3)] hover:shadow-[0_0_35px_rgba(37,99,235,0.5)] transition-all duration-300 hover:scale-[1.02] flex items-center justify-center gap-2 text-sm w-full sm:w-auto group">
-                    Start Practicing Free <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                  </Button>
+                <Link href="/login" className="hidden sm:inline-block font-black text-sm text-black hover:underline underline-offset-4 decoration-2 px-2">
+                  Log In
                 </Link>
-                <Link href="/login" className="w-full sm:w-auto">
-                  <Button size="lg" variant="outline" className="h-11 px-8 rounded-full font-semibold border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 bg-slate-100/80 dark:bg-white/[0.04] hover:bg-slate-200/80 dark:hover:bg-white/[0.08] text-slate-800 dark:text-zinc-200 hover:text-slate-900 dark:hover:text-white transition-all duration-300 backdrop-blur-md flex items-center justify-center text-sm w-full sm:w-auto">
-                    Sign In
-                  </Button>
+                <Link href="/register">
+                  <button className="neo-btn bg-[#99F6E4] px-4 sm:px-5 py-2.5 rounded-xl font-black text-xs sm:text-sm text-black cursor-pointer">
+                    [ Unlock Your Charisma ]
+                  </button>
                 </Link>
               </>
             )}
           </div>
+        </header>
 
-          {/* Subtle trust indicators */}
-          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 mt-8 text-[11px] text-[var(--text-secondary)]/70 font-medium anim-fadeup" style={{ animationDelay: '0.4s' }}>
-            <span className="flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 text-blue-500" /> Privacy-First</span>
-            <span className="hidden sm:inline w-1 h-1 rounded-full bg-[var(--text-secondary)]/30" />
-            <span>No Credit Card</span>
-            <span className="hidden sm:inline w-1 h-1 rounded-full bg-[var(--text-secondary)]/30" />
-            <span>Instant Access</span>
+        {/* ── Hero Split Section ────────────────────────────────────────────── */}
+        <div className="max-w-7xl mx-auto px-5 sm:px-10 lg:px-16 pt-10 sm:pt-14 pb-20 sm:pb-24 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
+          
+          {/* Left Column: Headlines & CTA */}
+          <div className="lg:col-span-6 flex flex-col items-start text-left z-10">
+            
+            {/* Top Badge Sticker */}
+            <div className="inline-flex items-center gap-2 bg-white border-2 border-black px-3.5 py-1 rounded-full text-xs font-black text-black shadow-[3px_3px_0px_0px_#000] mb-6 -rotate-1">
+              <span>⚡</span>
+              <span>AI-POWERED SPEECH COACH</span>
+            </div>
+
+            {/* Bold Punchy Headline (Exactly like reference image) */}
+            <h1 className="text-4xl sm:text-6xl lg:text-[68px] font-black tracking-tight leading-[1.03] text-black">
+              Speak Smooth.<br />
+              Sound Smart.<br />
+              Zero Sweat. 💦
+            </h1>
+
+            {/* Conversational Subtitle */}
+            <p className="text-base sm:text-lg font-bold text-black/85 max-w-lg leading-relaxed mt-5 mb-8">
+              Meet SpeakAI, your personal AI speaking coach. Practice presentations, interviews, or small talk in a safe, fun space!
+            </p>
+
+            {/* Brutalist Button: [ Start Practicing for Free ] */}
+            <div className="w-full sm:w-auto">
+              <Link href={user ? "/dashboard" : "/register"} className="block sm:inline-block">
+                <button className="neo-btn bg-[#99F6E4] px-7 py-4 sm:px-8 sm:py-4.5 rounded-2xl font-black text-base sm:text-lg text-black w-full sm:w-auto text-center cursor-pointer">
+                  [ Start Practicing for Free ]
+                </button>
+              </Link>
+            </div>
+
+            {/* Trust Stickers */}
+            <div className="flex flex-wrap items-center gap-2.5 mt-8">
+              <span className="inline-flex items-center gap-1.5 bg-white border-2 border-black px-3 py-1 rounded-lg text-xs font-black text-black shadow-[2px_2px_0px_0px_#000]">
+                ✓ No Credit Card
+              </span>
+              <span className="inline-flex items-center gap-1.5 bg-white border-2 border-black px-3 py-1 rounded-lg text-xs font-black text-black shadow-[2px_2px_0px_0px_#000]">
+                ✓ 100% Private
+              </span>
+              <span className="inline-flex items-center gap-1.5 bg-white border-2 border-black px-3 py-1 rounded-lg text-xs font-black text-black shadow-[2px_2px_0px_0px_#000]">
+                ✓ Instant AI Feedback
+              </span>
+            </div>
           </div>
-        </section>
+
+          {/* Right Column: Illustrated Mascot & Speech Bubbles */}
+          <div className="lg:col-span-6 flex items-center justify-center relative min-h-[360px] sm:min-h-[440px]">
+            
+            {/* Mascot Image (mix-blend-multiply blends the white BG into the sunny yellow background!) */}
+            <div className="relative z-10 flex items-center justify-center">
+              <img 
+                src="/speakai_mascot.jpg" 
+                alt="SpeakAI Coach Mascot" 
+                className="w-[280px] h-[280px] sm:w-[380px] sm:h-[380px] lg:w-[430px] lg:h-[430px] object-contain mix-blend-multiply select-none pointer-events-none"
+              />
+            </div>
+
+            {/* Speech Bubble Top-Left: "Ummm... ❌" */}
+            <div className="absolute top-2 sm:top-6 left-1 sm:left-6 z-20 anim-float-left">
+              <div className="bg-white border-[2.5px] border-black rounded-2xl px-4 py-2 sm:px-5 sm:py-2.5 shadow-[4px_4px_0px_0px_#000] flex items-center gap-2 relative">
+                <span className="font-black text-sm sm:text-base text-black">Ummm...</span>
+                <span className="w-5 h-5 rounded-full bg-red-500 border border-black flex items-center justify-center text-white font-black text-xs">✕</span>
+                {/* Comic speech tail */}
+                <div className="absolute -bottom-2 right-6 w-3.5 h-3.5 bg-white border-r-[2.5px] border-b-[2.5px] border-black rotate-45" />
+              </div>
+            </div>
+
+            {/* Speech Bubble Top-Right: "Nailed it! 🎯" */}
+            <div className="absolute top-0 sm:top-8 right-1 sm:right-6 z-20 anim-float-right">
+              <div className="bg-[#99F6E4] border-[2.5px] border-black rounded-2xl px-4 py-2 sm:px-5 sm:py-2.5 shadow-[4px_4px_0px_0px_#000] flex items-center gap-2 relative">
+                <span className="font-black text-sm sm:text-base text-black">Nailed it! 🎯</span>
+                {/* Comic speech tail */}
+                <div className="absolute -bottom-2 left-6 w-3.5 h-3.5 bg-[#99F6E4] border-l-[2.5px] border-b-[2.5px] border-black rotate-[-45deg]" />
+              </div>
+            </div>
+
+            {/* Sticker Badge Bottom-Left: "0 Filler Words! ⚡" */}
+            <div className="absolute bottom-2 left-2 sm:left-8 z-20 -rotate-3 hover:rotate-0 transition-transform">
+              <div className="bg-[#FBCFE8] border-2 border-black rounded-xl px-3.5 py-1.5 shadow-[3px_3px_0px_0px_#000] flex items-center gap-1.5">
+                <span className="font-black text-xs sm:text-sm text-black">0 Filler Words! ⚡</span>
+              </div>
+            </div>
+
+            {/* Sticker Badge Bottom-Right: "94/100 Clarity 🚀" */}
+            <div className="absolute bottom-6 right-2 sm:right-10 z-20 rotate-3 hover:rotate-0 transition-transform">
+              <div className="bg-[#DDD6FE] border-2 border-black rounded-xl px-3.5 py-1.5 shadow-[3px_3px_0px_0px_#000] flex items-center gap-1.5">
+                <span className="font-black text-xs sm:text-sm text-black">94/100 Clarity 🚀</span>
+              </div>
+            </div>
+
+            {/* Decorative comic elements */}
+            <div className="absolute top-1/2 left-0 text-2xl select-none animate-pulse">✨</div>
+            <div className="absolute top-1/3 right-1 text-2xl select-none animate-bounce">⭐</div>
+          </div>
+        </div>
+
+        {/* ── Bottom Transition Sticky Notes (Previewing Categories) ─────────── */}
+        <div className="max-w-6xl mx-auto px-6 relative -mb-12 z-20">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+            
+            {/* Sticky 1: Mint Green */}
+            <div className="bg-[#A7F3D0] border-[2.5px] border-black rounded-2xl p-5 shadow-[4px_4px_0px_0px_#000] -rotate-1 hover:rotate-0 hover:-translate-y-1 transition-all relative">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-14 h-5 bg-pink-300/80 border border-black/30 rounded-sm rotate-2" />
+              <div className="flex items-center gap-3 mb-2 pt-1">
+                <div className="w-10 h-10 rounded-xl bg-white border-2 border-black flex items-center justify-center text-xl shadow-[2px_2px_0px_0px_#000]">
+                  💼
+                </div>
+                <div>
+                  <h3 className="font-black text-sm sm:text-base text-black leading-tight">Job & Campus Prep</h3>
+                  <span className="text-[10px] font-bold text-black/70">CAT · UPSC · Tech · HR</span>
+                </div>
+              </div>
+              <p className="text-xs font-bold text-black/80 leading-snug">
+                Practice real behavioral & technical interview tracks with adaptive AI follow-ups.
+              </p>
+            </div>
+
+            {/* Sticky 2: Butter Yellow */}
+            <div className="bg-[#FEF08A] border-[2.5px] border-black rounded-2xl p-5 shadow-[4px_4px_0px_0px_#000] rotate-1 hover:rotate-0 hover:-translate-y-1 transition-all relative">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-14 h-5 bg-purple-300/80 border border-black/30 rounded-sm -rotate-2" />
+              <div className="flex items-center gap-3 mb-2 pt-1">
+                <div className="w-10 h-10 rounded-xl bg-white border-2 border-black flex items-center justify-center text-xl shadow-[2px_2px_0px_0px_#000]">
+                  🎤
+                </div>
+                <div>
+                  <h3 className="font-black text-sm sm:text-base text-black leading-tight">Public Speaking</h3>
+                  <span className="text-[10px] font-bold text-black/70">Impromptu · Debates · Pitches</span>
+                </div>
+              </div>
+              <p className="text-xs font-bold text-black/80 leading-snug">
+                Eliminate filler words (&quot;um&quot;, &quot;like&quot;) and master your cadence with instant pacing charts.
+              </p>
+            </div>
+
+            {/* Sticky 3: Pastel Pink */}
+            <div className="bg-[#FBCFE8] border-[2.5px] border-black rounded-2xl p-5 shadow-[4px_4px_0px_0px_#000] -rotate-2 hover:rotate-0 hover:-translate-y-1 transition-all relative">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-14 h-5 bg-yellow-300/80 border border-black/30 rounded-sm rotate-1" />
+              <div className="flex items-center gap-3 mb-2 pt-1">
+                <div className="w-10 h-10 rounded-xl bg-white border-2 border-black flex items-center justify-center text-xl shadow-[2px_2px_0px_0px_#000]">
+                  ✨
+                </div>
+                <div>
+                  <h3 className="font-black text-sm sm:text-base text-black leading-tight">Social Charisma</h3>
+                  <span className="text-[10px] font-bold text-black/70">Small Talk · Storytelling</span>
+                </div>
+              </div>
+              <p className="text-xs font-bold text-black/80 leading-snug">
+                Level up your vocabulary and vocal confidence in a zero-judgment environment.
+              </p>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+      {/* ── Main Content Body (Offset for sticky cards) ────────────────────── */}
+      <main className="flex-1 flex flex-col z-10 pt-20">
 
         {/* ── Feature Highlights (Bento Grid) ─────────────────────────────── */}
         <section className="px-6 md:px-12 max-w-6xl mx-auto w-full pb-28">

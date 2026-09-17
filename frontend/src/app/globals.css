@@ -221,3 +221,48 @@ button, a, input, select, textarea, [role="button"] {
     padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
   }
 }
+
+/* ── Neo-Brutalism Utilities ─────────────────────────────────────────────── */
+.neo-box {
+  border: 2.5px solid #000000;
+  box-shadow: 4px 4px 0px 0px #000000;
+}
+
+.neo-box-sm {
+  border: 2px solid #000000;
+  box-shadow: 3px 3px 0px 0px #000000;
+}
+
+.neo-btn {
+  border: 2.5px solid #000000;
+  box-shadow: 4px 4px 0px 0px #000000;
+  transition: transform 0.15s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.15s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.neo-btn:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px 0px #000000;
+}
+
+.neo-btn:active {
+  transform: translate(4px, 4px);
+  box-shadow: 0px 0px 0px 0px #000000;
+}
+
+@keyframes floatBubbleLeft {
+  0%, 100% { transform: translateY(0px) rotate(-6deg); }
+  50%      { transform: translateY(-7px) rotate(-4deg); }
+}
+
+@keyframes floatBubbleRight {
+  0%, 100% { transform: translateY(0px) rotate(6deg); }
+  50%      { transform: translateY(-8px) rotate(8deg); }
+}
+
+.anim-float-left {
+  animation: floatBubbleLeft 3.5s ease-in-out infinite;
+}
+
+.anim-float-right {
+  animation: floatBubbleRight 4s ease-in-out infinite;
+}
