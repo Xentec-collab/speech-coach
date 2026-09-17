@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useTheme } from "next-themes";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { CardTitle } from "@/components/ui/card";
@@ -9,27 +10,21 @@ import { Sparkles, Mic, BarChart2, ShieldCheck, Moon, Sun, ArrowRight, Check, X 
 
 export default function HomePage() {
   const { user, loading } = useAuth();
-  const [theme, setTheme] = useState<"dark" | "light">("dark");
+  const { theme, setTheme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem("theme-choice");
-    if (savedTheme === "light" || savedTheme === "dark") {
-      setTheme(savedTheme);
-    }
+    setMounted(true);
   }, []);
 
-  const toggleTheme = () => {
-    const newTheme = theme === "dark" ? "light" : "dark";
-    setTheme(newTheme);
-    localStorage.setItem("theme-choice", newTheme);
-  };
+  const isDark = mounted ? (resolvedTheme || theme) !== "light" : true;
 
-  const getThemeClass = () => {
-    return theme === "light" ? "theme-light bg-[#f8fafc] text-[#0f172a]" : "theme-dark dark bg-[#09090b] text-[#f4f4f5]";
+  const toggleTheme = () => {
+    setTheme(isDark ? "light" : "dark");
   };
 
   return (
-    <div className={`min-h-screen flex flex-col font-sans transition-colors duration-300 relative overflow-hidden ${getThemeClass()}`}>
+    <div className="min-h-screen flex flex-col font-sans transition-colors duration-300 relative overflow-hidden bg-background text-foreground">
       
       {/* ── Animated Background Mesh ──────────────────────────────────────── */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -55,7 +50,7 @@ export default function HomePage() {
             aria-label="Toggle Theme" 
             className="w-10 h-10 sm:w-9 sm:h-9 rounded-full flex items-center justify-center border border-slate-200 dark:border-white/10 bg-slate-100/80 dark:bg-white/[0.06] text-slate-700 dark:text-zinc-200 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/80 dark:hover:bg-white/[0.12] transition-all duration-200 backdrop-blur-md shadow-sm outline-none cursor-pointer shrink-0"
           >
-            {theme === "dark" ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-700" />}
+            {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-700" />}
           </button>
 
           {loading ? (

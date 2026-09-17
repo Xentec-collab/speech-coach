@@ -84,17 +84,17 @@ export default function RegisterPage() {
 
   if (authLoading) {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-[#09090b]">
+      <main className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-3">
           <span className="w-8 h-8 border-2 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"/>
-          <p className="text-xs text-zinc-400 font-semibold tracking-wide">Verifying session...</p>
+          <p className="text-xs text-muted-foreground font-semibold tracking-wide">Verifying session...</p>
         </div>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-[#09090b] px-4 py-12 font-sans relative overflow-hidden theme-dark dark">
+    <main className="min-h-screen flex items-center justify-center bg-background px-4 py-12 font-sans relative overflow-hidden">
       {/* Sleek professional background glow */}
       <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] rounded-full bg-blue-500/10 blur-[150px] pointer-events-none" />
       <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-cyan-500/5 blur-[150px] pointer-events-none" />
