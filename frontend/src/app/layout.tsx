@@ -9,8 +9,8 @@ import { cn } from "@/lib/utils";
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
 export const metadata: Metadata = {
-  title: "AI Public Speaking Coach",
-  description: "Practice public speaking and receive AI-powered coaching feedback."
+  title: "Rizzkey — AI Speaking & Charisma Coach",
+  description: "Speak smooth. Sound smart. Zero sweat. Practice presentations, interviews, dates, or small talk in a safe, fun space."
 };
 
 export const viewport: Viewport = {
