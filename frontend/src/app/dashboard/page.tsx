@@ -17,7 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
-import { Sun, Moon, BarChart2, Menu, X, History, Mic, Layers, BookOpen, Bot, Search, ChevronRight, LogOut } from "lucide-react";
+import { Sun, Moon, BarChart2, Menu, X, History, Mic, Layers, BookOpen, Bot, Search, ChevronRight, LogOut, Printer, Clock, Sparkles, Award } from "lucide-react";
 import {
   SidebarHistorySkeleton,
   PracticeConsoleSkeleton,
@@ -601,7 +601,10 @@ export default function DashboardPage() {
   const [stats, setStats] = useState<SpeechStatistics | null>(null);
   const [activeTrack, setActiveTrack] = useState<string | null>(null);
   const [trackStats, setTrackStats] = useState<any | null>(null);
-  const [activeTab, setActiveTab] = useState<"console" | "tracks" | "library" | "coach">("console");
+  const [activeTab, setActiveTab] = useState<"console" | "tracks" | "library" | "coach" | "history" | "evaluation">("console");
+  const [countdown, setCountdown] = useState<number | null>(null);
+  const countdownIntervalRef = useRef<any>(null);
+  const [showReceiptAnim, setShowReceiptAnim] = useState<boolean>(true);
   const [cachedIsCute, setCachedIsCute] = useState<boolean>(false);
   const [showDrawer, setShowDrawer] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -610,9 +613,15 @@ export default function DashboardPage() {
   const [activeSession, setActiveSession] = useState<any | null>(null);
   const [expandedReplayRound, setExpandedReplayRound] = useState<number | null>(1);
   const [rightTab, setRightTab] = useState<"feedback" | "vocab" | "progress">("feedback");
+  const [metricsView, setMetricsView] = useState<"bar" | "radar">("bar");
   const { theme, setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  useEffect(() => { setMounted(true); }, []);
+  useEffect(() => { 
+    setMounted(true); 
+    return () => {
+      if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
+    };
+  }, []);
   const isDark = mounted ? (resolvedTheme || theme) !== "light" : true;
   const normalTheme = isDark ? "default" : "light";
   
@@ -789,6 +798,35 @@ export default function DashboardPage() {
     setRecordingState("stopped");
   };
 
+  const cancelCountdown = () => {
+    if (countdownIntervalRef.current) {
+      clearInterval(countdownIntervalRef.current);
+      countdownIntervalRef.current = null;
+    }
+    setCountdown(null);
+  };
+
+  const handleStartWithCountdown = () => {
+    if (recordingState !== "idle") return;
+    if (countdownIntervalRef.current) {
+      clearInterval(countdownIntervalRef.current);
+      countdownIntervalRef.current = null;
+    }
+    setCountdown(3);
+    let currentCount = 3;
+    countdownIntervalRef.current = setInterval(() => {
+      currentCount -= 1;
+      if (currentCount <= 0) {
+        clearInterval(countdownIntervalRef.current);
+        countdownIntervalRef.current = null;
+        setCountdown(null);
+        startRecording();
+      } else {
+        setCountdown(currentCount);
+      }
+    }, 1000);
+  };
+
   const startRecording = async () => {
     setUploadError(null); setRecordSeconds(0); audioChunksRef.current=[];
     try {
@@ -809,7 +847,7 @@ export default function DashboardPage() {
 
   const pauseRecording=()=>{if(mediaRecorderRef.current?.state==="recording"){mediaRecorderRef.current.pause();setRecordingState("paused");if(timerRef.current){clearInterval(timerRef.current);timerRef.current=null;}}};
   const resumeRecording=()=>{if(mediaRecorderRef.current?.state==="paused"){mediaRecorderRef.current.resume();setRecordingState("recording");timerRef.current=setInterval(()=>setRecordSeconds(p=>{if(p>=300){stopStream();return 300;}return p+1;}),1000);}};
-  const discardRecording=()=>{stopStream();setAudioBlob(null);if(audioUrl){URL.revokeObjectURL(audioUrl);setAudioUrl(null);}setRecordSeconds(0);setRecordingState("idle");setUploadError(null);setUploadSuccess(false);};
+  const discardRecording=()=>{cancelCountdown();stopStream();setAudioBlob(null);if(audioUrl){URL.revokeObjectURL(audioUrl);setAudioUrl(null);}setRecordSeconds(0);setRecordingState("idle");setUploadError(null);setUploadSuccess(false);};
   const discardSpeechAndReset=()=>{if(pollingRef.current){clearInterval(pollingRef.current);pollingRef.current=null;}setPolledSpeechId(null);setPolledSpeechDetails(null);discardRecording();};
 
   const handleSubmitSpeech=async()=>{
@@ -1557,7 +1595,7 @@ export default function DashboardPage() {
     setPolledSpeechId(id);setPolledSpeechDetails(null);
     pollingRef.current=setInterval(async()=>{
       if(!session)return;
-      try{const res=await fetch(`${getApiBaseUrl()}/api/speeches/${id}`,{headers:{Authorization:`Bearer ${session.access_token}`}});if(!res.ok)throw new Error();const data=await res.json();setPolledSpeechDetails(data);if(data.status==="completed"||data.status==="failed"){clearInterval(pollingRef.current);pollingRef.current=null;fetchHistory(1);fetchStats();fetchTrackStats();fetchLibraryRecommendations();}}catch{}
+      try{const res=await fetch(`${getApiBaseUrl()}/api/speeches/${id}`,{headers:{Authorization:`Bearer ${session.access_token}`}});if(!res.ok)throw new Error();const data=await res.json();setPolledSpeechDetails(data);if(data.status==="completed"||data.status==="failed"){clearInterval(pollingRef.current);pollingRef.current=null;if(data.status==="completed")setActiveTab("evaluation");fetchHistory(1);fetchStats();fetchTrackStats();fetchLibraryRecommendations();}}catch{}
     },3000);
   };
 
@@ -1788,7 +1826,11 @@ export default function DashboardPage() {
         throw new Error(err.detail || `Error ${res.status}`);
       }
       const data = await res.json();
-      if (data?.topics) setTopics(data.topics);
+      if (data?.topics) {
+        setTopics(data.topics);
+        setShowReceiptAnim(false);
+        setTimeout(() => setShowReceiptAnim(true), 40);
+      }
     } catch (e: any) {
       setTopicError(e.message || "Failed to generate topic.");
     } finally {
@@ -1809,7 +1851,11 @@ export default function DashboardPage() {
         throw new Error(err.detail || `Error ${res.status}`);
       }
       const data = await res.json();
-      if (data?.topics) setTopics(data.topics);
+      if (data?.topics) {
+        setTopics(data.topics);
+        setShowReceiptAnim(false);
+        setTimeout(() => setShowReceiptAnim(true), 40);
+      }
     } catch (e: any) {
       setTopicError(e.message || "Failed to generate topic.");
     } finally {
@@ -2904,6 +2950,852 @@ export default function DashboardPage() {
     );
   };
 
+  // ── Retro Topic Machine & Dispensed Receipt ──────────────────────────────
+  const renderRetroPrinter = (isDrawer: boolean = false) => {
+    return (
+      <div className="space-y-4">
+        {/* Machine Housing */}
+        <div className="bg-[#18181b] text-white border-[3px] border-black rounded-2xl shadow-[6px_6px_0px_0px_#000] p-4 sm:p-5 relative overflow-hidden">
+          {/* Header Plate with LED Status Indicators */}
+          <div className="flex items-center justify-between border-b-2 border-black/80 pb-3 mb-4 bg-[#242427] -mx-4 sm:-mx-5 -mt-4 sm:-mt-5 px-4 sm:px-5 pt-3.5 rounded-t-xl">
+            <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-1.5">
+                <span className={`w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_8px_#ef4444] ${topicLoading ? "anim-led-pulse" : "opacity-75"}`} title="Power" />
+                <span className={`w-2.5 h-2.5 rounded-full bg-amber-400 shadow-[0_0_8px_#f59e0b] ${topicLoading ? "anim-led-pulse" : "opacity-75"}`} title="Feed" />
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981] anim-led-pulse" title="Ready" />
+              </div>
+              <span className="font-mono text-xs font-black tracking-widest text-[#FFDE59] uppercase drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">
+                ✦ RIZZKEY PRINTER-88 ✦
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5 bg-[#0e0e11] px-2.5 py-1 rounded-md border border-white/10 font-mono text-[10px]">
+              <span className={`w-1.5 h-1.5 rounded-full ${topicLoading ? "bg-amber-400 animate-ping" : "bg-emerald-400"}`} />
+              <span className={topicLoading ? "text-amber-400 font-bold" : "text-emerald-400 font-bold"}>
+                {topicLoading ? "DISPENSING..." : "ONLINE"}
+              </span>
+            </div>
+          </div>
+
+          {/* Machine Controls Form */}
+          <form onSubmit={handleGenerateTopic} className="flex flex-col gap-3">
+            {/* Custom Topic Input */}
+            <div className="flex flex-col gap-1">
+              <Label htmlFor={isDrawer ? "drawer-custom-topic" : "custom-topic"} className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-300">
+                CUSTOM TOPIC (OPTIONAL)
+              </Label>
+              <Input
+                id={isDrawer ? "drawer-custom-topic" : "custom-topic"}
+                value={customTopic}
+                onChange={e => setCustomTopic(e.target.value)}
+                placeholder="e.g. AI ethics, leadership under pressure..."
+                className="text-xs h-9 bg-[#09090b] border-2 border-zinc-700 text-white placeholder:text-zinc-500 font-mono focus-visible:border-[#FFDE59] focus-visible:ring-0 rounded-lg"
+              />
+            </div>
+
+            {/* Module Selector */}
+            <div className="flex flex-col gap-1">
+              <Label className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-300">
+                MODULE
+              </Label>
+              <Select value={moduleType} onValueChange={v => v && setModuleType(v as any)}>
+                <SelectTrigger className="h-9 text-xs font-mono bg-[#27272a] border-2 border-zinc-700 text-white hover:border-zinc-500 rounded-lg">
+                  <SelectValue>{moduleType === "public_speaking" ? "Public Speaking" : "Interview Preparation"}</SelectValue>
+                </SelectTrigger>
+                <SelectContent className="bg-[#18181b] border-2 border-zinc-700 text-white font-mono">
+                  <SelectItem value="public_speaking">Public Speaking</SelectItem>
+                  <SelectItem value="interview_preparation">Interview Preparation</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Dials: Category / Interview Type & Difficulty */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {moduleType === "public_speaking" ? (
+                <div className="flex flex-col gap-1">
+                  <Label className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-300">
+                    CATEGORY
+                  </Label>
+                  <Select value={category} onValueChange={v => v && setCategory(v)}>
+                    <SelectTrigger className="h-9 text-xs font-mono bg-[#27272a] border-2 border-zinc-700 text-white hover:border-zinc-500 rounded-lg">
+                      <SelectValue>
+                        {category === "impromptu" ? "Impromptu" : category === "interview" ? "Job Interview" : category === "persuasive" ? "Persuasive" : category === "warmup" ? "Warmup" : category === "debate" ? "Debate" : category}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#18181b] border-2 border-zinc-700 text-white font-mono">
+                      <SelectItem value="impromptu">Impromptu</SelectItem>
+                      <SelectItem value="interview">Job Interview</SelectItem>
+                      <SelectItem value="persuasive">Persuasive</SelectItem>
+                      <SelectItem value="warmup">Warmup</SelectItem>
+                      <SelectItem value="debate">Debate</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-1">
+                  <Label className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-300">
+                    INTERVIEW TRACK
+                  </Label>
+                  <Select value={interviewType} onValueChange={v => v && setInterviewType(v)}>
+                    <SelectTrigger className="h-9 text-xs font-mono bg-[#27272a] border-2 border-zinc-700 text-white hover:border-zinc-500 rounded-lg">
+                      <SelectValue>{INTERVIEW_TYPES.find(t => t.value === interviewType)?.label || interviewType}</SelectValue>
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#18181b] border-2 border-zinc-700 text-white font-mono">
+                      {INTERVIEW_TYPES.map(t => (
+                        <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              <div className="flex flex-col gap-1">
+                <Label className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-300">
+                  DIFFICULTY
+                </Label>
+                <Select value={difficulty} onValueChange={v => v && setDifficulty(v)}>
+                  <SelectTrigger className="h-9 text-xs font-mono bg-[#27272a] border-2 border-zinc-700 text-white hover:border-zinc-500 rounded-lg">
+                    <SelectValue>{difficulty === "easy" ? "Easy" : difficulty === "medium" ? "Medium" : difficulty === "hard" ? "Hard" : difficulty}</SelectValue>
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#18181b] border-2 border-zinc-700 text-white font-mono">
+                    <SelectItem value="easy">Easy</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="hard">Hard</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {moduleType === "interview_preparation" && (
+              <div className="flex flex-col gap-1">
+                <Label className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-300">
+                  INTERVIEW STYLE
+                </Label>
+                <Select value={interviewPersona} onValueChange={v => v && setInterviewPersona(v)}>
+                  <SelectTrigger className="h-9 text-xs font-mono bg-[#27272a] border-2 border-zinc-700 text-white hover:border-zinc-500 rounded-lg">
+                    <SelectValue>{INTERVIEW_PERSONAS.find(p => p.value === interviewPersona)?.label || interviewPersona}</SelectValue>
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#18181b] border-2 border-zinc-700 text-white font-mono">
+                    {INTERVIEW_PERSONAS.map(p => (
+                      <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            {/* Big Physical Generate Button */}
+            <Button
+              type="submit"
+              disabled={topicLoading}
+              className="w-full h-11 mt-1 bg-[#FFDE59] hover:bg-[#ffe57f] active:translate-x-[2px] active:translate-y-[2px] text-black font-black font-mono text-xs sm:text-sm uppercase tracking-wider border-[2.5px] border-black shadow-[4px_4px_0px_0px_#000] active:shadow-none rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer"
+            >
+              {topicLoading ? (
+                <>
+                  <span className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin mr-1" />
+                  PRINTING TOPIC...
+                </>
+              ) : (
+                <>
+                  <Printer className="w-4 h-4 text-black" />
+                  ✦ POP YOUR TOPIC ✦
+                </>
+              )}
+            </Button>
+            {topicError && <p className="text-xs text-red-400 font-mono font-bold">{topicError}</p>}
+          </form>
+
+          {/* Physical Paper Feed Slot */}
+          <div className="relative mt-4 pt-2">
+            <div className="h-4 w-full bg-[#0d0d10] border-2 border-[#333338] rounded-md shadow-[inset_0_2px_4px_rgba(0,0,0,0.8)] flex items-center justify-center relative overflow-hidden">
+              <div className="h-1.5 w-[92%] bg-black rounded-full shadow-[0_2px_4px_rgba(0,0,0,0.9)]" />
+              <div className="absolute top-0 left-0 right-0 h-px bg-zinc-700/50" />
+            </div>
+            <div className="text-center mt-1">
+              <span className="text-[8px] font-mono tracking-widest uppercase text-zinc-500 font-bold">
+                ▼ PAPER DISPENSER FEED ▼
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Dispensed Receipt Paper */}
+        {activeTopic && showReceiptAnim && (
+          <div className="pt-1 pb-2">
+            <div
+              className="receipt-paper anim-receipt-feed relative max-w-xl mx-auto w-full select-text rounded-t-sm"
+              style={{ backgroundColor: "#FFFFF0", color: "#111111" }}
+            >
+              <div className="receipt-scanline" />
+
+              {/* Receipt Header */}
+              <div className="text-center pt-5 pb-3 px-4 sm:px-6 border-b-2 border-dashed border-black/25">
+                <div className="flex items-center justify-center gap-1.5 text-xs font-mono font-black tracking-widest uppercase text-black">
+                  <Printer className="w-3.5 h-3.5" />
+                  <span>RIZZKEY TOPIC RECEIPT</span>
+                </div>
+                <p className="text-[9px] font-mono text-black/60 tracking-wider mt-0.5">
+                  ✦ OFFICIAL COACHING DISPENSER ✦
+                </p>
+                <div className="flex items-center justify-between text-[9px] font-mono text-black/55 mt-2 pt-2 border-t border-dashed border-black/20 uppercase">
+                  <span>ORDER #{Math.abs((activeTopic.title || "").split("").reduce((a, b) => ((a << 5) - a) + b.charCodeAt(0) | 0, 0) % 9000 + 1000)}</span>
+                  <span>{fTime(new Date().toISOString())}</span>
+                </div>
+              </div>
+
+              {/* Metadata Stamp Box */}
+              <div className="mx-4 sm:mx-6 my-3 p-2 bg-black/[0.04] border-2 border-dashed border-black/30 rounded flex flex-wrap items-center justify-between gap-1.5 text-[9px] font-mono font-bold uppercase">
+                <span className="text-black/80">
+                  {activeTopic.module_type === "interview_preparation" ? "INTERVIEW PREP" : "PUBLIC SPEAKING"}
+                </span>
+                <span className="text-black/40">•</span>
+                <span className="text-black/80">{category.toUpperCase()}</span>
+                <span className="text-black/40">•</span>
+                <span className="px-1.5 py-0.5 bg-black text-[#FFFFF0] rounded text-[8px] font-black">
+                  {difficulty.toUpperCase()}
+                </span>
+              </div>
+
+              {/* Topic Content (ONLY topics as requested) */}
+              <div className="px-4 sm:px-6 py-2 space-y-2">
+                <span className="text-[9px] font-mono uppercase tracking-widest text-black/50 font-bold block">
+                  [ CHALLENGE TOPIC ]
+                </span>
+                <h3 className="text-base sm:text-lg font-black font-mono text-black uppercase tracking-tight leading-snug break-words">
+                  {activeTopic.title}
+                </h3>
+                <div className="border-t-2 border-dashed border-black/20 my-3" />
+                <p className="text-xs sm:text-sm font-mono text-black/85 leading-relaxed whitespace-pre-wrap">
+                  {activeTopic.prompt}
+                </p>
+              </div>
+
+              {/* Bottom Stamp & Decorative Barcode */}
+              <div className="px-4 sm:px-6 pt-3 pb-2 border-t-2 border-dashed border-black/20 flex items-center justify-between text-[9px] font-mono text-black/60">
+                <div className="flex items-center gap-[2px] h-4 opacity-75">
+                  {[2, 1, 3, 1, 2, 4, 1, 2, 1, 3, 2, 1, 4, 2, 1, 3, 1, 2].map((w, i) => (
+                    <span key={i} className="bg-black inline-block h-full" style={{ width: `${w}px` }} />
+                  ))}
+                </div>
+                <span className="font-mono text-[9px] font-bold tracking-wider text-black/60">
+                  READY FOR RECORDING
+                </span>
+              </div>
+
+              {/* Crisp Serrated Zigzag Tear Edge (SVG) */}
+              <div className="w-full overflow-hidden leading-none -mb-[1px] translate-y-[1px]">
+                <svg
+                  className="w-full h-3.5 fill-[#FFFFF0] text-black stroke-black"
+                  viewBox="0 0 120 10"
+                  preserveAspectRatio="none"
+                  style={{ filter: "drop-shadow(0px 3px 0px #000000)" }}
+                >
+                  <path
+                    d="M0,0 L5,8 L10,0 L15,8 L20,0 L25,8 L30,0 L35,8 L40,0 L45,8 L50,0 L55,8 L60,0 L65,8 L70,0 L75,8 L80,0 L85,8 L90,0 L95,8 L100,0 L105,8 L110,0 L115,8 L120,0 V0 H0 Z"
+                    strokeWidth="0.8"
+                    fill="#FFFFF0"
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // ── Practice History Tab View ─────────────────────────────────────────────
+  const renderHistoryTab = () => {
+    const groups = getGroupedHistory();
+    return (
+      <div className="p-4 sm:p-6 md:p-8 max-w-4xl mx-auto space-y-6 animate-bloom">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border/80 pb-4">
+          <div>
+            <h1 className="text-xl sm:text-2xl font-black text-foreground tracking-tight flex items-center gap-2">
+              <History className="w-6 h-6 text-primary" />
+              Practice History
+            </h1>
+            <p className="text-xs text-muted-foreground mt-1">
+              Review past recordings, transcripts, and evaluation metrics.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <div className="flex p-1 rounded-xl bg-muted/60 text-xs font-bold gap-1 border border-border/40">
+              {(["all", "speaking", "interview"] as const).map(f => (
+                <button
+                  key={f}
+                  onClick={() => setHistoryFilter(f)}
+                  className={`px-3 py-1.5 rounded-lg capitalize transition-all ${
+                    historyFilter === f
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {f}
+                </button>
+              ))}
+            </div>
+            <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-primary/10 text-primary border border-primary/20">
+              {historyList.length} {historyList.length === 1 ? "session" : "sessions"}
+            </span>
+          </div>
+        </div>
+
+        {historyLoading ? (
+          <div className="space-y-4 py-8">
+            <SidebarHistorySkeleton />
+          </div>
+        ) : historyList.length === 0 ? (
+          <div className="text-center py-16 px-4 border-2 border-dashed border-border/60 rounded-2xl bg-card/40">
+            <History className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />
+            <h3 className="font-bold text-base text-foreground">No practice sessions found</h3>
+            <p className="text-xs text-muted-foreground mt-1 max-w-sm mx-auto">
+              You haven't recorded any sessions in this category yet. Fire up the topic dispenser and record your first response!
+            </p>
+            <Button
+              onClick={() => setActiveTab("console")}
+              className="mt-5 font-bold gap-2 text-xs"
+              style={primaryBtnStyle}
+            >
+              <Mic className="w-4 h-4" /> Go to Practice Console
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {groups.map(group => (
+              <div key={group.label} className="space-y-2.5">
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-mono font-bold tracking-widest uppercase text-muted-foreground px-2 py-0.5 rounded bg-muted/50">
+                    {group.label}
+                  </span>
+                  <div className="h-px flex-1 bg-border/60" />
+                </div>
+
+                <div className="grid grid-cols-1 gap-2.5">
+                  {group.items.map(item => {
+                    const score = item.overall_score;
+                    const isSelected = polledSpeechId === item.id;
+                    return (
+                      <div
+                        key={item.id}
+                        onClick={() => {
+                          if (pollingRef.current) {
+                            clearInterval(pollingRef.current);
+                            pollingRef.current = null;
+                          }
+                          setPolledSpeechId(item.id);
+                          fetchCompletedSessionDetails(item.id);
+                          setActiveTab("evaluation");
+                        }}
+                        className={`p-4 rounded-xl border-2 transition-all cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                          isSelected
+                            ? "border-primary bg-primary/[0.04] shadow-sm"
+                            : "border-border/80 bg-card hover:border-border hover:shadow-sm"
+                        }`}
+                      >
+                        <div className="min-w-0 flex-1 space-y-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span
+                              className={`w-2 h-2 rounded-full shrink-0 ${
+                                item.status === "failed"
+                                  ? "bg-red-500"
+                                  : item.status !== "completed"
+                                  ? "bg-blue-500 animate-pulse"
+                                  : "bg-emerald-500"
+                              }`}
+                            />
+                            <h4 className="font-bold text-sm text-foreground truncate">
+                              {item.topics?.title || (item.is_session ? "Interview Session" : "Impromptu Speech")}
+                            </h4>
+                            {item.is_session && (
+                              <Badge variant="outline" className="text-[9px] font-mono uppercase bg-muted/40">
+                                Interview
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground flex items-center gap-2 pl-4">
+                            <span>{fd(item.duration_seconds)}</span>
+                            <span>•</span>
+                            <span>{fLong(item.created_at)} at {fTime(item.created_at)}</span>
+                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-3 shrink-0 self-end sm:self-center">
+                          {score !== null ? (
+                            <div className="flex items-baseline gap-1 bg-primary/10 border border-primary/20 px-3 py-1.5 rounded-lg">
+                              <span className="text-base font-black text-primary tabular-nums">{score}</span>
+                              <span className="text-[9px] font-bold text-muted-foreground">/100</span>
+                            </div>
+                          ) : (
+                            <Badge variant="secondary" className="text-[10px] uppercase font-mono">
+                              {item.status}
+                            </Badge>
+                          )}
+                          <Button
+                            variant="ghost"
+                            size="xs"
+                            className="font-bold text-xs gap-1 text-primary hover:bg-primary/10"
+                          >
+                            View Results <ChevronRight className="w-3.5 h-3.5" />
+                          </Button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+
+            {/* Pagination */}
+            <div className="flex items-center justify-between pt-4 border-t border-border/60">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => fetchHistory(historyPage - 1)}
+                disabled={historyPage === 1 || historyLoading}
+                className="text-xs font-semibold"
+              >
+                ← Previous
+              </Button>
+              <span className="text-xs text-muted-foreground font-mono">
+                Page {historyPage}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => fetchHistory(historyPage + 1)}
+                disabled={!hasMoreHistory || historyLoading}
+                className="text-xs font-semibold"
+              >
+                Next →
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // ── Speech Evaluation Tab View ────────────────────────────────────────────
+  const renderEvaluationTab = () => {
+    if (!speech) {
+      return (
+        <div className="p-8 max-w-2xl mx-auto text-center space-y-4 py-20">
+          <div className="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto border border-primary/20">
+            <Award className="w-7 h-7" />
+          </div>
+          <h2 className="text-xl font-black text-foreground">No Evaluation Selected</h2>
+          <p className="text-xs sm:text-sm text-muted-foreground max-w-sm mx-auto leading-relaxed">
+            Record and submit a practice speech in the Console, or select an existing session from your History tab to view AI coaching, delivery scores, and transcript breakdown.
+          </p>
+          <div className="flex items-center justify-center gap-3 pt-3">
+            <Button onClick={() => setActiveTab("console")} className="text-xs font-bold gap-1.5" style={primaryBtnStyle}>
+              <Mic className="w-3.5 h-3.5" /> Go to Practice Console
+            </Button>
+            <Button variant="outline" onClick={() => setActiveTab("history")} className="text-xs font-semibold">
+              Browse History
+            </Button>
+          </div>
+        </div>
+      );
+    }
+
+    if (isProcessing) {
+      return (
+        <div className="flex flex-col items-center justify-center min-h-[400px] gap-6 py-12">
+          <div className="flex gap-1.5">
+            {[0, 0.15, 0.3].map((d, i) => (
+              <span key={i} className="w-2.5 h-2.5 rounded-full rec-pulse bg-[var(--accent-color)]" style={{ animationDelay: `${d}s` }} />
+            ))}
+          </div>
+          <div className="text-center">
+            <h2 className="text-lg font-bold text-foreground mb-1">
+              {speech ? `Processing — ${speech.status}` : "Connecting to pipeline..."}
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              {speech?.status === "transcribing" && "Transcribing your audio using speech models..."}
+              {speech?.status === "analyzing" && "Analysing delivery, pacing, and vocabulary..."}
+              {!speech && "Uploading and initialising the evaluation pipeline..."}
+            </p>
+          </div>
+          <div className="w-full max-w-lg space-y-3 mt-2 px-4">
+            <div className="skeleton-pulse h-4 w-3/4 mx-auto" />
+            <div className="skeleton-pulse h-3 w-1/2 mx-auto" />
+            <div className="grid grid-cols-3 gap-3 mt-4">
+              <div className="skeleton-pulse h-16 rounded-lg" />
+              <div className="skeleton-pulse h-16 rounded-lg" />
+              <div className="skeleton-pulse h-16 rounded-lg" />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (isFailed) {
+      return (
+        <div className="p-8 max-w-2xl mx-auto">
+          <Card className="border-destructive/20 bg-destructive/5 text-center rounded-xl">
+            <CardContent className="pt-8 pb-8 space-y-3">
+              <div className="mx-auto w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center mb-2">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--destructive))" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+              </div>
+              <p className="font-bold text-destructive">Evaluation Failed</p>
+              <p className="text-sm text-destructive/70 leading-relaxed max-w-sm mx-auto">
+                We couldn&apos;t transcribe or evaluate this recording. Please check your microphone and try again.
+              </p>
+              <Button variant="destructive" className="mt-2" onClick={() => { discardSpeechAndReset(); setActiveTab("console"); setShowDrawer(true); }}>
+                Retry Recording
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      );
+    }
+
+    if (speech.is_session) {
+      return renderInterviewReplayScreen(speech);
+    }
+
+    return (
+      <div className="flex flex-col lg:flex-row gap-6 p-4 sm:p-6 md:p-8 max-w-6xl w-full mx-auto relative z-10">
+        {/* Left Column: Core Speech Info & Transcript */}
+        <div className="flex-1 min-w-0 space-y-6 animate-bloom">
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+            <div className="min-w-0">
+              <h1 className="text-xl sm:text-2xl font-black text-foreground tracking-tight mb-1 break-words">
+                {speech.topics?.title || "Impromptu Speech"}
+              </h1>
+              <p className="text-xs sm:text-sm text-muted-foreground">
+                Recorded {fLong(speech.created_at)} · {fd(speech.duration_seconds)} duration
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2 shrink-0 w-full sm:w-auto">
+              <Button
+                variant="outline"
+                onClick={() => setActiveTab("console")}
+                className="gap-1.5 text-xs h-9 border-[var(--accent-color)] text-[var(--accent-color)] hover:bg-[var(--accent-color)]/10 font-bold flex-1 sm:flex-initial"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                Back to Practice
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => { setTopics([]); setShowDrawer(true); setActiveTab("console"); }}
+                className="gap-1.5 text-xs h-9 flex-1 sm:flex-initial"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                New Topic
+              </Button>
+              <Button
+                onClick={() => { setShowDrawer(true); setActiveTab("console"); }}
+                className="gap-2 shrink-0 flex-1 sm:flex-initial"
+                style={primaryBtnStyle}
+              >
+                <Mic className="w-4 h-4" /> Practice Again
+              </Button>
+            </div>
+          </div>
+
+          {/* Overall Score Card */}
+          {speech.overall_score !== null && (
+            <Card className="overflow-hidden border-border/85 bg-gradient-to-r from-card to-muted/5 relative">
+              <CardContent className="flex flex-col sm:flex-row items-center gap-6 py-6 px-6 relative z-10">
+                <div className="relative flex items-center justify-center shrink-0">
+                  <svg className="w-20 h-20 -rotate-90">
+                    <circle cx="40" cy="40" r="34" className="stroke-muted fill-none" strokeWidth="6" />
+                    <circle cx="40" cy="40" r="34"
+                      className="stroke-[var(--accent-color)] fill-none"
+                      strokeWidth="6"
+                      strokeDasharray={2 * Math.PI * 34}
+                      strokeDashoffset={2 * Math.PI * 34 * (1 - speech.overall_score / 100)}
+                      strokeLinecap="round"
+                      style={{ transition: "stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1)" }}
+                    />
+                  </svg>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="text-2xl font-black tracking-tight tabular-nums text-foreground">{speech.overall_score}</span>
+                    <span className="text-[8px] font-bold uppercase tracking-wider text-muted-foreground -mt-1">/ 100</span>
+                  </div>
+                </div>
+                <div className="text-center sm:text-left flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                    <span className="text-lg font-black tracking-tight text-[var(--accent-text)]">
+                      {scoreLabel(speech.overall_score)} Delivery
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                    This score reflects pronunciation accuracy, fluency tempo, structural layout, and vocabulary quality.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Transcript Analyzer */}
+          {speech.transcript && (() => {
+            const { fillerCount, suggestCount, avoidCount } = (() => {
+              const pattern = `(\\[suggest break\\]|\\[do not break\\]|\\b(?:${FILLERS.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})\\b)`;
+              const regex = new RegExp(pattern, "gi");
+              const parts = speech.transcript!.split(regex);
+              let fCount = 0; let sCount = 0; let aCount = 0;
+              parts.forEach((p, i) => {
+                if (i % 2 === 1) {
+                  const lower = p.toLowerCase();
+                  if (lower === "[suggest break]") sCount++;
+                  else if (lower === "[do not break]") aCount++;
+                  else fCount++;
+                }
+              });
+              return { fillerCount: fCount, suggestCount: sCount, avoidCount: aCount };
+            })();
+
+            const handleCopy = () => {
+              if (!speech.transcript) return;
+              const cleanText = speech.transcript.replace(/\[suggest break\]/gi, "").replace(/\[do not break\]/gi, "").replace(/\s+/g, " ").trim();
+              navigator.clipboard.writeText(cleanText);
+              setCopied(true);
+              setTimeout(() => setCopied(false), 1500);
+            };
+
+            const renderSpokenText = () => {
+              const pattern = `(\\[suggest break\\]|\\[do not break\\]|\\b(?:${FILLERS.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})\\b)`;
+              const regex = new RegExp(pattern, "gi");
+              const parts = speech.transcript!.split(regex);
+              return parts.map((p, i) => {
+                if (i % 2 === 1) {
+                  const lower = p.toLowerCase();
+                  if (lower === "[suggest break]") {
+                    return <span key={i} title="Suggested pause" className="inline-block w-[6px] h-[6px] rounded-full bg-[#1D9E75]/80 mx-[3px] align-middle select-none cursor-help" />;
+                  } else if (lower === "[do not break]") {
+                    return <span key={i} title="Avoid pausing here" className="inline-block w-[6px] h-[6px] rounded-full bg-[#BA7517]/80 mx-[3px] align-middle select-none cursor-help" />;
+                  } else {
+                    return <span key={i} className="inline-block bg-[#FCEBEB] text-[#A32D2D] border-[0.5px] border-[#F09595] rounded px-[5px] py-[1px] text-[13px] font-medium hover:scale-[1.05] cursor-pointer transition-transform duration-100 ease-out select-text">{p}</span>;
+                  }
+                }
+                return p;
+              });
+            };
+
+            return (
+              <div className="py-2 px-0 bg-transparent flex flex-col font-sans" style={{ color: "var(--transcript-text)" }}>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mb-4">
+                  <span className="text-[10px] font-semibold tracking-[0.12em] uppercase select-none" style={{ color: "var(--transcript-muted)" }}>
+                    SPOKEN TRANSCRIPT
+                  </span>
+                  <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 sm:ml-auto">
+                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-red-500/[0.04] border border-red-500/10 text-[10px] font-bold text-red-500/90 select-none">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#E24B4A] animate-pulse" />
+                      Filler words
+                    </div>
+                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/[0.04] border border-emerald-500/10 text-[10px] font-bold text-emerald-600/90 select-none">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#1D9E75]" />
+                      Suggested break
+                    </div>
+                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-amber-500/[0.04] border border-amber-500/10 text-[10px] font-bold text-amber-600/90 select-none">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#BA7517]" />
+                      Avoid break
+                    </div>
+                  </div>
+                  <Button variant="outline" size="xs" onClick={handleCopy} className="gap-1.5 text-xs font-semibold self-start sm:self-auto">
+                    <span>{copied ? "Copied ✓" : "Copy"}</span>
+                  </Button>
+                </div>
+                <div className="border-[0.5px] rounded-[12px] py-5 px-4 sm:px-6 max-h-[320px] overflow-y-auto" style={{ backgroundColor: "var(--transcript-bg)", borderColor: "var(--transcript-border)" }}>
+                  <p onDoubleClick={handleTextDoubleClick} className="text-[14px] sm:text-[15px] font-normal whitespace-pre-wrap cursor-pointer select-text" style={{ color: "var(--transcript-text)", lineHeight: "2.0" }}>
+                    {renderSpokenText()}
+                  </p>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
+                  <div className="border border-border/50 border-l-4 border-l-red-500 rounded-r-lg py-3 px-4 flex flex-col justify-between bg-red-500/[0.02]">
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground/90">Filler words</span>
+                    <div className="flex items-baseline justify-between mt-1">
+                      <span className="text-2xl font-black text-red-500 tabular-nums">{fillerCount}</span>
+                      <span className="text-[10px] text-red-500/70 font-semibold">{fillerCount > 0 ? "⚠️ Optimize" : "✓ Perfect"}</span>
+                    </div>
+                  </div>
+                  <div className="border border-border/50 border-l-4 border-l-[#1D9E75] rounded-r-lg py-3 px-4 flex flex-col justify-between bg-[#1D9E75]/[0.02]">
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground/90">Suggested breaks</span>
+                    <div className="flex items-baseline justify-between mt-1">
+                      <span className="text-2xl font-black text-[#1D9E75] tabular-nums">{suggestCount}</span>
+                      <span className="text-[10px] text-[#1D9E75]/70 font-semibold">{suggestCount > 0 ? "⚡ Pauses" : "✓ Steady"}</span>
+                    </div>
+                  </div>
+                  <div className="border border-border/50 border-l-4 border-l-[#BA7517] rounded-r-lg py-3 px-4 flex flex-col justify-between bg-[#BA7517]/[0.02]">
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground/90">Avoid breaks</span>
+                    <div className="flex items-baseline justify-between mt-1">
+                      <span className="text-2xl font-black text-[#BA7517] tabular-nums">{avoidCount}</span>
+                      <span className="text-[10px] text-[#BA7517]/70 font-semibold">{avoidCount > 0 ? "⚠️ Haste" : "✓ Smooth"}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* Debate challenge */}
+          {counterArgument && (
+            <Card className="border-amber-200/85 bg-amber-50/20 shadow-sm">
+              <CardHeader className="pb-3 pt-4 px-5">
+                <CardTitle className="text-xs font-bold uppercase tracking-wider text-amber-800">Debate Challenge</CardTitle>
+              </CardHeader>
+              <CardContent className="px-5 pb-5">
+                <div className="pl-3.5 border-l-2 border-amber-400 italic text-xs text-foreground/90 leading-relaxed mb-4 whitespace-pre-wrap">
+                  {counterArgument}
+                </div>
+                <Button onClick={handleTryAnsweringDebate} className="bg-amber-600 hover:bg-amber-700 text-white font-semibold text-xs py-2 px-4 rounded-lg flex items-center gap-1.5 transition-all shadow-sm">
+                  Try Answering This
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Follow-up question */}
+          {speech.feedback?.follow_up_question && (
+            <Card className="border-emerald-200/85 bg-emerald-50/10 shadow-sm">
+              <CardHeader className="pb-2 pt-4 px-5">
+                <CardTitle className="text-xs font-bold uppercase tracking-wider text-emerald-800">Interviewer Follow-Up Question</CardTitle>
+              </CardHeader>
+              <CardContent className="px-5 pb-5">
+                <div className="pl-3.5 border-l-2 border-emerald-400 italic text-xs text-foreground/90 leading-relaxed mb-4 whitespace-pre-wrap">
+                  {speech.feedback.follow_up_question}
+                </div>
+                <Button onClick={handleTryAnsweringFollowUp} className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs py-2 px-4 rounded-lg flex items-center gap-1.5 transition-all shadow-sm">
+                  Answer Follow-Up Question
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
+        {/* Right Column: Coach Feedback, Vocabulary & Metrics */}
+        <div className="w-full lg:w-[360px] shrink-0">
+          <div className="sticky top-6 space-y-4">
+            <Card className="border-border/85 bg-card/65 backdrop-blur-md">
+              <div className="p-3 border-b border-border flex-shrink-0 bg-muted/5">
+                <div className="flex p-0.5 rounded-lg bg-muted/60 text-xs">
+                  {(["feedback", "vocab", "progress"] as const).map((tab) => {
+                    const active = rightTab === tab;
+                    const label = tab === "feedback" ? "Feedback" : tab === "vocab" ? "Vocab" : "Metrics";
+                    return (
+                      <button
+                        key={tab}
+                        onClick={() => setRightTab(tab)}
+                        className={`flex-1 py-1.5 rounded-md font-semibold text-center transition-all ${
+                          active ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <CardContent className="p-4">
+                {rightTab === "feedback" && (
+                  <div className="space-y-4 anim-fadeup">
+                    <p className="text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground select-none mb-1">Coach Feedback</p>
+                    {coachFeedback.length > 0 ? (
+                      coachFeedback.map((item, i) => {
+                        const isPositive = item.type === "positive";
+                        const isWarning = !isPositive && item.type === "warning";
+                        const cardBg = isPositive ? "bg-emerald-500/[0.02] border-l-emerald-500" : isWarning ? "bg-amber-500/[0.02] border-l-amber-500" : "bg-blue-500/[0.02] border-l-blue-500";
+                        const iconColor = isPositive ? "text-emerald-500" : isWarning ? "text-amber-500" : "text-blue-500";
+                        return (
+                          <div key={i} className={`p-3.5 rounded-r-lg border-l-4 border-y border-r border-y-border/30 border-r-border/30 ${cardBg} transition-all duration-300 hover:shadow-sm`}>
+                            <div className="flex gap-2.5 items-start">
+                              <span className={`w-2 h-2 rounded-full mt-1 shrink-0 ${iconColor} bg-current`} />
+                              <div className="min-w-0 flex-1">
+                                <p className="text-xs font-black text-foreground tracking-tight">{item.title}</p>
+                                <p className="text-[11px] text-muted-foreground leading-relaxed mt-1">{item.body}</p>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <div className="text-center py-6 text-xs text-muted-foreground">No feedback items for this session.</div>
+                    )}
+                  </div>
+                )}
+
+                {rightTab === "vocab" && (
+                  <div className="space-y-4 anim-fadeup">
+                    <p className="text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground select-none mb-1">Vocabulary Upgrades</p>
+                    {lexiconSuggestions.length > 0 ? (
+                      <div className="space-y-3">
+                        {lexiconSuggestions.slice(0, 4).map((rawItem: any, i: number) => {
+                          const norm = typeof rawItem === "string" ? {
+                            original_word: "Word Choice",
+                            suggested_replacement: rawItem,
+                            explanation: `Try incorporating "${rawItem}" to enhance vocabulary impact.`
+                          } : {
+                            original_word: rawItem?.original_word || rawItem?.word || "Word Choice",
+                            suggested_replacement: rawItem?.suggested_replacement || rawItem?.suggestion || rawItem?.replacement || "Suggested Word",
+                            explanation: rawItem?.explanation || `Consider using "${rawItem?.suggested_replacement || rawItem?.suggestion || "a stronger term"}" for clarity.`
+                          };
+                          return (
+                            <Card key={i} className="p-3.5 space-y-2.5 transition-all shadow-none border border-border/40 bg-card/65">
+                              <CardContent className="p-0 space-y-2">
+                                <div className="grid grid-cols-[1fr_24px_1fr] items-center gap-1 w-full bg-muted/40 p-2 rounded-lg">
+                                  <span className="text-xs line-through text-rose-600 font-mono font-bold block truncate">{norm.original_word}</span>
+                                  <span className="text-center text-muted-foreground">→</span>
+                                  <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 block truncate">{norm.suggested_replacement}</span>
+                                </div>
+                                <p className="text-[11px] text-muted-foreground leading-relaxed font-normal">{norm.explanation}</p>
+                              </CardContent>
+                            </Card>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div className="text-center py-6 text-xs text-muted-foreground">No vocabulary suggestions for this session.</div>
+                    )}
+                  </div>
+                )}
+
+                {rightTab === "progress" && (
+                  <div className="space-y-4 anim-fadeup">
+                    <div className="space-y-3.5">
+                      <div className="flex justify-between items-center mb-1">
+                        <p className="text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground">Core Skills</p>
+                        <div className="flex p-0.5 rounded bg-muted/60 text-[9px] gap-0.5 border border-border/10">
+                          <button onClick={() => setMetricsView("bar")} className={`px-2 py-0.5 rounded font-bold ${metricsView === "bar" ? "bg-card text-foreground shadow-xs" : "text-muted-foreground"}`}>Bars</button>
+                          <button onClick={() => setMetricsView("radar")} className={`px-2 py-0.5 rounded font-bold ${metricsView === "radar" ? "bg-card text-foreground shadow-xs" : "text-muted-foreground"}`}>Radar</button>
+                        </div>
+                      </div>
+                      {metricsView === "radar" ? (
+                        <RadarChart scores={[speech.pronunciation_score||0, speech.fluency_score||0, speech.grammar_score||0, speech.content_score||0, speech.lexicon_score||0]} />
+                      ) : (
+                        [
+                          {label:"Clarity & Enunciation",score:speech.pronunciation_score},
+                          {label:"Pacing & Pauses",score:speech.fluency_score},
+                          {label:"Grammar & Accuracy",score:speech.grammar_score},
+                          {label:"Content & Structure",score:speech.content_score},
+                          ...(speech.lexicon_score!=null?[{label:"Vocabulary & Lexicon",score:speech.lexicon_score}]:[])
+                        ].map((skill,idx)=>(
+                          <div key={skill.label}>
+                            <div className="flex justify-between items-center mb-1">
+                              <span className="text-[11px] font-medium text-foreground/80">{skill.label}</span>
+                              <span className="text-[11px] font-bold text-foreground tabular-nums">{skill.score}/100</span>
+                            </div>
+                            <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                              <div className="h-full rounded-full transition-all duration-1000" style={{width:`${skill.score}%`,background:skillGradients[idx%skillGradients.length]}}/>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-background font-sans relative">
 
@@ -3058,178 +3950,44 @@ export default function DashboardPage() {
         {/* Body */}
         <div ref={drawerBodyRef} className="flex-1 overflow-y-auto p-5 flex flex-col gap-4 z-10 bg-transparent">
 
-          {/* Topic generator */}
-          <Card>
-            <CardHeader className="pb-3 pt-4 px-4">
-              <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Topic Generator</CardTitle>
-            </CardHeader>
-            <CardContent className="px-4 pb-4">
-              <form onSubmit={handleGenerateTopic} className="flex flex-col gap-3">
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="custom-topic" className="text-xs">Custom topic (optional)</Label>
-                  <Input id="custom-topic" value={customTopic} onChange={e=>setCustomTopic(e.target.value)}
-                    placeholder="e.g. benefits of remote work, my leadership story..." className="text-sm h-9"/>
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <Label className="text-xs">Module</Label>
-                  <Select value={moduleType} onValueChange={v=>v&&setModuleType(v as any)}>
-                    <SelectTrigger className="h-9 text-sm">
-                      <SelectValue>{moduleType === "public_speaking" ? "Public Speaking" : "Interview Prep"}</SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="public_speaking">Public Speaking</SelectItem>
-                      <SelectItem value="interview_preparation">Interview Preparation</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  {moduleType === "public_speaking" ? (
-                    <div className="flex flex-col gap-1.5">
-                      <Label className="text-xs">Category</Label>
-                      <Select value={category} onValueChange={v=>v&&setCategory(v)}>
-                        <SelectTrigger className="h-9 text-sm">
-                          <SelectValue>{category === "impromptu" ? "Impromptu" : category === "interview" ? "Job Interview" : category === "persuasive" ? "Persuasive" : category === "warmup" ? "Warmup" : category === "debate" ? "Debate" : category}</SelectValue>
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="impromptu">Impromptu</SelectItem>
-                          <SelectItem value="interview">Job Interview</SelectItem>
-                          <SelectItem value="persuasive">Persuasive</SelectItem>
-                          <SelectItem value="warmup">Warmup</SelectItem>
-                          <SelectItem value="debate">Debate</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col gap-1.5">
-                      <Label className="text-xs">Interview Type</Label>
-                      <Select value={interviewType} onValueChange={v=>v&&setInterviewType(v)}>
-                        <SelectTrigger className="h-9 text-sm">
-                          <SelectValue>{INTERVIEW_TYPES.find(t=>t.value===interviewType)?.label||interviewType}</SelectValue>
-                        </SelectTrigger>
-                        <SelectContent>
-                          {INTERVIEW_TYPES.map(t=> (
-                            <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
-                  <div className="flex flex-col gap-1.5">
-                    <Label className="text-xs">Difficulty</Label>
-                    <Select value={difficulty} onValueChange={v=>v&&setDifficulty(v)}>
-                      <SelectTrigger className="h-9 text-sm">
-                        <SelectValue>{difficulty === "easy" ? "Easy" : difficulty === "medium" ? "Medium" : difficulty === "hard" ? "Hard" : difficulty}</SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="easy">Easy</SelectItem>
-                        <SelectItem value="medium">Medium</SelectItem>
-                        <SelectItem value="hard">Hard</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  {moduleType === "interview_preparation" && (
-                    <div className="col-span-2 flex flex-col gap-1.5">
-                      <Label className="text-xs">Interview Style</Label>
-                      <Select value={interviewPersona} onValueChange={v=>v&&setInterviewPersona(v)}>
-                        <SelectTrigger className="h-9 text-sm">
-                          <SelectValue>{INTERVIEW_PERSONAS.find(p=>p.value===interviewPersona)?.label||interviewPersona}</SelectValue>
-                        </SelectTrigger>
-                        <SelectContent>
-                          {INTERVIEW_PERSONAS.map(p=> (
-                            <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
-                </div>
-                <Button type="submit" disabled={topicLoading} className="w-full" style={primaryBtnStyle}>
-                  {topicLoading ? <><span className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin mr-2"/>Generating...</> : "Generate Topic"}
-                </Button>
-                {topicError && <p className="text-xs text-destructive font-medium">{topicError}</p>}
-              </form>
-            </CardContent>
-          </Card>
-
-          {/* Generated topic */}
-          {activeTopic && (
-            <Card className={`border ${accentBorderClass} ${accentBgClass} relative overflow-visible`}>
-              <CardContent className="p-4 flex gap-4 justify-between items-start">
-                <div className="min-w-0 flex-1">
-                  <div className="flex justify-between items-start gap-2 mb-2">
-                    <p className={`font-bold text-sm leading-snug ${accentTextClass}`}>{activeTopic.title}</p>
-                    <Badge variant="secondary" className="text-[10px] uppercase shrink-0 bg-muted text-muted-foreground border border-border">{difficulty}</Badge>
-                  </div>
-                  <p className="text-sm text-foreground/80 leading-relaxed mb-3">{activeTopic.prompt}</p>
-                  {activeTopic.module_type === "interview_preparation" ? (
-                    <div className="space-y-3">
-                      {activeTopic.context && (
-                        <div>
-                          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Scenario/Context</p>
-                          <p className="text-xs text-muted-foreground leading-relaxed">{activeTopic.context}</p>
-                        </div>
-                      )}
-                      <div>
-                        <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Evaluation Focus</p>
-                        <p className="text-xs text-muted-foreground leading-relaxed">
-                          The interviewer is evaluating your <strong>Confidence</strong>, <strong>Professionalism</strong>, <strong>Readiness</strong>, <strong>Structure</strong>, and <strong>Relevance</strong>.
-                        </p>
-                      </div>
-                      {activeTopic.suggested_points?.length > 0 && (
-                        <div>
-                          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Suggested Answer Structure</p>
-                          <ul className="space-y-1.5">
-                            {activeTopic.suggested_points.map((p, i) => (
-                              <li key={i} className="flex gap-2 text-xs text-muted-foreground leading-relaxed">
-                                <span className="shrink-0 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold text-white mt-0.5 bg-[var(--accent-color)]">{i+1}</span>
-                                {p}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    activeTopic.suggested_points?.length > 0 && (
-                      <div>
-                        <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Talking Points</p>
-                        <ul className="space-y-1.5">
-                          {activeTopic.suggested_points.map((p, i) => (
-                            <li key={i} className="flex gap-2 text-xs text-muted-foreground leading-relaxed">
-                              <span className="shrink-0 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold text-white mt-0.5 bg-[var(--accent-color)]">{i+1}</span>
-                              {p}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )
-                  )}
-                </div>
-                {isCute && (
-                  <div className="relative w-24 h-24 shrink-0 select-none pointer-events-none mt-2 self-end">
-                    <div className="absolute -bottom-1 -left-2 text-[10px] animate-pulse">🌸 🌼 🌸</div>
-                    <img src="/cute_garden_puppy.png" alt="Peeking Puppy" className="w-24 h-24 object-contain animate-float-leaf" style={{ "--duration": "8s" } as any} />
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
+          {/* Retro Hardware Topic Dispenser & Dispensed Receipt */}
+          {renderRetroPrinter(true)}
 
           {/* Recorder */}
           {activeTopic && (
-            <Card className={`transition-all duration-500
-              ${isCute && recordingState === "recording"
-                ? "animate-pulse-glow"
-                : ""
-              }`}
-            >
-              <CardHeader className="pb-3 pt-4 px-4">
-                <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Record Your Response</CardTitle>
+            <Card className="border-border/85 bg-card transition-all duration-500 relative overflow-hidden">
+              <CardHeader className="pb-3 pt-4 px-4 border-b border-border/40">
+                <CardTitle className="text-xs font-mono font-bold uppercase tracking-wider text-muted-foreground flex items-center justify-between">
+                  <span>Record Your Response</span>
+                  <span className="text-[9px] text-zinc-400 font-normal">Max 5 mins</span>
+                </CardTitle>
               </CardHeader>
-              <CardContent className="px-4 pb-4 flex flex-col gap-4">
+              <CardContent className="px-4 pb-4 flex flex-col gap-4 relative">
+                {/* Countdown 3...2...1... Overlay */}
+                {countdown !== null && (
+                  <div className="absolute inset-0 z-30 bg-black/90 backdrop-blur-xs rounded-xl flex flex-col items-center justify-center gap-2 p-4 text-center animate-fade-in">
+                    <div className="flex items-center gap-1.5 text-xs font-mono font-bold tracking-widest text-[#FFDE59] uppercase">
+                      <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
+                      RECORDING STARTS IN
+                    </div>
+                    <div key={countdown} className="text-7xl sm:text-8xl font-black text-[#FFDE59] font-mono tabular-nums anim-countdown leading-none select-none drop-shadow-[0_0_20px_rgba(255,222,89,0.5)]">
+                      {countdown}
+                    </div>
+                    <p className="text-[11px] font-mono text-zinc-300">Take a breath & organize your thoughts...</p>
+                    <Button
+                      variant="ghost"
+                      size="xs"
+                      onClick={cancelCountdown}
+                      className="mt-1 text-zinc-400 hover:text-white hover:bg-white/10 text-[10px] font-mono uppercase tracking-wider"
+                    >
+                      ✕ Cancel
+                    </Button>
+                  </div>
+                )}
+
                 {/* Timer */}
                 <div className="text-center">
-                  <p className="text-5xl font-black tracking-tighter tabular-nums text-foreground" style={{fontFamily:"'SF Mono',monospace"}}>{ft(recordSeconds)}</p>
+                  <p className="text-5xl font-black tracking-tighter tabular-nums text-foreground font-mono">{ft(recordSeconds)}</p>
                   {recordingState==="recording"&&<div className="flex items-center justify-center gap-1.5 mt-2"><span className="rec-pulse w-2 h-2 rounded-full bg-red-500"/><span className="text-[10px] font-bold tracking-widest text-red-500">REC</span></div>}
                   {recordingState==="paused"&&<p className="text-[10px] font-bold tracking-widest text-muted-foreground mt-2">PAUSED</p>}
                 </div>
@@ -3239,48 +3997,45 @@ export default function DashboardPage() {
                   <div className="h-9 flex items-center justify-center gap-[2px] overflow-hidden">
                     {Array.from({length:32}).map((_,i)=>{
                       const hs=[8,14,20,10,24,16,12,28,18,10,22,16,8,20,14,26,12,18,10,24,16,8,20,14,28,12,18,10,22,16,8,20];
-                      return <div key={i} className={`w-[3px] rounded-sm 
-                        ${isCute 
-                          ? (i % 2 === 0 ? "bg-[#eab308]" : "bg-[#568764]") 
-                          : "bg-indigo-500"
-                        }`} 
-                        style={{height:`${hs[i%hs.length]}px`,animation:`recPulse ${0.8+i*0.04}s ease-in-out infinite`,animationDelay:`${i*0.03}s`}}/>;
+                      return <div key={i} className="w-[3px] rounded-sm bg-indigo-500" style={{height:`${hs[i%hs.length]}px`,animation:`recPulse ${0.8+i*0.04}s ease-in-out infinite`,animationDelay:`${i*0.03}s`}}/>;
                     })}
                   </div>
                 )}
 
                 {/* Controls */}
                 {recordingState==="idle"&&(
-                  <Button onClick={startRecording} className="w-full gap-2" style={primaryBtnStyle}><Mic className="w-4 h-4"/>Start Recording</Button>
+                  <Button onClick={handleStartWithCountdown} className="w-full h-10 gap-2 font-black font-mono text-xs uppercase tracking-wider bg-black text-white hover:bg-zinc-800 border-2 border-black rounded-xl shadow-[3px_3px_0px_0px_#FFDE59]">
+                    <Mic className="w-4 h-4 text-[#FFDE59]"/> Start Recording
+                  </Button>
                 )}
                 {recordingState==="recording"&&(
                   <div className="flex gap-2">
-                    <Button variant="outline" onClick={pauseRecording} className="flex-1">Pause</Button>
-                    <Button variant="destructive" onClick={()=>stopStream()} className="flex-1">Stop</Button>
+                    <Button variant="outline" onClick={pauseRecording} className="flex-1 font-mono text-xs">Pause</Button>
+                    <Button variant="destructive" onClick={()=>stopStream()} className="flex-1 font-mono text-xs">Stop</Button>
                   </div>
                 )}
                 {recordingState==="paused"&&(
                   <div className="flex gap-2">
-                    <Button variant="outline" onClick={resumeRecording} className={`flex-1 ${accentBorderClass} ${accentTextClass}`}>Resume</Button>
-                    <Button variant="destructive" onClick={()=>stopStream()} className="flex-1">Stop</Button>
+                    <Button variant="outline" onClick={resumeRecording} className={`flex-1 font-mono text-xs ${accentBorderClass} ${accentTextClass}`}>Resume</Button>
+                    <Button variant="destructive" onClick={()=>stopStream()} className="flex-1 font-mono text-xs">Stop</Button>
                   </div>
                 )}
                 {recordingState==="stopped"&&(
                   <div className="flex flex-col gap-3">
                     <div className="rounded-lg border border-border bg-muted/40 p-3">
-                      <div className="flex justify-between text-xs text-muted-foreground mb-2">
+                      <div className="flex justify-between text-xs text-muted-foreground mb-2 font-mono">
                         <span className="font-medium text-foreground">Duration: {ft(recordSeconds)}</span>
                         {audioBlob&&<span>{(audioBlob.size/1048576).toFixed(2)} MB</span>}
                       </div>
                       <audio src={audioUrl||""} controls className="w-full h-8 rounded"/>
                     </div>
-                    {recordSeconds<10&&<p className="text-xs text-destructive bg-destructive/10 border border-destructive/20 rounded-lg px-3 py-2 font-medium">Speech must be at least 10 seconds long.</p>}
-                    {uploadError&&<p className="text-xs text-destructive bg-destructive/10 border border-destructive/20 rounded-lg px-3 py-2 font-medium">{uploadError}</p>}
+                    {recordSeconds<10&&<p className="text-xs text-destructive bg-destructive/10 border border-destructive/20 rounded-lg px-3 py-2 font-semibold font-mono">Speech must be at least 10 seconds long.</p>}
+                    {uploadError&&<p className="text-xs text-destructive bg-destructive/10 border border-destructive/20 rounded-lg px-3 py-2 font-semibold font-mono">{uploadError}</p>}
                     <div className="flex gap-2">
-                      <Button onClick={handleSubmitSpeech} disabled={isUploading||recordSeconds<10} className="flex-1" style={primaryBtnStyle}>
-                        {isUploading?<><span className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin mr-2"/>Uploading...</>:"Submit for Evaluation"}
+                      <Button onClick={handleSubmitSpeech} disabled={isUploading||recordSeconds<10} className="flex-1 h-10 text-xs font-black font-mono uppercase bg-[#FFDE59] text-black hover:bg-[#ffe57f] border-2 border-black rounded-xl shadow-[3px_3px_0px_0px_#000]">
+                        {isUploading?<><span className="w-3.5 h-3.5 border-2 border-black/40 border-t-black rounded-full animate-spin mr-2"/>Uploading...</>:"Submit for Evaluation"}
                       </Button>
-                      <Button variant="outline" onClick={discardRecording} disabled={isUploading}>Discard</Button>
+                      <Button variant="outline" onClick={discardRecording} disabled={isUploading} className="h-10 text-xs font-mono">Discard</Button>
                     </div>
                   </div>
                 )}
@@ -3313,7 +4068,9 @@ export default function DashboardPage() {
               { id: "console", label: "Practice Console", icon: <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 0 0 6-6v-1.5m-6 7.5a6 6 0 0 1-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 0 1-3-3V4.5a3 3 0 1 1 6 0v8.25a3 3 0 0 1-3 3Z"/></svg> },
               { id: "tracks", label: "Interview Tracks", icon: <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>, onSelect: () => { setModuleType("interview_preparation"); fetchTrackStats(); } },
               { id: "library", label: "Knowledge Library", icon: <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"/></svg> },
-              { id: "coach", label: "AI Coach", icon: <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8.625 9.75a.625.625 0 1 1-1.25 0 .625.625 0 0 1 1.25 0Zm4.5 0a.625.625 0 1 1-1.25 0 .625.625 0 0 1 1.25 0Zm4.5 0a.625.625 0 1 1-1.25 0 .625.625 0 0 1 1.25 0Z"/><path strokeLinecap="round" strokeLinejoin="round" d="M20.25 8.511c.046.218.07.444.07.675 0 2.761-2.91 5-6.5 5-1.127 0-2.189-.221-3.084-.607L6.5 15.5v-3.791c-1.879-1.047-3.001-2.617-3.001-4.384 0-3.314 3.582-6 8-6 4.418 0 8 2.686 8 6Z"/></svg> }
+              { id: "coach", label: "AI Coach", icon: <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8.625 9.75a.625.625 0 1 1-1.25 0 .625.625 0 0 1 1.25 0Zm4.5 0a.625.625 0 1 1-1.25 0 .625.625 0 0 1 1.25 0Zm4.5 0a.625.625 0 1 1-1.25 0 .625.625 0 0 1 1.25 0Z"/><path strokeLinecap="round" strokeLinejoin="round" d="M20.25 8.511c.046.218.07.444.07.675 0 2.761-2.91 5-6.5 5-1.127 0-2.189-.221-3.084-.607L6.5 15.5v-3.791c-1.879-1.047-3.001-2.617-3.001-4.384 0-3.314 3.582-6 8-6 4.418 0 8 2.686 8 6Z"/></svg> },
+              { id: "history", label: "Practice History", icon: <Clock className="w-4 h-4 shrink-0" /> },
+              { id: "evaluation", label: "Speech Evaluation", icon: <Award className="w-4 h-4 shrink-0" /> }
             ].map(tab => {
               const active = !uploadSuccess && activeTab === tab.id;
               return (
@@ -3420,6 +4177,7 @@ export default function DashboardPage() {
                             }
                             setPolledSpeechId(item.id);
                             fetchCompletedSessionDetails(item.id);
+                            setActiveTab("evaluation");
                           }}
                           className={`w-full text-left px-2.5 py-2 rounded-md transition-all flex flex-col gap-1 ${activeClass}`}
                           style={{fontFamily:"inherit"}}>
@@ -3532,7 +4290,9 @@ export default function DashboardPage() {
                   <span className="text-foreground truncate">
                     {activeTab === "console" ? "Practice Console" :
                      activeTab === "tracks" ? "Interview Tracks" :
-                     activeTab === "library" ? "Knowledge Library" : "AI Coach"}
+                     activeTab === "library" ? "Knowledge Library" :
+                     activeTab === "coach" ? "AI Coach" :
+                     activeTab === "history" ? "Practice History" : "Speech Evaluation"}
                   </span>
                 )}
               </div>
@@ -3622,6 +4382,24 @@ export default function DashboardPage() {
                             Curated articles, frameworks, and practice guides.
                           </p>
                         </>
+                      ) : activeTab === "history" ? (
+                        <>
+                          <h1 className="text-base font-black text-foreground tracking-tight flex items-center gap-1.5">
+                            Practice History
+                          </h1>
+                          <p className="text-[10px] text-muted-foreground mt-0.5">
+                            Review past recordings, transcripts, and evaluation metrics.
+                          </p>
+                        </>
+                      ) : activeTab === "evaluation" ? (
+                        <>
+                          <h1 className="text-base font-black text-foreground tracking-tight flex items-center gap-1.5">
+                            Speech Evaluation
+                          </h1>
+                          <p className="text-[10px] text-muted-foreground mt-0.5">
+                            Comprehensive speech feedback, score breakdown, and vocabulary upgrades.
+                          </p>
+                        </>
                       ) : (
                         <>
                           <h1 className="text-base font-black text-foreground tracking-tight flex items-center gap-1.5">
@@ -3661,6 +4439,18 @@ export default function DashboardPage() {
                       >
                         AI Coach
                       </button>
+                      <button
+                        onClick={() => { setActiveTab("history"); }}
+                        className={`px-3 py-1 rounded-md font-semibold transition-all ${activeTab === "history" ? "bg-card text-foreground shadow-sm scale-[1.02]" : "text-muted-foreground hover:text-foreground hover:bg-muted/30"}`}
+                      >
+                        History
+                      </button>
+                      <button
+                        onClick={() => { setActiveTab("evaluation"); }}
+                        className={`px-3 py-1 rounded-md font-semibold transition-all ${activeTab === "evaluation" ? "bg-card text-foreground shadow-sm scale-[1.02]" : "text-muted-foreground hover:text-foreground hover:bg-muted/30"}`}
+                      >
+                        Evaluation {polledSpeechDetails?.overall_score != null ? `(${polledSpeechDetails.overall_score})` : ""}
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -3672,175 +4462,50 @@ export default function DashboardPage() {
                 renderKnowledgeLibrary()
               ) : activeTab === "coach" ? (
                 renderAICoach()
+              ) : activeTab === "history" ? (
+                renderHistoryTab()
+              ) : activeTab === "evaluation" ? (
+                renderEvaluationTab()
               ) : (
                 <>
-                  {/* Topic Generator Card inline */}
-                  <Card className={isCute ? "border-[rgba(21,46,27,0.14)] bg-white/40" : "border-border/85 bg-card"}>
-                    <CardHeader className="pb-2 pt-4 px-4">
-                      <CardTitle className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Topic Generator</CardTitle>
-                    </CardHeader>
-                    <CardContent className="px-4 pb-4">
-                      <form onSubmit={handleGenerateTopic} className="flex flex-col gap-3">
-                        <div className="flex flex-col gap-1">
-                          <Label htmlFor="custom-topic" className="text-[10px] font-bold text-foreground/80">Custom topic (optional)</Label>
-                          <Input id="custom-topic" value={customTopic} onChange={e=>setCustomTopic(e.target.value)}
-                            placeholder="e.g. benefits of remote work, my leadership story..." className="text-xs h-9"/>
-                        </div>
-                        <div className="flex flex-col gap-1">
-                          <Label className="text-[10px] font-bold text-foreground/80">Module</Label>
-                          <Select value={moduleType} onValueChange={v=>v&&setModuleType(v as any)}>
-                            <SelectTrigger className="h-9 text-xs">
-                              <SelectValue>{moduleType === "public_speaking" ? "Public Speaking" : "Interview Prep"}</SelectValue>
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="public_speaking">Public Speaking</SelectItem>
-                              <SelectItem value="interview_preparation">Interview Preparation</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          {moduleType === "public_speaking" ? (
-                            <div className="flex flex-col gap-1">
-                              <Label className="text-[10px] font-bold text-foreground/80">Category</Label>
-                              <Select value={category} onValueChange={v=>v&&setCategory(v)}>
-                                <SelectTrigger className="h-9 text-xs">
-                                  <SelectValue>{category === "impromptu" ? "Impromptu" : category === "interview" ? "Job Interview" : category === "persuasive" ? "Persuasive" : category === "warmup" ? "Warmup" : category === "debate" ? "Debate" : category}</SelectValue>
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="impromptu">Impromptu</SelectItem>
-                                  <SelectItem value="interview">Job Interview</SelectItem>
-                                  <SelectItem value="persuasive">Persuasive</SelectItem>
-                                  <SelectItem value="warmup">Warmup</SelectItem>
-                                  <SelectItem value="debate">Debate</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          ) : (
-                            <div className="flex flex-col gap-1">
-                              <Label className="text-[10px] font-bold text-foreground/80">Interview Type</Label>
-                              <Select value={interviewType} onValueChange={v=>v&&setInterviewType(v)}>
-                                <SelectTrigger className="h-9 text-xs">
-                                  <SelectValue>{INTERVIEW_TYPES.find(t=>t.value===interviewType)?.label||interviewType}</SelectValue>
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {INTERVIEW_TYPES.map(t=> (
-                                    <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          )}
-                          <div className="flex flex-col gap-1">
-                            <Label className="text-[10px] font-bold text-foreground/80">Difficulty</Label>
-                            <Select value={difficulty} onValueChange={v=>v&&setDifficulty(v)}>
-                              <SelectTrigger className="h-9 text-xs">
-                                <SelectValue>{difficulty === "easy" ? "Easy" : difficulty === "medium" ? "Medium" : difficulty === "hard" ? "Hard" : difficulty}</SelectValue>
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="easy">Easy</SelectItem>
-                                <SelectItem value="medium">Medium</SelectItem>
-                                <SelectItem value="hard">Hard</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </div>
-                        {moduleType === "interview_preparation" && (
-                          <div className="flex flex-col gap-1">
-                            <Label className="text-[10px] font-bold text-foreground/80">Interview Style</Label>
-                            <Select value={interviewPersona} onValueChange={v=>v&&setInterviewPersona(v)}>
-                              <SelectTrigger className="h-9 text-xs">
-                                <SelectValue>{INTERVIEW_PERSONAS.find(p=>p.value===interviewPersona)?.label||interviewPersona}</SelectValue>
-                              </SelectTrigger>
-                              <SelectContent>
-                                {INTERVIEW_PERSONAS.map(p=> (
-                                  <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        )}
-                        <Button type="submit" disabled={topicLoading} className="w-full h-9 text-xs font-bold" style={primaryBtnStyle}>
-                          {topicLoading ? <><span className="w-3 h-3 border-2 border-white/40 border-t-white rounded-full animate-spin mr-1.5"/>Generating...</> : "Generate Topic"}
-                        </Button>
-                        {topicError && <p className="text-[10px] text-destructive font-medium">{topicError}</p>}
-                      </form>
-                    </CardContent>
-                  </Card>
+                  {/* Retro Hardware Printer & Dispensed Topic Receipt */}
+                  {renderRetroPrinter(false)}
 
-                  {isCute && renderLeafDivider()}
-
-                  {activeTopic ? (
-                    <div className="space-y-4 animate-bloom">
-                      <Card className={`border ${accentBorderClass} ${accentBgClass} relative overflow-visible`}>
-                        <CardContent className="p-4 flex gap-4 justify-between items-start">
-                          <div className="min-w-0 flex-1">
-                            <div className="flex justify-between items-start gap-2 mb-1.5">
-                              <p className={`font-bold text-xs leading-snug ${accentTextClass}`}>{activeTopic.title}</p>
-                              <Badge variant="secondary" className="text-[8px] uppercase shrink-0 bg-muted text-muted-foreground border border-border">{difficulty}</Badge>
-                            </div>
-                            <p className="text-xs text-foreground/80 leading-relaxed mb-3">{activeTopic.prompt}</p>
-                            {activeTopic.module_type === "interview_preparation" ? (
-                              <div className="space-y-3">
-                                {activeTopic.context && (
-                                  <div>
-                                    <p className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Scenario/Context</p>
-                                    <p className="text-xs text-muted-foreground leading-relaxed">{activeTopic.context}</p>
-                                  </div>
-                                )}
-                                <div>
-                                  <p className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Evaluation Focus</p>
-                                  <p className="text-xs text-muted-foreground leading-relaxed">
-                                    The interviewer is evaluating your <strong>Confidence</strong>, <strong>Professionalism</strong>, <strong>Readiness</strong>, <strong>Structure</strong>, and <strong>Relevance</strong>.
-                                  </p>
-                                </div>
-                                {activeTopic.suggested_points?.length > 0 && (
-                                  <div>
-                                    <p className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Suggested Answer Structure</p>
-                                    <ul className="space-y-1.5">
-                                      {activeTopic.suggested_points.map((p, i) => (
-                                        <li key={i} className="flex gap-2 text-xs text-muted-foreground leading-relaxed">
-                                          <span className="shrink-0 w-3.5 h-3.5 rounded-full flex items-center justify-center text-[8px] font-bold text-white mt-0.5 bg-[var(--accent-color)]">{i+1}</span>
-                                          {p}
-                                        </li>
-                                      ))}
-                                    </ul>
-                                  </div>
-                                )}
-                              </div>
-                            ) : (
-                              activeTopic.suggested_points?.length > 0 && (
-                                <div>
-                                  <p className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Talking Points</p>
-                                  <ul className="space-y-1.5">
-                                    {activeTopic.suggested_points.map((p, i) => (
-                                      <li key={i} className="flex gap-2 text-xs text-muted-foreground leading-relaxed">
-                                        <span className="shrink-0 w-3.5 h-3.5 rounded-full flex items-center justify-center text-[8px] font-bold text-white mt-0.5 bg-[#fb7185]">{i+1}</span>
-                                        {p}
-                                      </li>
-                                    ))}
-                                  </ul>
-                                </div>
-                              )
-                            )}
-                          </div>
-                          {isCute && (
-                            <div className="relative w-24 h-24 shrink-0 select-none pointer-events-none mt-2 self-end">
-                              <div className="absolute -bottom-1 -left-2 text-[10px] animate-pulse">🌸 🌼 🌸</div>
-                              <img src="/cute_garden_puppy.png" alt="Peeking Puppy" className="w-24 h-24 object-contain animate-float-leaf" style={{ "--duration": "8s" } as any} />
-                            </div>
-                          )}
-                        </CardContent>
-                      </Card>
-
-                      <Card className={`transition-all duration-500 ${
-                        isCute ? "border-[rgba(21,46,27,0.14)] bg-white/40" : "border-border/85 bg-card"
-                      } ${isCute && recordingState === "recording" ? "animate-pulse-glow" : ""}`}>
-                        <CardHeader className="pb-2 pt-4 px-4">
-                          <CardTitle className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Record Your Response</CardTitle>
+                  {/* Recorder Card */}
+                  {activeTopic && (
+                    <div className="space-y-4 animate-bloom pt-1">
+                      <Card className="border-border/85 bg-card transition-all duration-500 relative overflow-hidden">
+                        <CardHeader className="pb-2 pt-4 px-4 border-b border-border/40">
+                          <CardTitle className="text-[10px] font-mono font-bold uppercase tracking-wider text-muted-foreground flex items-center justify-between">
+                            <span>Record Your Response</span>
+                            <span className="text-[9px] text-zinc-400 font-normal">Max 5 mins</span>
+                          </CardTitle>
                         </CardHeader>
-                        <CardContent className="px-4 pb-4 flex flex-col gap-3">
+                        <CardContent className="px-4 pb-4 pt-3 flex flex-col gap-3 relative">
+                          {/* Countdown 3...2...1... Overlay */}
+                          {countdown !== null && (
+                            <div className="absolute inset-0 z-30 bg-black/90 backdrop-blur-xs rounded-xl flex flex-col items-center justify-center gap-2 p-4 text-center animate-fade-in">
+                              <div className="flex items-center gap-1.5 text-xs font-mono font-bold tracking-widest text-[#FFDE59] uppercase">
+                                <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
+                                RECORDING STARTS IN
+                              </div>
+                              <div key={countdown} className="text-7xl sm:text-8xl font-black text-[#FFDE59] font-mono tabular-nums anim-countdown leading-none select-none drop-shadow-[0_0_20px_rgba(255,222,89,0.5)]">
+                                {countdown}
+                              </div>
+                              <p className="text-[11px] font-mono text-zinc-300">Take a breath & organize your thoughts...</p>
+                              <Button
+                                variant="ghost"
+                                size="xs"
+                                onClick={cancelCountdown}
+                                className="mt-1 text-zinc-400 hover:text-white hover:bg-white/10 text-[10px] font-mono uppercase tracking-wider"
+                              >
+                                ✕ Cancel
+                              </Button>
+                            </div>
+                          )}
+
                           <div className="text-center">
-                            <p className="text-4xl font-black tracking-tighter tabular-nums text-foreground" style={{fontFamily:"'SF Mono',monospace"}}>{ft(recordSeconds)}</p>
+                            <p className="text-4xl font-black tracking-tighter tabular-nums text-foreground font-mono">{ft(recordSeconds)}</p>
                             {recordingState === "recording" && <div className="flex items-center justify-center gap-1.5 mt-1.5"><span className="rec-pulse w-2 h-2 rounded-full bg-red-500"/><span className="text-[9px] font-bold tracking-widest text-red-500">REC</span></div>}
                             {recordingState === "paused" && <p className="text-[9px] font-bold tracking-widest text-[#854d0e] mt-1.5">PAUSED</p>}
                           </div>
@@ -3848,61 +4513,56 @@ export default function DashboardPage() {
                             <div className="h-8 flex items-center justify-center gap-[2px] overflow-hidden">
                               {Array.from({length:32}).map((_,i)=>{
                                 const hs=[8,14,20,10,24,16,12,28,18,10,22,16,8,20,14,26,12,18,10,24,16,8,20,14,28,12,18,10,22,16,8,20];
-                                return <div key={i} className={`w-[2.5px] rounded-sm 
-                                  ${isCute ? (i % 2 === 0 ? "bg-[#eab308]" : "bg-[#568764]") : "bg-indigo-500"}`} 
-                                  style={{height:`${hs[i%hs.length]}px`,animation:`recPulse ${0.8+i*0.04}s ease-in-out infinite`,animationDelay:`${i*0.03}s`}}/>;
+                                return <div key={i} className="w-[2.5px] rounded-sm bg-indigo-500" style={{height:`${hs[i%hs.length]}px`,animation:`recPulse ${0.8+i*0.04}s ease-in-out infinite`,animationDelay:`${i*0.03}s`}}/>;
                               })}
                             </div>
                           )}
                           {recordingState === "idle" && (
-                            <Button onClick={startRecording} className="w-full h-9 gap-1.5 font-bold text-xs" style={primaryBtnStyle}><Mic className="w-3.5 h-3.5"/>Start Recording</Button>
+                            <Button onClick={handleStartWithCountdown} className="w-full h-10 gap-2 font-black font-mono text-xs uppercase tracking-wider bg-black text-white hover:bg-zinc-800 border-2 border-black rounded-xl shadow-[3px_3px_0px_0px_#FFDE59]">
+                              <Mic className="w-4 h-4 text-[#FFDE59]"/> Start Recording
+                            </Button>
                           )}
                           {recordingState === "recording" && (
                             <div className="flex gap-2">
-                              <Button variant="outline" onClick={pauseRecording} className="flex-1 h-9 text-xs">Pause</Button>
-                              <Button variant="destructive" onClick={()=>stopStream()} className="flex-1 h-9 text-xs">Stop</Button>
+                              <Button variant="outline" onClick={pauseRecording} className="flex-1 h-9 text-xs font-mono">Pause</Button>
+                              <Button variant="destructive" onClick={()=>stopStream()} className="flex-1 h-9 text-xs font-mono">Stop</Button>
                             </div>
                           )}
                           {recordingState === "paused" && (
                             <div className="flex gap-2">
-                              <Button variant="outline" onClick={resumeRecording} className={`flex-1 h-9 text-xs ${accentBorderClass} ${accentTextClass}`}>Resume</Button>
-                              <Button variant="destructive" onClick={()=>stopStream()} className="flex-1 h-9 text-xs">Stop</Button>
+                              <Button variant="outline" onClick={resumeRecording} className={`flex-1 h-9 text-xs font-mono ${accentBorderClass} ${accentTextClass}`}>Resume</Button>
+                              <Button variant="destructive" onClick={()=>stopStream()} className="flex-1 h-9 text-xs font-mono">Stop</Button>
                             </div>
                           )}
                           {recordingState === "stopped" && (
                             <div className="flex flex-col gap-3.5">
                               <div className="rounded-lg border border-border bg-muted/40 p-2.5">
-                                <div className="flex justify-between text-[10px] text-muted-foreground mb-1.5">
+                                <div className="flex justify-between text-[10px] text-muted-foreground mb-1.5 font-mono">
                                   <span className="font-medium text-foreground">Duration: {ft(recordSeconds)}</span>
                                   {audioBlob && <span>{(audioBlob.size/1048576).toFixed(2)} MB</span>}
                                 </div>
                                 <audio src={audioUrl||""} controls className="w-full h-8 rounded"/>
                               </div>
-                              {recordSeconds < 10 && <p className="text-[10px] text-destructive bg-destructive/10 border border-destructive/20 rounded-lg px-2.5 py-1.5 font-semibold">Speech must be at least 10 seconds long.</p>}
-                              {uploadError && <p className="text-[10px] text-destructive bg-destructive/10 border border-destructive/20 rounded-lg px-2.5 py-1.5 font-semibold">{uploadError}</p>}
+                              {recordSeconds < 10 && <p className="text-[10px] text-destructive bg-destructive/10 border border-destructive/20 rounded-lg px-2.5 py-1.5 font-semibold font-mono">Speech must be at least 10 seconds long.</p>}
+                              {uploadError && <p className="text-[10px] text-destructive bg-destructive/10 border border-destructive/20 rounded-lg px-2.5 py-1.5 font-semibold font-mono">{uploadError}</p>}
                               <div className="flex gap-2">
-                                <Button onClick={handleSubmitSpeech} disabled={isUploading||recordSeconds<10} className="flex-1 h-9 text-xs font-bold" style={primaryBtnStyle}>
-                                  {isUploading?<><span className="w-3 h-3 border-2 border-white/40 border-t-white rounded-full animate-spin mr-1.5"/>Uploading...</>:"Submit for Evaluation"}
+                                <Button onClick={handleSubmitSpeech} disabled={isUploading||recordSeconds<10} className="flex-1 h-10 text-xs font-black font-mono uppercase bg-[#FFDE59] text-black hover:bg-[#ffe57f] border-2 border-black rounded-xl shadow-[3px_3px_0px_0px_#000]">
+                                  {isUploading?<><span className="w-3 h-3 border-2 border-black/40 border-t-black rounded-full animate-spin mr-1.5"/>Uploading...</>:"Submit for Evaluation"}
                                 </Button>
-                                <Button variant="outline" onClick={discardRecording} disabled={isUploading} className="h-9 text-xs">Discard</Button>
+                                <Button variant="outline" onClick={discardRecording} disabled={isUploading} className="h-10 text-xs font-mono">Discard</Button>
                               </div>
                             </div>
                           )}
                         </CardContent>
                       </Card>
                     </div>
-                  ) : (
-                    <div className={`text-center p-4 rounded-xl flex items-center justify-center gap-2 border ${
-                      isCute 
-                        ? "bg-[#fff0f3] border-[#ffe4e6] text-[#9f1239] font-bold" 
-                        : "bg-muted/30 border-border text-muted-foreground font-medium"
-                    }`}>
+                  )}
+
+                  {!activeTopic && (
+                    <div className="text-center p-4 rounded-xl flex items-center justify-center gap-2 border bg-muted/30 border-border text-muted-foreground font-medium">
                       <span className="text-sm">✨</span>
                       <p className="text-[10px]">
-                        {isCute 
-                          ? "Your Speech Coaching Garden is ready. Generate a topic above to begin practicing!" 
-                          : "Practice Terminal is ready. Generate a topic above to begin practicing!"
-                        }
+                        Practice Terminal is ready. Generate a topic above to begin practicing!
                       </p>
                     </div>
                   )}
@@ -4625,12 +5285,12 @@ export default function DashboardPage() {
         </div>
       )}
       {/* ── MOBILE BOTTOM NAVIGATION BAR ─────────────────────────────────── */}
-      <nav className="fixed bottom-0 left-0 right-0 h-16 bg-[var(--bg-sidebar)]/95 backdrop-blur-xl border-t border-[var(--border-sidebar)]/80 flex items-center justify-around z-40 md:hidden pb-safe px-2">
+      <nav className="fixed bottom-0 left-0 right-0 h-16 bg-[var(--bg-sidebar)]/95 backdrop-blur-xl border-t border-[var(--border-sidebar)]/80 flex items-center justify-around z-40 md:hidden pb-safe px-1">
         {[
           { id: "console", label: "Console", icon: <Mic className="w-5 h-5" /> },
           { id: "tracks", label: "Tracks", icon: <Layers className="w-5 h-5" />, onSelect: () => { setModuleType("interview_preparation"); fetchTrackStats(); } },
-          { id: "library", label: "Library", icon: <BookOpen className="w-5 h-5" /> },
-          { id: "coach", label: "Coach", icon: <Bot className="w-5 h-5" /> }
+          { id: "history", label: "History", icon: <Clock className="w-5 h-5" /> },
+          { id: "evaluation", label: "Evaluate", icon: <Award className="w-5 h-5" /> }
         ].map(tab => {
           const active = !uploadSuccess && activeTab === tab.id;
           return (
@@ -4643,7 +5303,7 @@ export default function DashboardPage() {
                 setPolledSpeechDetails(null);
                 if ((tab as any).onSelect) (tab as any).onSelect();
               }}
-              className={`flex flex-col items-center justify-center gap-0.5 py-1 px-3 rounded-xl transition-all ${
+              className={`flex flex-col items-center justify-center gap-0.5 py-1 px-2.5 rounded-xl transition-all ${
                 active
                   ? "text-blue-500 dark:text-blue-400 font-extrabold"
                   : "text-muted-foreground hover:text-foreground font-medium"
@@ -4656,10 +5316,10 @@ export default function DashboardPage() {
         })}
         <button
           onClick={() => setMobileSidebarOpen(true)}
-          className="flex flex-col items-center justify-center gap-0.5 py-1 px-3 rounded-xl text-muted-foreground hover:text-foreground font-medium transition-all"
+          className="flex flex-col items-center justify-center gap-0.5 py-1 px-2.5 rounded-xl text-muted-foreground hover:text-foreground font-medium transition-all"
         >
-          <History className="w-5 h-5" />
-          <span className="text-[10px] tracking-tight">History</span>
+          <Menu className="w-5 h-5" />
+          <span className="text-[10px] tracking-tight">More</span>
         </button>
       </nav>
 
@@ -4689,7 +5349,9 @@ export default function DashboardPage() {
                 { id: "console", label: "Practice Console", icon: <Mic className="w-4 h-4 shrink-0" /> },
                 { id: "tracks", label: "Interview Tracks", icon: <Layers className="w-4 h-4 shrink-0" />, onSelect: () => { setModuleType("interview_preparation"); fetchTrackStats(); } },
                 { id: "library", label: "Knowledge Library", icon: <BookOpen className="w-4 h-4 shrink-0" /> },
-                { id: "coach", label: "AI Coach", icon: <Bot className="w-4 h-4 shrink-0" /> }
+                { id: "coach", label: "AI Coach", icon: <Bot className="w-4 h-4 shrink-0" /> },
+                { id: "history", label: "Practice History", icon: <Clock className="w-4 h-4 shrink-0" /> },
+                { id: "evaluation", label: "Speech Evaluation", icon: <Award className="w-4 h-4 shrink-0" /> }
               ].map(tab => {
                 const active = !uploadSuccess && activeTab === tab.id;
                 return (
@@ -4743,6 +5405,7 @@ export default function DashboardPage() {
                               }
                               setPolledSpeechId(item.id);
                               fetchCompletedSessionDetails(item.id);
+                              setActiveTab("evaluation");
                               setMobileSidebarOpen(false);
                             }}
                             className={`w-full text-left px-2.5 py-2 rounded-md transition-all flex flex-col gap-1 ${
