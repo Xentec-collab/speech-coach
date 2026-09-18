@@ -3412,225 +3412,194 @@ export default function DashboardPage() {
             </div>
 
             {/* ── Tabbed Evaluation Card: Feedback | Vocab | Metrics (Pink & White Theme) ── */}
-            <div className="rounded-3xl bg-white/95 backdrop-blur-md p-5 sm:p-6 border border-[#EAE4D9] shadow-sm space-y-4">
-              {/* Tab Selector */}
-              <div className="flex p-1 rounded-2xl bg-[#F6F2EC] border border-[#EAE4D9] text-xs">
-                {(["feedback", "vocab", "metrics"] as const).map((tab) => {
-                  const active = consoleEvalTab === tab;
-                  const label = tab === "feedback" ? "Feedback" : tab === "vocab" ? "Vocab" : "Metrics";
-                  return (
-                    <button
-                      key={tab}
-                      type="button"
-                      onClick={() => setConsoleEvalTab(tab)}
-                      className={`flex-1 py-1.5 rounded-xl font-bold text-center transition-all cursor-pointer ${
-                        active
-                          ? "bg-[#FA5276] text-white shadow-sm"
-                          : "text-zinc-600 hover:text-zinc-900"
-                      }`}
-                    >
-                      {label}
-                    </button>
-                  );
-                })}
+            {/* Only shown when a speech session has been submitted/evaluated or is processing */}
+            {isProcessing ? (
+              <div className="rounded-3xl bg-white/95 backdrop-blur-md p-6 border border-[#EAE4D9] shadow-sm space-y-4 animate-bloom">
+                <div className="flex items-center gap-2 text-xs font-bold text-[#FA5276]">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#FA5276] animate-ping" />
+                  <span>Evaluating Speech...</span>
+                </div>
+                <p className="text-xs text-zinc-600 leading-relaxed">
+                  Our AI coach is transcribing your speech and computing delivery, pacing, and vocabulary metrics.
+                </p>
+                <div className="space-y-2 pt-2">
+                  <div className="h-2 w-full bg-zinc-100 rounded-full overflow-hidden">
+                    <div className="h-full bg-[#FA5276] rounded-full animate-pulse w-3/4" />
+                  </div>
+                </div>
               </div>
-
-              {/* Tab 1: Coach Feedback */}
-              {consoleEvalTab === "feedback" && (
-                <div className="space-y-3.5 animate-bloom">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-zinc-400">
-                      COACH FEEDBACK
-                    </span>
-                    <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-extrabold">
-                      <span>{polledSpeechDetails?.overall_score ?? 82}</span>
-                      <span className="text-[10px] text-emerald-500">/100</span>
-                    </div>
-                  </div>
-
-                  {/* Strengths Card */}
-                  <div className="p-3.5 rounded-2xl bg-blue-50/50 border border-blue-100/90 border-l-4 border-l-blue-500 space-y-2">
-                    <div className="flex items-center gap-2 text-blue-900 font-bold text-xs">
-                      <Info className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                      <span>Strengths:</span>
-                    </div>
-                    <ul className="space-y-1.5 text-[11px] text-zinc-700 leading-relaxed pl-1">
-                      {coachFeedback.filter(f => f.type === "positive").length > 0 ? (
-                        coachFeedback.filter(f => f.type === "positive").map((item, idx) => (
-                          <li key={idx} className="flex items-start gap-1.5">
-                            <span className="text-blue-500 font-bold mt-0.5">✦</span>
-                            <span>{item.body || item.title}</span>
-                          </li>
-                        ))
-                      ) : (
-                        <>
-                          <li className="flex items-start gap-1.5">
-                            <span className="text-blue-500 font-bold mt-0.5">✦</span>
-                            <span>You effectively addressed both the beneficial and detrimental aspects of the topic, acknowledging its complexity.</span>
-                          </li>
-                          <li className="flex items-start gap-1.5">
-                            <span className="text-blue-500 font-bold mt-0.5">✦</span>
-                            <span>You attempted to offer solutions for mitigating the negative impacts, demonstrating a proactive approach to the topic.</span>
-                          </li>
-                        </>
-                      )}
-                    </ul>
-                  </div>
-
-                  {/* Areas to Improve Card */}
-                  <div className="p-3.5 rounded-2xl bg-rose-50/40 border border-rose-100/90 border-l-4 border-l-[#FA5276] space-y-2">
-                    <div className="flex items-center gap-2 text-[#FA5276] font-bold text-xs">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-[#FA5276] shrink-0" />
-                      <span>Areas to Improve:</span>
-                    </div>
-                    <ul className="space-y-2 text-[11px] text-zinc-700 leading-relaxed pl-1">
-                      {coachFeedback.filter(f => f.type !== "positive").length > 0 ? (
-                        coachFeedback.filter(f => f.type !== "positive").map((item, idx) => (
-                          <li key={idx} className="flex items-start gap-1.5">
-                            <span className="text-[#FA5276] font-bold mt-0.5">✦</span>
-                            <div>
-                              <strong className="text-zinc-900">{item.title}: </strong>
-                              <span>{item.body}</span>
-                            </div>
-                          </li>
-                        ))
-                      ) : (
-                        <>
-                          <li className="flex items-start gap-1.5">
-                            <span className="text-[#FA5276] font-bold mt-0.5">✦</span>
-                            <div>
-                              <strong className="text-zinc-900">Fluency and Pacing:</strong> Your speech was frequently interrupted by pauses and repetitions, making it sound disjointed. Focus on speaking in smoother, more connected phrases.
-                            </div>
-                          </li>
-                          <li className="flex items-start gap-1.5">
-                            <span className="text-[#FA5276] font-bold mt-0.5">✦</span>
-                            <div>
-                              <strong className="text-zinc-900">Grammatical Accuracy:</strong> Several sentences were grammatically incorrect or very awkwardly phrased. Review your sentence structures for clarity and correctness.
-                            </div>
-                          </li>
-                          <li className="flex items-start gap-1.5">
-                            <span className="text-[#FA5276] font-bold mt-0.5">✦</span>
-                            <div>
-                              <strong className="text-zinc-900">Argument Cohesion:</strong> While you touched on various points, the argument lacked a clear, strong thesis and logical progression. Work on structuring your points to build a more persuasive case.
-                            </div>
-                          </li>
-                        </>
-                      )}
-                    </ul>
-                  </div>
+            ) : speech ? (
+              <div className="rounded-3xl bg-white/95 backdrop-blur-md p-5 sm:p-6 border border-[#EAE4D9] shadow-sm space-y-4 animate-bloom">
+                {/* Tab Selector */}
+                <div className="flex p-1 rounded-2xl bg-[#F6F2EC] border border-[#EAE4D9] text-xs">
+                  {(["feedback", "vocab", "metrics"] as const).map((tab) => {
+                    const active = consoleEvalTab === tab;
+                    const label = tab === "feedback" ? "Feedback" : tab === "vocab" ? "Vocab" : "Metrics";
+                    return (
+                      <button
+                        key={tab}
+                        type="button"
+                        onClick={() => setConsoleEvalTab(tab)}
+                        className={`flex-1 py-1.5 rounded-xl font-bold text-center transition-all cursor-pointer ${
+                          active
+                            ? "bg-[#FA5276] text-white shadow-sm"
+                            : "text-zinc-600 hover:text-zinc-900"
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
                 </div>
-              )}
 
-              {/* Tab 2: Vocab Upgrades */}
-              {consoleEvalTab === "vocab" && (
-                <div className="space-y-3 animate-bloom">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-zinc-400">
-                      VOCABULARY UPGRADES
-                    </span>
-                    <span className="text-[10px] font-bold text-[#FA5276]">Elevate Word Choice</span>
+                {/* Tab 1: Coach Feedback */}
+                {consoleEvalTab === "feedback" && (
+                  <div className="space-y-3.5 animate-bloom">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-zinc-400">
+                        COACH FEEDBACK
+                      </span>
+                      {speech.overall_score !== null && (
+                        <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-extrabold">
+                          <span>{speech.overall_score}</span>
+                          <span className="text-[10px] text-emerald-500">/100</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Strengths Card */}
+                    <div className="p-3.5 rounded-2xl bg-blue-50/50 border border-blue-100/90 border-l-4 border-l-blue-500 space-y-2">
+                      <div className="flex items-center gap-2 text-blue-900 font-bold text-xs">
+                        <Info className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                        <span>Strengths:</span>
+                      </div>
+                      <ul className="space-y-1.5 text-[11px] text-zinc-700 leading-relaxed pl-1">
+                        {coachFeedback.filter(f => f.type === "positive").length > 0 ? (
+                          coachFeedback.filter(f => f.type === "positive").map((item, idx) => (
+                            <li key={idx} className="flex items-start gap-1.5">
+                              <span className="text-blue-500 font-bold mt-0.5">✦</span>
+                              <span>{item.body || item.title}</span>
+                            </li>
+                          ))
+                        ) : (
+                          <li className="text-zinc-500 italic text-[11px]">Good speech completion and steady vocal energy.</li>
+                        )}
+                      </ul>
+                    </div>
+
+                    {/* Areas to Improve Card */}
+                    <div className="p-3.5 rounded-2xl bg-rose-50/40 border border-rose-100/90 border-l-4 border-l-[#FA5276] space-y-2">
+                      <div className="flex items-center gap-2 text-[#FA5276] font-bold text-xs">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-[#FA5276] shrink-0" />
+                        <span>Areas to Improve:</span>
+                      </div>
+                      <ul className="space-y-2 text-[11px] text-zinc-700 leading-relaxed pl-1">
+                        {coachFeedback.filter(f => f.type !== "positive").length > 0 ? (
+                          coachFeedback.filter(f => f.type !== "positive").map((item, idx) => (
+                            <li key={idx} className="flex items-start gap-1.5">
+                              <span className="text-[#FA5276] font-bold mt-0.5">✦</span>
+                              <div>
+                                <strong className="text-zinc-900">{item.title}: </strong>
+                                <span>{item.body}</span>
+                              </div>
+                            </li>
+                          ))
+                        ) : (
+                          <li className="text-zinc-500 italic text-[11px]">Focus on structuring your ideas into a clear beginning, middle, and conclusion.</li>
+                        )}
+                      </ul>
+                    </div>
                   </div>
+                )}
 
-                  {lexiconSuggestions.length > 0 ? (
-                    lexiconSuggestions.slice(0, 3).map((rawItem: any, i: number) => {
-                      const norm = typeof rawItem === "string" ? {
-                        original_word: "Word Choice",
-                        suggested_replacement: rawItem,
-                        explanation: `Try incorporating "${rawItem}" to enhance impact.`
-                      } : {
-                        original_word: rawItem?.original_word || rawItem?.word || "Word Choice",
-                        suggested_replacement: rawItem?.suggested_replacement || rawItem?.suggestion || "Suggested Word",
-                        explanation: rawItem?.explanation || `Consider using "${rawItem?.suggested_replacement || "a stronger term"}" for clarity.`
-                      };
-                      return (
-                        <div key={i} className="p-3 rounded-2xl bg-[#FAF7F2] border border-[#EAE4D9] space-y-1.5">
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs line-through text-rose-500 font-mono font-bold">{norm.original_word}</span>
-                            <span className="text-zinc-400 text-xs">→</span>
-                            <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-lg bg-[#FA5276]/10 text-[#FA5276] border border-[#FA5276]/20">{norm.suggested_replacement}</span>
+                {/* Tab 2: Vocab Upgrades */}
+                {consoleEvalTab === "vocab" && (
+                  <div className="space-y-3 animate-bloom">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-zinc-400">
+                        VOCABULARY UPGRADES
+                      </span>
+                      <span className="text-[10px] font-bold text-[#FA5276]">Elevate Word Choice</span>
+                    </div>
+
+                    {lexiconSuggestions.length > 0 ? (
+                      lexiconSuggestions.slice(0, 4).map((rawItem: any, i: number) => {
+                        const norm = typeof rawItem === "string" ? {
+                          original_word: "Word Choice",
+                          suggested_replacement: rawItem,
+                          explanation: `Try incorporating "${rawItem}" to enhance impact.`
+                        } : {
+                          original_word: rawItem?.original_word || rawItem?.word || "Word Choice",
+                          suggested_replacement: rawItem?.suggested_replacement || rawItem?.suggestion || "Suggested Word",
+                          explanation: rawItem?.explanation || `Consider using "${rawItem?.suggested_replacement || "a stronger term"}" for clarity.`
+                        };
+                        return (
+                          <div key={i} className="p-3 rounded-2xl bg-[#FAF7F2] border border-[#EAE4D9] space-y-1.5">
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs line-through text-rose-500 font-mono font-bold">{norm.original_word}</span>
+                              <span className="text-zinc-400 text-xs">→</span>
+                              <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-lg bg-[#FA5276]/10 text-[#FA5276] border border-[#FA5276]/20">{norm.suggested_replacement}</span>
+                            </div>
+                            <p className="text-[11px] text-zinc-600 leading-relaxed">{norm.explanation}</p>
                           </div>
-                          <p className="text-[11px] text-zinc-600 leading-relaxed">{norm.explanation}</p>
-                        </div>
-                      );
-                    })
-                  ) : (
-                    <>
-                      <div className="p-3 rounded-2xl bg-[#FAF7F2] border border-[#EAE4D9] space-y-1.5">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs line-through text-rose-500 font-mono font-bold">good</span>
-                          <span className="text-zinc-400 text-xs">→</span>
-                          <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-lg bg-[#FA5276]/10 text-[#FA5276] border border-[#FA5276]/20">compelling</span>
-                        </div>
-                        <p className="text-[11px] text-zinc-600 leading-relaxed">Conveys authority, intentionality, and stronger argumentative force.</p>
-                      </div>
-                      <div className="p-3 rounded-2xl bg-[#FAF7F2] border border-[#EAE4D9] space-y-1.5">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs line-through text-rose-500 font-mono font-bold">stuff</span>
-                          <span className="text-zinc-400 text-xs">→</span>
-                          <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-lg bg-[#FA5276]/10 text-[#FA5276] border border-[#FA5276]/20">core elements</span>
-                        </div>
-                        <p className="text-[11px] text-zinc-600 leading-relaxed">Replaces ambiguous conversational filler with professional, precise terminology.</p>
-                      </div>
-                      <div className="p-3 rounded-2xl bg-[#FAF7F2] border border-[#EAE4D9] space-y-1.5">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs line-through text-rose-500 font-mono font-bold">a lot</span>
-                          <span className="text-zinc-400 text-xs">→</span>
-                          <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-lg bg-[#FA5276]/10 text-[#FA5276] border border-[#FA5276]/20">substantially</span>
-                        </div>
-                        <p className="text-[11px] text-zinc-600 leading-relaxed">Adds intellectual weight and quantitative clarity to your observations.</p>
-                      </div>
-                    </>
-                  )}
-                </div>
-              )}
+                        );
+                      })
+                    ) : (
+                      <p className="text-xs text-zinc-500 italic py-4 text-center">No vocabulary upgrade items generated for this speech.</p>
+                    )}
+                  </div>
+                )}
 
-              {/* Tab 3: Metrics */}
-              {consoleEvalTab === "metrics" && (
-                <div className="space-y-3 animate-bloom">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-zinc-400">
-                      CORE SKILLS
-                    </span>
-                    <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-extrabold">
-                      <span>{polledSpeechDetails?.overall_score ?? 82}</span>
-                      <span className="text-[10px] text-emerald-500">/100</span>
+                {/* Tab 3: Metrics */}
+                {consoleEvalTab === "metrics" && (
+                  <div className="space-y-3 animate-bloom">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-zinc-400">
+                        CORE SKILLS
+                      </span>
+                      {speech.overall_score !== null && (
+                        <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-extrabold">
+                          <span>{speech.overall_score}</span>
+                          <span className="text-[10px] text-emerald-500">/100</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-2.5">
+                      {[
+                        { label: "Clarity & Enunciation", score: speech.pronunciation_score ?? 0, color: "bg-blue-500" },
+                        { label: "Pacing & Pauses", score: speech.fluency_score ?? 0, color: "bg-amber-500" },
+                        { label: "Grammar & Accuracy", score: speech.grammar_score ?? 0, color: "bg-emerald-500" },
+                        { label: "Content & Structure", score: speech.content_score ?? 0, color: "bg-[#FA5276]" },
+                        { label: "Vocabulary & Lexicon", score: speech.lexicon_score ?? 0, color: "bg-purple-500" },
+                      ].map((item, i) => (
+                        <div key={i} className="space-y-1">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="font-semibold text-zinc-700 text-[11px]">{item.label}</span>
+                            <span className="font-bold text-zinc-900 tabular-nums text-[11px]">{item.score}/100</span>
+                          </div>
+                          <div className="h-2 w-full rounded-full bg-zinc-100 overflow-hidden">
+                            <div
+                              className={`h-full rounded-full transition-all duration-700 ${item.color}`}
+                              style={{ width: `${item.score}%` }}
+                            />
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
+                )}
 
-                  <div className="space-y-2.5">
-                    {[
-                      { label: "Clarity & Enunciation", score: polledSpeechDetails?.pronunciation_score ?? 84, color: "bg-blue-500" },
-                      { label: "Pacing & Pauses", score: polledSpeechDetails?.fluency_score ?? 76, color: "bg-amber-500" },
-                      { label: "Grammar & Accuracy", score: polledSpeechDetails?.grammar_score ?? 88, color: "bg-emerald-500" },
-                      { label: "Content & Structure", score: polledSpeechDetails?.content_score ?? 82, color: "bg-[#FA5276]" },
-                      { label: "Vocabulary & Lexicon", score: polledSpeechDetails?.lexicon_score ?? 80, color: "bg-purple-500" },
-                    ].map((item, i) => (
-                      <div key={i} className="space-y-1">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="font-semibold text-zinc-700 text-[11px]">{item.label}</span>
-                          <span className="font-bold text-zinc-900 tabular-nums text-[11px]">{item.score}/100</span>
-                        </div>
-                        <div className="h-2 w-full rounded-full bg-zinc-100 overflow-hidden">
-                          <div
-                            className={`h-full rounded-full transition-all duration-700 ${item.color}`}
-                            style={{ width: `${item.score}%` }}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* View Full Evaluation Button */}
-              <Button
-                variant="ghost"
-                onClick={() => setActiveTab("evaluation")}
-                className="w-full text-xs font-bold text-[#FA5276] hover:text-[#e64064] hover:bg-[#FA5276]/5 rounded-xl h-9 flex items-center justify-center gap-1 cursor-pointer pt-2"
-              >
-                View Detailed Feedback in Evaluation Tab →
-              </Button>
-            </div>
+                {/* View Full Evaluation Button */}
+                <Button
+                  variant="ghost"
+                  onClick={() => setActiveTab("evaluation")}
+                  className="w-full text-xs font-bold text-[#FA5276] hover:text-[#e64064] hover:bg-[#FA5276]/5 rounded-xl h-9 flex items-center justify-center gap-1 cursor-pointer pt-2"
+                >
+                  View Detailed Feedback in Evaluation Tab →
+                </Button>
+              </div>
+            ) : null}
           </div>
         </div>
       </div>
