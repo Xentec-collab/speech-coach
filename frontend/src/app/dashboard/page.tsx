@@ -17,7 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
-import { Sun, Moon, BarChart2, Menu, X, History, Mic, Layers, BookOpen, Bot, Search, ChevronRight, LogOut, Printer, Clock, Sparkles, Award, Play, Square, Pause, Volume2, Heart, Megaphone } from "lucide-react";
+import { Sun, Moon, BarChart2, Menu, X, History, Mic, Layers, BookOpen, Bot, Search, ChevronRight, LogOut, Printer, Clock, Sparkles, Award, Play, Square, Pause, Volume2, Heart, Megaphone, Info, CheckCircle2, Sliders } from "lucide-react";
 import {
   SidebarHistorySkeleton,
   PracticeConsoleSkeleton,
@@ -613,6 +613,8 @@ export default function DashboardPage() {
   const [activeSession, setActiveSession] = useState<any | null>(null);
   const [expandedReplayRound, setExpandedReplayRound] = useState<number | null>(1);
   const [rightTab, setRightTab] = useState<"feedback" | "vocab" | "progress">("feedback");
+  const [consoleEvalTab, setConsoleEvalTab] = useState<"feedback" | "vocab" | "metrics">("feedback");
+  const [showMachineSettings, setShowMachineSettings] = useState(false);
   const [metricsView, setMetricsView] = useState<"bar" | "radar">("bar");
   const { theme, setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -841,12 +843,12 @@ export default function DashboardPage() {
       rec.ondataavailable=e=>{if(e.data&&e.data.size>0)audioChunksRef.current.push(e.data);};
       rec.onstop=()=>{const b=new Blob(audioChunksRef.current,{type:mime});setAudioBlob(b);setAudioUrl(URL.createObjectURL(b));};
       rec.start(250); setRecordingState("recording");
-      timerRef.current=setInterval(()=>setRecordSeconds(p=>{if(p>=300){stopStream(rec,stream);return 300;}return p+1;}),1000);
+      timerRef.current=setInterval(()=>setRecordSeconds(p=>{if(p>=600){stopStream(rec,stream);return 600;}return p+1;}),1000);
     } catch { setUploadError("Could not access microphone — please check your browser permissions."); }
   };
 
   const pauseRecording=()=>{if(mediaRecorderRef.current?.state==="recording"){mediaRecorderRef.current.pause();setRecordingState("paused");if(timerRef.current){clearInterval(timerRef.current);timerRef.current=null;}}};
-  const resumeRecording=()=>{if(mediaRecorderRef.current?.state==="paused"){mediaRecorderRef.current.resume();setRecordingState("recording");timerRef.current=setInterval(()=>setRecordSeconds(p=>{if(p>=300){stopStream();return 300;}return p+1;}),1000);}};
+  const resumeRecording=()=>{if(mediaRecorderRef.current?.state==="paused"){mediaRecorderRef.current.resume();setRecordingState("recording");timerRef.current=setInterval(()=>setRecordSeconds(p=>{if(p>=600){stopStream();return 600;}return p+1;}),1000);}};
   const discardRecording=()=>{cancelCountdown();stopStream();setAudioBlob(null);if(audioUrl){URL.revokeObjectURL(audioUrl);setAudioUrl(null);}setRecordSeconds(0);setRecordingState("idle");setUploadError(null);setUploadSuccess(false);};
   const discardSpeechAndReset=()=>{if(pollingRef.current){clearInterval(pollingRef.current);pollingRef.current=null;}setPolledSpeechId(null);setPolledSpeechDetails(null);discardRecording();};
 
@@ -2954,7 +2956,7 @@ export default function DashboardPage() {
   // ── 3D Retro "Pop Your Topic" Machine & Dispensed Receipt ──────────────
   const renderRetroPrinter = (isDrawer: boolean = false) => {
     return (
-      <div className="flex flex-col items-center w-full max-w-[380px] mx-auto select-none relative">
+      <div className="flex flex-col items-center w-full max-w-[390px] sm:max-w-[420px] mx-auto select-none relative">
         {/* Label above machine */}
         <div className="text-center mb-2 flex flex-col items-center">
           <div className="flex items-center gap-1 text-xs font-semibold text-[#FA5276]">
@@ -2969,12 +2971,25 @@ export default function DashboardPage() {
         </div>
 
         {/* 3D Machine Housing (Claymorphic / Matte Plastic) */}
-        <div className="relative w-full min-h-[440px] sm:min-h-[460px] bg-[#EBE7DF] rounded-[42px] border-2 border-[#DDD6CB] p-6 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.16),0_10px_20px_-5px_rgba(0,0,0,0.08),inset_0_2px_4px_rgba(255,255,255,0.9),inset_0_-4px_8px_rgba(0,0,0,0.06)] flex flex-col items-center justify-between overflow-visible">
+        <div className="relative w-full min-h-[460px] bg-[#EBE7DF] rounded-[42px] border-2 border-[#DDD6CB] p-5 sm:p-6 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.16),0_10px_20px_-5px_rgba(0,0,0,0.08),inset_0_2px_4px_rgba(255,255,255,0.9),inset_0_-4px_8px_rgba(0,0,0,0.06)] flex flex-col items-center justify-between overflow-visible">
           {/* Machine Header */}
-          <div className="pt-1 pb-3 text-center">
+          <div className="pt-1 pb-2.5 text-center flex items-center justify-between w-full px-1">
+            <div className="w-6" />
             <span className="text-[11px] font-bold tracking-[0.26em] text-[#FA5276] uppercase">
               • POP YOUR TOPIC •
             </span>
+            {activeTopic ? (
+              <button
+                type="button"
+                onClick={() => setShowMachineSettings(prev => !prev)}
+                title="Topic Settings"
+                className={`p-1.5 rounded-lg border transition-all cursor-pointer ${showMachineSettings ? "bg-[#FA5276]/15 border-[#FA5276] text-[#FA5276]" : "bg-white/40 border-[#DDD6CB] text-zinc-500 hover:text-zinc-800"}`}
+              >
+                <Sliders className="w-3.5 h-3.5" />
+              </button>
+            ) : (
+              <div className="w-6" />
+            )}
           </div>
 
           {/* Paper Feed Slot */}
@@ -2982,94 +2997,203 @@ export default function DashboardPage() {
             <div className="h-1.5 w-[92%] bg-black rounded-full" />
           </div>
 
-          {/* Paper: Idle Lip vs Dispensed Active Paper */}
-          {!activeTopic ? (
-            /* Idle serrated paper lip peeking out */
-            <div className="w-[82%] -mt-1 bg-white shadow-sm relative z-0 flex flex-col items-center">
-              <div className="h-3.5 bg-white w-full" />
-              <svg className="w-full h-2 text-white fill-current shrink-0 -mb-px" viewBox="0 0 200 8" preserveAspectRatio="none">
-                <path d="M0,0 L5,8 L10,0 L15,8 L20,0 L25,8 L30,0 L35,8 L40,0 L45,8 L50,0 L55,8 L60,0 L65,8 L70,0 L75,8 L80,0 L85,8 L90,0 L95,8 L100,0 L105,8 L110,0 L115,8 L120,0 L125,8 L130,0 L135,8 L140,0 L145,8 L150,0 L155,8 L160,0 L165,8 L170,0 L175,8 L180,0 L185,8 L190,0 L195,8 L200,0 Z" />
-              </svg>
+          {/* Paper / Controls: Idle Lip & Form vs Dispensed Receipt */}
+          {!activeTopic || showMachineSettings ? (
+            <div className="w-full flex flex-col items-center">
+              {/* Idle paper lip peeking out */}
+              <div className="w-[82%] -mt-1 bg-white shadow-xs relative z-0 flex flex-col items-center">
+                <div className="h-3 bg-white w-full" />
+                <svg className="w-full h-2 text-white fill-current shrink-0 -mb-px" viewBox="0 0 200 8" preserveAspectRatio="none">
+                  <path d="M0,0 L5,8 L10,0 L15,8 L20,0 L25,8 L30,0 L35,8 L40,0 L45,8 L50,0 L55,8 L60,0 L65,8 L70,0 L75,8 L80,0 L85,8 L90,0 L95,8 L100,0 L105,8 L110,0 L115,8 L120,0 L125,8 L130,0 L135,8 L140,0 L145,8 L150,0 L155,8 L160,0 L165,8 L170,0 L175,8 L180,0 L185,8 L190,0 L195,8 L200,0 Z" />
+                </svg>
+              </div>
+
+              {/* Machine Face Controls (Placed right onto the machine casing) */}
+              <form onSubmit={handleGenerateTopic} className="w-full mt-3 space-y-2.5 px-1">
+                {/* Module */}
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-bold text-[#7D766A] uppercase tracking-wider">Module</label>
+                  <Select value={moduleType} onValueChange={v => v && setModuleType(v as any)}>
+                    <SelectTrigger className="h-9 text-xs rounded-xl bg-[#F7F4EE] border-[#D5CDC0] text-zinc-900 shadow-[inset_0_1px_2px_rgba(0,0,0,0.06)] focus:ring-1 focus:ring-[#FA5276]">
+                      <SelectValue>{moduleType === "public_speaking" ? "Public Speaking" : "Interview Preparation"}</SelectValue>
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border-zinc-200">
+                      <SelectItem value="public_speaking">Public Speaking</SelectItem>
+                      <SelectItem value="interview_preparation">Interview Preparation</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Category / Track & Difficulty */}
+                <div className="grid grid-cols-2 gap-2">
+                  {moduleType === "public_speaking" ? (
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] font-bold text-[#7D766A] uppercase tracking-wider">Category</label>
+                      <Select value={category} onValueChange={v => v && setCategory(v)}>
+                        <SelectTrigger className="h-9 text-xs rounded-xl bg-[#F7F4EE] border-[#D5CDC0] text-zinc-900 shadow-[inset_0_1px_2px_rgba(0,0,0,0.06)] focus:ring-1 focus:ring-[#FA5276]">
+                          <SelectValue>
+                            {category === "impromptu" ? "Impromptu" : category === "interview" ? "Interview" : category === "persuasive" ? "Persuasive" : category === "warmup" ? "Warmup" : category === "debate" ? "Debate" : category}
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent className="bg-white border-zinc-200">
+                          <SelectItem value="impromptu">Impromptu</SelectItem>
+                          <SelectItem value="interview">Interview</SelectItem>
+                          <SelectItem value="persuasive">Persuasive</SelectItem>
+                          <SelectItem value="warmup">Warmup</SelectItem>
+                          <SelectItem value="debate">Debate</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] font-bold text-[#7D766A] uppercase tracking-wider">Track</label>
+                      <Select value={interviewType} onValueChange={v => v && setInterviewType(v)}>
+                        <SelectTrigger className="h-9 text-xs rounded-xl bg-[#F7F4EE] border-[#D5CDC0] text-zinc-900 shadow-[inset_0_1px_2px_rgba(0,0,0,0.06)] focus:ring-1 focus:ring-[#FA5276]">
+                          <SelectValue>{INTERVIEW_TYPES.find(t => t.value === interviewType)?.label || interviewType}</SelectValue>
+                        </SelectTrigger>
+                        <SelectContent className="bg-white border-zinc-200">
+                          {INTERVIEW_TYPES.map(t => (
+                            <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] font-bold text-[#7D766A] uppercase tracking-wider">Difficulty</label>
+                    <Select value={difficulty} onValueChange={v => v && setDifficulty(v)}>
+                      <SelectTrigger className="h-9 text-xs rounded-xl bg-[#F7F4EE] border-[#D5CDC0] text-zinc-900 shadow-[inset_0_1px_2px_rgba(0,0,0,0.06)] focus:ring-1 focus:ring-[#FA5276]">
+                        <SelectValue>{difficulty === "easy" ? "Easy" : difficulty === "medium" ? "Medium" : difficulty === "hard" ? "Hard" : difficulty}</SelectValue>
+                      </SelectTrigger>
+                      <SelectContent className="bg-white border-zinc-200">
+                        <SelectItem value="easy">Easy</SelectItem>
+                        <SelectItem value="medium">Medium</SelectItem>
+                        <SelectItem value="hard">Hard</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {/* Custom Topic Input */}
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-bold text-[#7D766A] uppercase tracking-wider">Custom Topic (Optional)</label>
+                  <Input
+                    value={customTopic}
+                    onChange={e => setCustomTopic(e.target.value)}
+                    placeholder="e.g. why remote work is the future..."
+                    className="text-xs h-9 rounded-xl bg-[#F7F4EE] border-[#D5CDC0] text-zinc-900 placeholder:text-zinc-400 shadow-[inset_0_1px_2px_rgba(0,0,0,0.06)] focus:ring-1 focus:ring-[#FA5276]"
+                  />
+                </div>
+
+                {/* Big Pink Pop Button on Machine */}
+                <button
+                  type="submit"
+                  disabled={topicLoading}
+                  className="w-full bg-[#FA5276] hover:bg-[#e64064] text-white font-bold rounded-2xl h-11 shadow-[0_6px_18px_rgba(250,82,118,0.35)] active:scale-95 transition-all flex items-center justify-center gap-2 text-xs sm:text-sm cursor-pointer disabled:opacity-50 mt-2"
+                >
+                  {topicLoading ? (
+                    <>
+                      <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                      <span>Dispensing Topic...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>✦</span>
+                      <span>POP YOUR TOPIC</span>
+                      <span>✦</span>
+                    </>
+                  )}
+                </button>
+              </form>
             </div>
           ) : (
             /* Dispensed Topic Receipt Paper */
-            <div className="w-[84%] sm:w-[86%] -mt-1 bg-white shadow-[0_16px_36px_rgba(0,0,0,0.14),0_2px_6px_rgba(0,0,0,0.06)] relative z-0 anim-receipt-feed flex flex-col rounded-t-xs">
-              <div className="p-4 sm:p-5 flex flex-col items-center text-center">
-                <div className="flex items-center gap-1.5 text-[#FA5276] text-[10px] font-bold tracking-wider uppercase mb-2">
-                  <span>✦</span>
-                  <span>YOUR TOPIC IS READY!</span>
-                  <span>✦</span>
+            <div className="w-full flex flex-col items-center">
+              <div className="w-[84%] sm:w-[88%] -mt-1 bg-white shadow-[0_16px_36px_rgba(0,0,0,0.14),0_2px_6px_rgba(0,0,0,0.06)] relative z-0 anim-receipt-feed flex flex-col rounded-t-xs">
+                <div className="p-4 sm:p-5 flex flex-col items-center text-center">
+                  <div className="flex items-center gap-1.5 text-[#FA5276] text-[10px] font-bold tracking-wider uppercase mb-2">
+                    <span>✦</span>
+                    <span>YOUR TOPIC IS READY!</span>
+                    <span>✦</span>
+                  </div>
+
+                  <h3 className="text-base sm:text-lg font-bold text-zinc-900 leading-snug my-2 select-text">
+                    {activeTopic.title}
+                  </h3>
+                  {activeTopic.prompt && activeTopic.prompt !== activeTopic.title && (
+                    <p className="text-xs text-zinc-600 leading-relaxed mt-1 select-text">
+                      {activeTopic.prompt}
+                    </p>
+                  )}
+
+                  <div className="w-full border-t border-dashed border-zinc-200 my-3" />
+
+                  <div className="w-full flex items-center justify-between text-zinc-700 px-1">
+                    <div className="flex items-center gap-1.5 text-[11px] font-semibold">
+                      <Clock className="w-3.5 h-3.5 text-zinc-500" />
+                      <span>Min 10s · Max 10 mins</span>
+                    </div>
+                    <div className="p-1.5 rounded-full bg-[#FA5276]/10 text-[#FA5276]">
+                      <Megaphone className="w-4 h-4" />
+                    </div>
+                  </div>
                 </div>
 
-                <h3 className="text-base sm:text-lg font-bold text-zinc-900 leading-snug my-2 select-text">
-                  {activeTopic.title}
-                </h3>
-                {activeTopic.prompt && activeTopic.prompt !== activeTopic.title && (
-                  <p className="text-xs text-zinc-600 leading-relaxed mt-1 select-text">
-                    {activeTopic.prompt}
-                  </p>
-                )}
-
-                <div className="w-full border-t border-dashed border-zinc-200 my-3" />
-
-                <div className="w-full flex items-center justify-between text-zinc-700 px-1">
-                  <div className="flex items-center gap-1.5 text-[11px] font-semibold">
-                    <Clock className="w-3.5 h-3.5 text-zinc-500" />
-                    <span>90 seconds to speak</span>
-                  </div>
-                  <div className="p-1.5 rounded-full bg-[#FA5276]/10 text-[#FA5276]">
-                    <Megaphone className="w-4 h-4" />
-                  </div>
-                </div>
+                {/* Serrated tear edge */}
+                <svg className="w-full h-3 text-white fill-current shrink-0 -mb-px" viewBox="0 0 200 12" preserveAspectRatio="none">
+                  <path d="M0,0 L5,12 L10,0 L15,12 L20,0 L25,12 L30,0 L35,12 L40,0 L45,12 L50,0 L55,12 L60,0 L65,12 L70,0 L75,12 L80,0 L85,12 L90,0 L95,12 L100,0 L105,12 L110,0 L115,12 L120,0 L125,12 L130,0 L135,12 L140,0 L145,12 L150,0 L155,12 L160,0 L165,12 L170,0 L175,12 L180,0 L185,12 L190,0 L195,12 L200,0 Z" />
+                </svg>
               </div>
 
-              {/* Serrated tear edge */}
-              <svg className="w-full h-3 text-white fill-current shrink-0 -mb-px" viewBox="0 0 200 12" preserveAspectRatio="none">
-                <path d="M0,0 L5,12 L10,0 L15,12 L20,0 L25,12 L30,0 L35,12 L40,0 L45,12 L50,0 L55,12 L60,0 L65,12 L70,0 L75,12 L80,0 L85,12 L90,0 L95,12 L100,0 L105,12 L110,0 L115,12 L120,0 L125,12 L130,0 L135,12 L140,0 L145,12 L150,0 L155,12 L160,0 L165,12 L170,0 L175,12 L180,0 L185,12 L190,0 L195,12 L200,0 Z" />
-              </svg>
+              {/* Quick actions below receipt */}
+              <div className="w-full pt-4 pb-1 flex items-center justify-between px-2">
+                <button
+                  type="button"
+                  onClick={handleGenerateTopic}
+                  disabled={topicLoading}
+                  className="text-xs font-bold text-[#FA5276] hover:underline flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Printer className="w-3.5 h-3.5" />
+                  <span>Dispense Another Topic</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowMachineSettings(true)}
+                  className="text-[11px] font-semibold text-zinc-500 hover:text-zinc-800 flex items-center gap-1 cursor-pointer"
+                >
+                  <Sliders className="w-3 h-3" />
+                  <span>Settings</span>
+                </button>
+              </div>
             </div>
           )}
 
-          {/* Machine Body Details (when idle or below paper) */}
-          {!activeTopic ? (
-            <div className="w-full mt-auto pt-16 pb-2 px-2 flex items-center justify-between">
-              {/* 3D mechanical button with 3 vertical grooves */}
-              <button
-                type="button"
-                onClick={handleGenerateTopic}
-                disabled={topicLoading}
-                title="Press to generate topic"
-                className="w-14 h-10 rounded-xl bg-[#DDD7CD] shadow-[0_3px_5px_rgba(0,0,0,0.12),inset_0_1px_2px_rgba(255,255,255,0.85)] border border-[#CFC7BA] flex items-center justify-center gap-1.5 hover:bg-[#D5CEC4] active:scale-95 transition-all cursor-pointer"
-              >
-                <span className="w-0.5 h-4 bg-[#9E9689] rounded-full opacity-60" />
-                <span className="w-0.5 h-4 bg-[#9E9689] rounded-full opacity-60" />
-                <span className="w-0.5 h-4 bg-[#9E9689] rounded-full opacity-60" />
-              </button>
+          {/* Machine Bottom Controls & Mechanical Hardware */}
+          <div className="w-full pt-3 pb-1 px-1 flex items-center justify-between">
+            {/* 3D mechanical button with 3 vertical grooves */}
+            <button
+              type="button"
+              onClick={handleGenerateTopic}
+              disabled={topicLoading}
+              title="Mechanical dispense switch"
+              className="w-14 h-10 rounded-xl bg-[#DDD7CD] shadow-[0_3px_5px_rgba(0,0,0,0.12),inset_0_1px_2px_rgba(255,255,255,0.85)] border border-[#CFC7BA] flex items-center justify-center gap-1.5 hover:bg-[#D5CEC4] active:scale-95 transition-all cursor-pointer"
+            >
+              <span className="w-0.5 h-4 bg-[#9E9689] rounded-full opacity-60" />
+              <span className="w-0.5 h-4 bg-[#9E9689] rounded-full opacity-60" />
+              <span className="w-0.5 h-4 bg-[#9E9689] rounded-full opacity-60" />
+            </button>
 
-              {/* Center status LED */}
-              <div className={`w-2 h-2 rounded-full ${topicLoading ? "bg-amber-400 animate-ping" : "bg-[#FA5276]/60 shadow-[0_0_6px_#FA5276]"}`} />
+            {/* Center status LED */}
+            <div className={`w-2.5 h-2.5 rounded-full transition-all ${topicLoading ? "bg-amber-400 animate-ping shadow-[0_0_8px_#f59e0b]" : activeTopic ? "bg-emerald-500 shadow-[0_0_8px_#10b981]" : "bg-[#FA5276] shadow-[0_0_8px_#FA5276]"}`} />
 
-              {/* Circular speaker grill */}
-              <div className="grid grid-cols-5 gap-1 p-1">
-                {Array.from({ length: 25 }).map((_, i) => (
-                  <span key={i} className="w-1 h-1 rounded-full bg-[#7D766A]/35" />
-                ))}
-              </div>
+            {/* Circular speaker grill */}
+            <div className="grid grid-cols-5 gap-1 p-1">
+              {Array.from({ length: 25 }).map((_, i) => (
+                <span key={i} className="w-1 h-1 rounded-full bg-[#7D766A]/35" />
+              ))}
             </div>
-          ) : (
-            <div className="w-full pt-3 pb-1 flex items-center justify-between px-2">
-              <button
-                type="button"
-                onClick={handleGenerateTopic}
-                disabled={topicLoading}
-                className="text-[10px] font-bold text-[#FA5276] hover:underline flex items-center gap-1 cursor-pointer"
-              >
-                <Printer className="w-3 h-3" />
-                <span>Dispense Another Topic</span>
-              </button>
-              <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_6px_#10b981]" />
-            </div>
-          )}
+          </div>
 
           {/* 3...2...1... Countdown Overlay floating over machine */}
           {countdown !== null && (
@@ -3099,7 +3223,7 @@ export default function DashboardPage() {
     return (
       <div className="w-full max-w-7xl mx-auto py-2 px-1 sm:px-4 animate-bloom">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
-          {/* ── LEFT COLUMN: Headline, Controls & Get Topic ── */}
+          {/* ── LEFT COLUMN: Headline & How It Works & Daily Inspiration ── */}
           <div className="lg:col-span-4 flex flex-col gap-5">
             {/* Top Navigation / Back */}
             <div className="flex items-center gap-2">
@@ -3119,116 +3243,40 @@ export default function DashboardPage() {
                 <span className="text-[#FA5276]">Real growth.</span>
               </h1>
               <p className="text-xs sm:text-sm text-zinc-600 mt-2 leading-relaxed font-normal">
-                Get a random impromptu topic, speak for 90 seconds and get AI feedback to improve.
+                Get a random impromptu topic, speak for up to 10 minutes and get AI coaching to improve.
               </p>
             </div>
 
-            {/* Topic Controls Form */}
-            <form onSubmit={handleGenerateTopic} className="bg-white/85 backdrop-blur-md rounded-3xl p-5 border border-[#EAE4D9] shadow-sm space-y-3.5">
-              {/* Module */}
-              <div className="flex flex-col gap-1">
-                <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Module</label>
-                <Select value={moduleType} onValueChange={v => v && setModuleType(v as any)}>
-                  <SelectTrigger className="h-9 text-xs rounded-xl bg-zinc-50 border-zinc-200 text-zinc-900">
-                    <SelectValue>{moduleType === "public_speaking" ? "Public Speaking" : "Interview Preparation"}</SelectValue>
-                  </SelectTrigger>
-                  <SelectContent className="bg-white border-zinc-200">
-                    <SelectItem value="public_speaking">Public Speaking</SelectItem>
-                    <SelectItem value="interview_preparation">Interview Preparation</SelectItem>
-                  </SelectContent>
-                </Select>
+            {/* How It Works Card */}
+            <div className="bg-white/85 backdrop-blur-md rounded-3xl p-5 border border-[#EAE4D9] shadow-sm space-y-3">
+              <div className="flex items-center gap-2 text-xs font-bold text-zinc-800">
+                <Sparkles className="w-4 h-4 text-[#FA5276]" />
+                <span>Practice Guidelines</span>
               </div>
-
-              {/* Category / Track & Difficulty */}
-              <div className="grid grid-cols-2 gap-2.5">
-                {moduleType === "public_speaking" ? (
-                  <div className="flex flex-col gap-1">
-                    <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Category</label>
-                    <Select value={category} onValueChange={v => v && setCategory(v)}>
-                      <SelectTrigger className="h-9 text-xs rounded-xl bg-zinc-50 border-zinc-200 text-zinc-900">
-                        <SelectValue>
-                          {category === "impromptu" ? "Impromptu" : category === "interview" ? "Interview" : category === "persuasive" ? "Persuasive" : category === "warmup" ? "Warmup" : category === "debate" ? "Debate" : category}
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent className="bg-white border-zinc-200">
-                        <SelectItem value="impromptu">Impromptu</SelectItem>
-                        <SelectItem value="interview">Interview</SelectItem>
-                        <SelectItem value="persuasive">Persuasive</SelectItem>
-                        <SelectItem value="warmup">Warmup</SelectItem>
-                        <SelectItem value="debate">Debate</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                ) : (
-                  <div className="flex flex-col gap-1">
-                    <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Track</label>
-                    <Select value={interviewType} onValueChange={v => v && setInterviewType(v)}>
-                      <SelectTrigger className="h-9 text-xs rounded-xl bg-zinc-50 border-zinc-200 text-zinc-900">
-                        <SelectValue>{INTERVIEW_TYPES.find(t => t.value === interviewType)?.label || interviewType}</SelectValue>
-                      </SelectTrigger>
-                      <SelectContent className="bg-white border-zinc-200">
-                        {INTERVIEW_TYPES.map(t => (
-                          <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Difficulty</label>
-                  <Select value={difficulty} onValueChange={v => v && setDifficulty(v)}>
-                    <SelectTrigger className="h-9 text-xs rounded-xl bg-zinc-50 border-zinc-200 text-zinc-900">
-                      <SelectValue>{difficulty === "easy" ? "Easy" : difficulty === "medium" ? "Medium" : difficulty === "hard" ? "Hard" : difficulty}</SelectValue>
-                    </SelectTrigger>
-                    <SelectContent className="bg-white border-zinc-200">
-                      <SelectItem value="easy">Easy</SelectItem>
-                      <SelectItem value="medium">Medium</SelectItem>
-                      <SelectItem value="hard">Hard</SelectItem>
-                    </SelectContent>
-                  </Select>
+              <div className="space-y-3 text-xs text-zinc-600">
+                <div className="flex items-start gap-2.5">
+                  <span className="w-5 h-5 rounded-full bg-[#FA5276]/10 text-[#FA5276] font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">1</span>
+                  <p className="leading-snug">Set your module, track, and difficulty right on the retro machine.</p>
+                </div>
+                <div className="flex items-start gap-2.5">
+                  <span className="w-5 h-5 rounded-full bg-[#FA5276]/10 text-[#FA5276] font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">2</span>
+                  <p className="leading-snug">Press <strong className="text-zinc-800">POP YOUR TOPIC</strong> to dispense your printed speech prompt.</p>
+                </div>
+                <div className="flex items-start gap-2.5">
+                  <span className="w-5 h-5 rounded-full bg-[#FA5276]/10 text-[#FA5276] font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">3</span>
+                  <p className="leading-snug">Record your answer (10s minimum, up to 10 minutes maximum) for full AI evaluation.</p>
                 </div>
               </div>
+            </div>
 
-              {/* Custom Topic Input */}
-              <div className="flex flex-col gap-1">
-                <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Custom Topic (Optional)</label>
-                <Input
-                  value={customTopic}
-                  onChange={e => setCustomTopic(e.target.value)}
-                  placeholder="e.g. why remote work is the future..."
-                  className="text-xs h-9 rounded-xl bg-zinc-50 border-zinc-200 text-zinc-900 placeholder:text-zinc-400"
-                />
-              </div>
-
-              {/* Get a Topic Button */}
-              <button
-                type="submit"
-                disabled={topicLoading}
-                className="w-full bg-[#FA5276] hover:bg-[#e64064] text-white font-bold rounded-2xl h-11 shadow-lg shadow-[#FA5276]/25 active:scale-95 transition-all flex items-center justify-center gap-2 text-xs sm:text-sm cursor-pointer disabled:opacity-50 mt-1"
-              >
-                {topicLoading ? (
-                  <>
-                    <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                    <span>Printing Topic...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>✦</span>
-                    <span>Get a Topic</span>
-                  </>
-                )}
-              </button>
-            </form>
-
-            {/* Playful Annotation Arrow */}
+            {/* Playful Annotation pointing to machine */}
             <div className="flex items-center gap-2 text-[#FA5276] pl-2">
               <svg className="w-8 h-8 -rotate-12 stroke-current fill-none stroke-[1.8]" viewBox="0 0 40 40">
                 <path d="M5,10 Q20,32 35,20" />
                 <path d="M28,15 L35,20 L27,25" />
               </svg>
               <span className="text-xs font-serif italic text-[#FA5276]">
-                Click to get a random topic!
+                Configure controls on the machine & pop your topic!
               </span>
             </div>
 
@@ -3250,13 +3298,13 @@ export default function DashboardPage() {
             {renderRetroPrinter(false)}
           </div>
 
-          {/* ── RIGHT COLUMN: Your Recording & AI Suggestions ── */}
+          {/* ── RIGHT COLUMN: Your Recording & Tabbed Feedback / Vocab / Metrics ── */}
           <div className="lg:col-span-4 space-y-5">
             {/* Your Recording Card */}
             <div className="rounded-3xl bg-white/95 backdrop-blur-md p-6 border border-[#EAE4D9] shadow-sm space-y-4">
               <div className="flex items-center justify-between text-xs font-bold text-zinc-700">
                 <span>Your Recording</span>
-                <span className="text-zinc-400 font-normal">90 sec</span>
+                <span className="text-zinc-400 font-normal">10 min max</span>
               </div>
 
               {/* Audio Waveform */}
@@ -3281,7 +3329,7 @@ export default function DashboardPage() {
               {/* Timer Display */}
               <div className="text-center">
                 <p className="text-xs font-mono font-semibold text-zinc-600">
-                  {ft(recordSeconds)} / 01:30
+                  {ft(recordSeconds)} / 10:00
                 </p>
               </div>
 
@@ -3363,72 +3411,224 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* AI Suggestions Card */}
-            <div className="rounded-3xl bg-white/95 backdrop-blur-md p-6 border border-[#EAE4D9] shadow-sm space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-zinc-700">AI Suggestions</span>
-                <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-extrabold">
-                  <span>{polledSpeechDetails?.overall_score ?? 82}</span>
-                  <span className="text-[10px] text-emerald-500">/100</span>
-                </div>
+            {/* ── Tabbed Evaluation Card: Feedback | Vocab | Metrics (Pink & White Theme) ── */}
+            <div className="rounded-3xl bg-white/95 backdrop-blur-md p-5 sm:p-6 border border-[#EAE4D9] shadow-sm space-y-4">
+              {/* Tab Selector */}
+              <div className="flex p-1 rounded-2xl bg-[#F6F2EC] border border-[#EAE4D9] text-xs">
+                {(["feedback", "vocab", "metrics"] as const).map((tab) => {
+                  const active = consoleEvalTab === tab;
+                  const label = tab === "feedback" ? "Feedback" : tab === "vocab" ? "Vocab" : "Metrics";
+                  return (
+                    <button
+                      key={tab}
+                      type="button"
+                      onClick={() => setConsoleEvalTab(tab)}
+                      className={`flex-1 py-1.5 rounded-xl font-bold text-center transition-all cursor-pointer ${
+                        active
+                          ? "bg-[#FA5276] text-white shadow-sm"
+                          : "text-zinc-600 hover:text-zinc-900"
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
               </div>
 
-              <div className="space-y-3 text-xs">
-                <div className="flex items-start gap-2.5">
-                  <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5 font-bold text-[10px]">
-                    ✓
+              {/* Tab 1: Coach Feedback */}
+              {consoleEvalTab === "feedback" && (
+                <div className="space-y-3.5 animate-bloom">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-zinc-400">
+                      COACH FEEDBACK
+                    </span>
+                    <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-extrabold">
+                      <span>{polledSpeechDetails?.overall_score ?? 82}</span>
+                      <span className="text-[10px] text-emerald-500">/100</span>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-bold text-zinc-800">Content</p>
-                    <p className="text-zinc-500 text-[11px] leading-relaxed">
-                      {polledSpeechDetails ? "Evaluated speech relevance and coverage." : "Great job covering multiple points and staying relevant!"}
-                    </p>
+
+                  {/* Strengths Card */}
+                  <div className="p-3.5 rounded-2xl bg-blue-50/50 border border-blue-100/90 border-l-4 border-l-blue-500 space-y-2">
+                    <div className="flex items-center gap-2 text-blue-900 font-bold text-xs">
+                      <Info className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                      <span>Strengths:</span>
+                    </div>
+                    <ul className="space-y-1.5 text-[11px] text-zinc-700 leading-relaxed pl-1">
+                      {coachFeedback.filter(f => f.type === "positive").length > 0 ? (
+                        coachFeedback.filter(f => f.type === "positive").map((item, idx) => (
+                          <li key={idx} className="flex items-start gap-1.5">
+                            <span className="text-blue-500 font-bold mt-0.5">✦</span>
+                            <span>{item.body || item.title}</span>
+                          </li>
+                        ))
+                      ) : (
+                        <>
+                          <li className="flex items-start gap-1.5">
+                            <span className="text-blue-500 font-bold mt-0.5">✦</span>
+                            <span>You effectively addressed both the beneficial and detrimental aspects of the topic, acknowledging its complexity.</span>
+                          </li>
+                          <li className="flex items-start gap-1.5">
+                            <span className="text-blue-500 font-bold mt-0.5">✦</span>
+                            <span>You attempted to offer solutions for mitigating the negative impacts, demonstrating a proactive approach to the topic.</span>
+                          </li>
+                        </>
+                      )}
+                    </ul>
+                  </div>
+
+                  {/* Areas to Improve Card */}
+                  <div className="p-3.5 rounded-2xl bg-rose-50/40 border border-rose-100/90 border-l-4 border-l-[#FA5276] space-y-2">
+                    <div className="flex items-center gap-2 text-[#FA5276] font-bold text-xs">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[#FA5276] shrink-0" />
+                      <span>Areas to Improve:</span>
+                    </div>
+                    <ul className="space-y-2 text-[11px] text-zinc-700 leading-relaxed pl-1">
+                      {coachFeedback.filter(f => f.type !== "positive").length > 0 ? (
+                        coachFeedback.filter(f => f.type !== "positive").map((item, idx) => (
+                          <li key={idx} className="flex items-start gap-1.5">
+                            <span className="text-[#FA5276] font-bold mt-0.5">✦</span>
+                            <div>
+                              <strong className="text-zinc-900">{item.title}: </strong>
+                              <span>{item.body}</span>
+                            </div>
+                          </li>
+                        ))
+                      ) : (
+                        <>
+                          <li className="flex items-start gap-1.5">
+                            <span className="text-[#FA5276] font-bold mt-0.5">✦</span>
+                            <div>
+                              <strong className="text-zinc-900">Fluency and Pacing:</strong> Your speech was frequently interrupted by pauses and repetitions, making it sound disjointed. Focus on speaking in smoother, more connected phrases.
+                            </div>
+                          </li>
+                          <li className="flex items-start gap-1.5">
+                            <span className="text-[#FA5276] font-bold mt-0.5">✦</span>
+                            <div>
+                              <strong className="text-zinc-900">Grammatical Accuracy:</strong> Several sentences were grammatically incorrect or very awkwardly phrased. Review your sentence structures for clarity and correctness.
+                            </div>
+                          </li>
+                          <li className="flex items-start gap-1.5">
+                            <span className="text-[#FA5276] font-bold mt-0.5">✦</span>
+                            <div>
+                              <strong className="text-zinc-900">Argument Cohesion:</strong> While you touched on various points, the argument lacked a clear, strong thesis and logical progression. Work on structuring your points to build a more persuasive case.
+                            </div>
+                          </li>
+                        </>
+                      )}
+                    </ul>
                   </div>
                 </div>
+              )}
 
-                <div className="flex items-start gap-2.5">
-                  <div className="w-5 h-5 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center shrink-0 mt-0.5 font-bold text-[10px]">
-                    ☺
+              {/* Tab 2: Vocab Upgrades */}
+              {consoleEvalTab === "vocab" && (
+                <div className="space-y-3 animate-bloom">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-zinc-400">
+                      VOCABULARY UPGRADES
+                    </span>
+                    <span className="text-[10px] font-bold text-[#FA5276]">Elevate Word Choice</span>
                   </div>
-                  <div>
-                    <p className="font-bold text-zinc-800">Clarity</p>
-                    <p className="text-zinc-500 text-[11px] leading-relaxed">
-                      {polledSpeechDetails ? "Speech pacing and articulation measured." : "Try to structure your thoughts more clearly. A strong opening helps."}
-                    </p>
+
+                  {lexiconSuggestions.length > 0 ? (
+                    lexiconSuggestions.slice(0, 3).map((rawItem: any, i: number) => {
+                      const norm = typeof rawItem === "string" ? {
+                        original_word: "Word Choice",
+                        suggested_replacement: rawItem,
+                        explanation: `Try incorporating "${rawItem}" to enhance impact.`
+                      } : {
+                        original_word: rawItem?.original_word || rawItem?.word || "Word Choice",
+                        suggested_replacement: rawItem?.suggested_replacement || rawItem?.suggestion || "Suggested Word",
+                        explanation: rawItem?.explanation || `Consider using "${rawItem?.suggested_replacement || "a stronger term"}" for clarity.`
+                      };
+                      return (
+                        <div key={i} className="p-3 rounded-2xl bg-[#FAF7F2] border border-[#EAE4D9] space-y-1.5">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs line-through text-rose-500 font-mono font-bold">{norm.original_word}</span>
+                            <span className="text-zinc-400 text-xs">→</span>
+                            <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-lg bg-[#FA5276]/10 text-[#FA5276] border border-[#FA5276]/20">{norm.suggested_replacement}</span>
+                          </div>
+                          <p className="text-[11px] text-zinc-600 leading-relaxed">{norm.explanation}</p>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <>
+                      <div className="p-3 rounded-2xl bg-[#FAF7F2] border border-[#EAE4D9] space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs line-through text-rose-500 font-mono font-bold">good</span>
+                          <span className="text-zinc-400 text-xs">→</span>
+                          <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-lg bg-[#FA5276]/10 text-[#FA5276] border border-[#FA5276]/20">compelling</span>
+                        </div>
+                        <p className="text-[11px] text-zinc-600 leading-relaxed">Conveys authority, intentionality, and stronger argumentative force.</p>
+                      </div>
+                      <div className="p-3 rounded-2xl bg-[#FAF7F2] border border-[#EAE4D9] space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs line-through text-rose-500 font-mono font-bold">stuff</span>
+                          <span className="text-zinc-400 text-xs">→</span>
+                          <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-lg bg-[#FA5276]/10 text-[#FA5276] border border-[#FA5276]/20">core elements</span>
+                        </div>
+                        <p className="text-[11px] text-zinc-600 leading-relaxed">Replaces ambiguous conversational filler with professional, precise terminology.</p>
+                      </div>
+                      <div className="p-3 rounded-2xl bg-[#FAF7F2] border border-[#EAE4D9] space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs line-through text-rose-500 font-mono font-bold">a lot</span>
+                          <span className="text-zinc-400 text-xs">→</span>
+                          <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-lg bg-[#FA5276]/10 text-[#FA5276] border border-[#FA5276]/20">substantially</span>
+                        </div>
+                        <p className="text-[11px] text-zinc-600 leading-relaxed">Adds intellectual weight and quantitative clarity to your observations.</p>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+
+              {/* Tab 3: Metrics */}
+              {consoleEvalTab === "metrics" && (
+                <div className="space-y-3 animate-bloom">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-zinc-400">
+                      CORE SKILLS
+                    </span>
+                    <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-extrabold">
+                      <span>{polledSpeechDetails?.overall_score ?? 82}</span>
+                      <span className="text-[10px] text-emerald-500">/100</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2.5">
+                    {[
+                      { label: "Clarity & Enunciation", score: polledSpeechDetails?.pronunciation_score ?? 84, color: "bg-blue-500" },
+                      { label: "Pacing & Pauses", score: polledSpeechDetails?.fluency_score ?? 76, color: "bg-amber-500" },
+                      { label: "Grammar & Accuracy", score: polledSpeechDetails?.grammar_score ?? 88, color: "bg-emerald-500" },
+                      { label: "Content & Structure", score: polledSpeechDetails?.content_score ?? 82, color: "bg-[#FA5276]" },
+                      { label: "Vocabulary & Lexicon", score: polledSpeechDetails?.lexicon_score ?? 80, color: "bg-purple-500" },
+                    ].map((item, i) => (
+                      <div key={i} className="space-y-1">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="font-semibold text-zinc-700 text-[11px]">{item.label}</span>
+                          <span className="font-bold text-zinc-900 tabular-nums text-[11px]">{item.score}/100</span>
+                        </div>
+                        <div className="h-2 w-full rounded-full bg-zinc-100 overflow-hidden">
+                          <div
+                            className={`h-full rounded-full transition-all duration-700 ${item.color}`}
+                            style={{ width: `${item.score}%` }}
+                          />
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
+              )}
 
-                <div className="flex items-start gap-2.5">
-                  <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5 font-bold text-[10px]">
-                    ⚡
-                  </div>
-                  <div>
-                    <p className="font-bold text-zinc-800">Confidence</p>
-                    <p className="text-zinc-500 text-[11px] leading-relaxed">
-                      {polledSpeechDetails ? "Vocal inflection and energy sustained." : "Good pace and tone! Keep up the confidence."}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-2.5">
-                  <div className="w-5 h-5 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center shrink-0 mt-0.5 font-bold text-[10px]">
-                    ✦
-                  </div>
-                  <div>
-                    <p className="font-bold text-zinc-800">Vocabulary</p>
-                    <p className="text-zinc-500 text-[11px] leading-relaxed">
-                      {polledSpeechDetails ? "Lexicon suggestions and word choice." : "Use more varied vocabulary to make your speech richer."}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
+              {/* View Full Evaluation Button */}
               <Button
                 variant="ghost"
                 onClick={() => setActiveTab("evaluation")}
-                className="w-full text-xs font-bold text-[#FA5276] hover:text-[#e64064] hover:bg-[#FA5276]/5 rounded-xl h-9 flex items-center justify-center gap-1 cursor-pointer"
+                className="w-full text-xs font-bold text-[#FA5276] hover:text-[#e64064] hover:bg-[#FA5276]/5 rounded-xl h-9 flex items-center justify-center gap-1 cursor-pointer pt-2"
               >
-                View Detailed Feedback →
+                View Detailed Feedback in Evaluation Tab →
               </Button>
             </div>
           </div>
