@@ -357,3 +357,12 @@ button, a, input, select, textarea, [role="button"] {
   border-right: 2.5px solid #000000;
   border-top: 2.5px solid #000000;
 }
+
+/* Custom serrated / zigzag cut for receipt paper bottom edge from topic-dispenser */
+.zigzag-edge {
+  background:
+    linear-gradient(135deg, transparent 6px, #ffffff 6px) top left,
+    linear-gradient(-135deg, transparent 6px, #ffffff 6px) top right;
+  background-size: 14px 10px;
+  background-repeat: repeat-x;
+}

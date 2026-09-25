@@ -27,6 +27,9 @@ import {
   SpeechEvaluationSkeleton,
   FullDashboardLayoutSkeleton
 } from "@/components/dashboard/DashboardSkeletons";
+import { TopicDispenser } from "@/components/TopicDispenser";
+import { Topic as DispenserTopic } from "@/types/dispenser";
+import { TOPICS } from "@/data/topics";
 
 // ── Interfaces ────────────────────────────────────────────────────────────────
 interface GeneratedTopic {
@@ -2952,271 +2955,62 @@ export default function DashboardPage() {
     );
   };
 
-  // ── Retro Topic Machine & Dispensed Receipt ──────────────────────────────
-  // ── 3D Retro "Pop Your Topic" Machine & Dispensed Receipt ──────────────
+  // ── Sync Topic Dispenser with Dashboard Topics State ─────────────────────
+  const handleDispenserTopicChange = (dispenserTopic: DispenserTopic) => {
+    setTopics([{
+      id: dispenserTopic.id,
+      title: dispenserTopic.text,
+      prompt: dispenserTopic.text,
+      context: dispenserTopic.categoryLabel,
+      suggested_points: (dispenserTopic.talkingPoints as string[]) || [],
+      module_type: moduleType,
+      interview_type: interviewType,
+    }]);
+  };
+
+  // Initialize topics with first dispenser topic if empty on mount
+  useEffect(() => {
+    if (topics.length === 0 && TOPICS.length > 0) {
+      const first = TOPICS[0];
+      setTopics([{
+        id: first.id,
+        title: first.text,
+        prompt: first.text,
+        context: first.categoryLabel,
+        suggested_points: [...(first.talkingPoints || [])],
+        module_type: "public_speaking",
+        interview_type: "general",
+      }]);
+    }
+  }, []);
+
+  // ── Retro Topic Machine & Dispensed Receipt (From zip prototype) ────────────────
   const renderRetroPrinter = (isDrawer: boolean = false) => {
+    const currentDispenserTopic: DispenserTopic | undefined = activeTopic ? {
+      id: activeTopic.id || activeTopic.title,
+      text: activeTopic.title,
+      category: activeTopic.context || 'general',
+      categoryLabel: activeTopic.context || 'General Practice',
+      timeToSpeak: 90,
+      talkingPoints: (activeTopic.suggested_points && activeTopic.suggested_points.length > 0)
+        ? activeTopic.suggested_points
+        : [
+            "Key point to introduce your perspective clearly",
+            "Concrete example or personal experience supporting your thesis",
+            "Closing takeaway or actionable conclusion for the audience"
+          ]
+    } : undefined;
+
     return (
-      <div className="flex flex-col items-center w-full max-w-[390px] sm:max-w-[420px] mx-auto select-none relative">
-        {/* Label above machine */}
-        <div className="text-center mb-2 flex flex-col items-center">
-          <div className="flex items-center gap-1 text-xs font-semibold text-[#FA5276]">
-            <span>Tap to get your topic</span>
-            <span className="text-xs">↓</span>
-          </div>
-          <div className="flex gap-1 mt-0.5 opacity-60">
-            <span className="w-1 h-2 bg-[#FA5276]/60 -rotate-12 rounded-full" />
-            <span className="w-1 h-2.5 bg-[#FA5276]/80 rounded-full" />
-            <span className="w-1 h-2 bg-[#FA5276]/60 rotate-12 rounded-full" />
-          </div>
-        </div>
-
-        {/* 3D Machine Housing (Claymorphic / Matte Plastic) */}
-        <div className="relative w-full min-h-[460px] bg-[#EBE7DF] rounded-[42px] border-2 border-[#DDD6CB] p-5 sm:p-6 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.16),0_10px_20px_-5px_rgba(0,0,0,0.08),inset_0_2px_4px_rgba(255,255,255,0.9),inset_0_-4px_8px_rgba(0,0,0,0.06)] flex flex-col items-center justify-between overflow-visible">
-          {/* Machine Header */}
-          <div className="pt-1 pb-2.5 text-center flex items-center justify-between w-full px-1">
-            <div className="w-6" />
-            <span className="text-[11px] font-bold tracking-[0.26em] text-[#FA5276] uppercase">
-              • POP YOUR TOPIC •
-            </span>
-            {activeTopic ? (
-              <button
-                type="button"
-                onClick={() => setShowMachineSettings(prev => !prev)}
-                title="Topic Settings"
-                className={`p-1.5 rounded-lg border transition-all cursor-pointer ${showMachineSettings ? "bg-[#FA5276]/15 border-[#FA5276] text-[#FA5276]" : "bg-white/40 border-[#DDD6CB] text-zinc-500 hover:text-zinc-800"}`}
-              >
-                <Sliders className="w-3.5 h-3.5" />
-              </button>
-            ) : (
-              <div className="w-6" />
-            )}
-          </div>
-
-          {/* Paper Feed Slot */}
-          <div className="w-full h-8 bg-[#18181b] rounded-full shadow-[inset_0_3px_6px_rgba(0,0,0,0.85),0_1px_2px_rgba(255,255,255,0.8)] border border-black/70 flex items-center justify-center relative overflow-visible z-10">
-            <div className="h-1.5 w-[92%] bg-black rounded-full" />
-          </div>
-
-          {/* Paper / Controls: Idle Lip & Form vs Dispensed Receipt */}
-          {!activeTopic || showMachineSettings ? (
-            <div className="w-full flex flex-col items-center">
-              {/* Idle paper lip peeking out */}
-              <div className="w-[82%] -mt-1 bg-white shadow-xs relative z-0 flex flex-col items-center">
-                <div className="h-3 bg-white w-full" />
-                <svg className="w-full h-2 text-white fill-current shrink-0 -mb-px" viewBox="0 0 200 8" preserveAspectRatio="none">
-                  <path d="M0,0 L5,8 L10,0 L15,8 L20,0 L25,8 L30,0 L35,8 L40,0 L45,8 L50,0 L55,8 L60,0 L65,8 L70,0 L75,8 L80,0 L85,8 L90,0 L95,8 L100,0 L105,8 L110,0 L115,8 L120,0 L125,8 L130,0 L135,8 L140,0 L145,8 L150,0 L155,8 L160,0 L165,8 L170,0 L175,8 L180,0 L185,8 L190,0 L195,8 L200,0 Z" />
-                </svg>
-              </div>
-
-              {/* Machine Face Controls (Placed right onto the machine casing) */}
-              <form onSubmit={handleGenerateTopic} className="w-full mt-3 space-y-2.5 px-1">
-                {/* Module */}
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-bold text-[#7D766A] uppercase tracking-wider">Module</label>
-                  <Select value={moduleType} onValueChange={v => v && setModuleType(v as any)}>
-                    <SelectTrigger className="h-9 text-xs rounded-xl bg-[#F7F4EE] border-[#D5CDC0] text-zinc-900 shadow-[inset_0_1px_2px_rgba(0,0,0,0.06)] focus:ring-1 focus:ring-[#FA5276]">
-                      <SelectValue>{moduleType === "public_speaking" ? "Public Speaking" : "Interview Preparation"}</SelectValue>
-                    </SelectTrigger>
-                    <SelectContent className="bg-white border-zinc-200">
-                      <SelectItem value="public_speaking">Public Speaking</SelectItem>
-                      <SelectItem value="interview_preparation">Interview Preparation</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Category / Track & Difficulty */}
-                <div className="grid grid-cols-2 gap-2">
-                  {moduleType === "public_speaking" ? (
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[10px] font-bold text-[#7D766A] uppercase tracking-wider">Category</label>
-                      <Select value={category} onValueChange={v => v && setCategory(v)}>
-                        <SelectTrigger className="h-9 text-xs rounded-xl bg-[#F7F4EE] border-[#D5CDC0] text-zinc-900 shadow-[inset_0_1px_2px_rgba(0,0,0,0.06)] focus:ring-1 focus:ring-[#FA5276]">
-                          <SelectValue>
-                            {category === "impromptu" ? "Impromptu" : category === "interview" ? "Interview" : category === "persuasive" ? "Persuasive" : category === "warmup" ? "Warmup" : category === "debate" ? "Debate" : category}
-                          </SelectValue>
-                        </SelectTrigger>
-                        <SelectContent className="bg-white border-zinc-200">
-                          <SelectItem value="impromptu">Impromptu</SelectItem>
-                          <SelectItem value="interview">Interview</SelectItem>
-                          <SelectItem value="persuasive">Persuasive</SelectItem>
-                          <SelectItem value="warmup">Warmup</SelectItem>
-                          <SelectItem value="debate">Debate</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[10px] font-bold text-[#7D766A] uppercase tracking-wider">Track</label>
-                      <Select value={interviewType} onValueChange={v => v && setInterviewType(v)}>
-                        <SelectTrigger className="h-9 text-xs rounded-xl bg-[#F7F4EE] border-[#D5CDC0] text-zinc-900 shadow-[inset_0_1px_2px_rgba(0,0,0,0.06)] focus:ring-1 focus:ring-[#FA5276]">
-                          <SelectValue>{INTERVIEW_TYPES.find(t => t.value === interviewType)?.label || interviewType}</SelectValue>
-                        </SelectTrigger>
-                        <SelectContent className="bg-white border-zinc-200">
-                          {INTERVIEW_TYPES.map(t => (
-                            <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
-
-                  <div className="flex flex-col gap-1">
-                    <label className="text-[10px] font-bold text-[#7D766A] uppercase tracking-wider">Difficulty</label>
-                    <Select value={difficulty} onValueChange={v => v && setDifficulty(v)}>
-                      <SelectTrigger className="h-9 text-xs rounded-xl bg-[#F7F4EE] border-[#D5CDC0] text-zinc-900 shadow-[inset_0_1px_2px_rgba(0,0,0,0.06)] focus:ring-1 focus:ring-[#FA5276]">
-                        <SelectValue>{difficulty === "easy" ? "Easy" : difficulty === "medium" ? "Medium" : difficulty === "hard" ? "Hard" : difficulty}</SelectValue>
-                      </SelectTrigger>
-                      <SelectContent className="bg-white border-zinc-200">
-                        <SelectItem value="easy">Easy</SelectItem>
-                        <SelectItem value="medium">Medium</SelectItem>
-                        <SelectItem value="hard">Hard</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                {/* Custom Topic Input */}
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-bold text-[#7D766A] uppercase tracking-wider">Custom Topic (Optional)</label>
-                  <Input
-                    value={customTopic}
-                    onChange={e => setCustomTopic(e.target.value)}
-                    placeholder="e.g. why remote work is the future..."
-                    className="text-xs h-9 rounded-xl bg-[#F7F4EE] border-[#D5CDC0] text-zinc-900 placeholder:text-zinc-400 shadow-[inset_0_1px_2px_rgba(0,0,0,0.06)] focus:ring-1 focus:ring-[#FA5276]"
-                  />
-                </div>
-
-                {/* Big Pink Pop Button on Machine */}
-                <button
-                  type="submit"
-                  disabled={topicLoading}
-                  className="w-full bg-[#FA5276] hover:bg-[#e64064] text-white font-bold rounded-2xl h-11 shadow-[0_6px_18px_rgba(250,82,118,0.35)] active:scale-95 transition-all flex items-center justify-center gap-2 text-xs sm:text-sm cursor-pointer disabled:opacity-50 mt-2"
-                >
-                  {topicLoading ? (
-                    <>
-                      <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                      <span>Dispensing Topic...</span>
-                    </>
-                  ) : (
-                    <>
-                      <span>✦</span>
-                      <span>POP YOUR TOPIC</span>
-                      <span>✦</span>
-                    </>
-                  )}
-                </button>
-              </form>
-            </div>
-          ) : (
-            /* Dispensed Topic Receipt Paper */
-            <div className="w-full flex flex-col items-center">
-              <div className="w-[84%] sm:w-[88%] -mt-1 bg-white shadow-[0_16px_36px_rgba(0,0,0,0.14),0_2px_6px_rgba(0,0,0,0.06)] relative z-0 anim-receipt-feed flex flex-col rounded-t-xs">
-                <div className="p-4 sm:p-5 flex flex-col items-center text-center">
-                  <div className="flex items-center gap-1.5 text-[#FA5276] text-[10px] font-bold tracking-wider uppercase mb-2">
-                    <span>✦</span>
-                    <span>YOUR TOPIC IS READY!</span>
-                    <span>✦</span>
-                  </div>
-
-                  <h3 className="text-base sm:text-lg font-bold text-zinc-900 leading-snug my-2 select-text">
-                    {activeTopic.title}
-                  </h3>
-                  {activeTopic.prompt && activeTopic.prompt !== activeTopic.title && (
-                    <p className="text-xs text-zinc-600 leading-relaxed mt-1 select-text">
-                      {activeTopic.prompt}
-                    </p>
-                  )}
-
-                  <div className="w-full border-t border-dashed border-zinc-200 my-3" />
-
-                  <div className="w-full flex items-center justify-between text-zinc-700 px-1">
-                    <div className="flex items-center gap-1.5 text-[11px] font-semibold">
-                      <Clock className="w-3.5 h-3.5 text-zinc-500" />
-                      <span>Min 10s · Max 10 mins</span>
-                    </div>
-                    <div className="p-1.5 rounded-full bg-[#FA5276]/10 text-[#FA5276]">
-                      <Megaphone className="w-4 h-4" />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Serrated tear edge */}
-                <svg className="w-full h-3 text-white fill-current shrink-0 -mb-px" viewBox="0 0 200 12" preserveAspectRatio="none">
-                  <path d="M0,0 L5,12 L10,0 L15,12 L20,0 L25,12 L30,0 L35,12 L40,0 L45,12 L50,0 L55,12 L60,0 L65,12 L70,0 L75,12 L80,0 L85,12 L90,0 L95,12 L100,0 L105,12 L110,0 L115,12 L120,0 L125,12 L130,0 L135,12 L140,0 L145,12 L150,0 L155,12 L160,0 L165,12 L170,0 L175,12 L180,0 L185,12 L190,0 L195,12 L200,0 Z" />
-                </svg>
-              </div>
-
-              {/* Quick actions below receipt */}
-              <div className="w-full pt-4 pb-1 flex items-center justify-between px-2">
-                <button
-                  type="button"
-                  onClick={handleGenerateTopic}
-                  disabled={topicLoading}
-                  className="text-xs font-bold text-[#FA5276] hover:underline flex items-center gap-1.5 cursor-pointer"
-                >
-                  <Printer className="w-3.5 h-3.5" />
-                  <span>Dispense Another Topic</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowMachineSettings(true)}
-                  className="text-[11px] font-semibold text-zinc-500 hover:text-zinc-800 flex items-center gap-1 cursor-pointer"
-                >
-                  <Sliders className="w-3 h-3" />
-                  <span>Settings</span>
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Machine Bottom Controls & Mechanical Hardware */}
-          <div className="w-full pt-3 pb-1 px-1 flex items-center justify-between">
-            {/* 3D mechanical button with 3 vertical grooves */}
-            <button
-              type="button"
-              onClick={handleGenerateTopic}
-              disabled={topicLoading}
-              title="Mechanical dispense switch"
-              className="w-14 h-10 rounded-xl bg-[#DDD7CD] shadow-[0_3px_5px_rgba(0,0,0,0.12),inset_0_1px_2px_rgba(255,255,255,0.85)] border border-[#CFC7BA] flex items-center justify-center gap-1.5 hover:bg-[#D5CEC4] active:scale-95 transition-all cursor-pointer"
-            >
-              <span className="w-0.5 h-4 bg-[#9E9689] rounded-full opacity-60" />
-              <span className="w-0.5 h-4 bg-[#9E9689] rounded-full opacity-60" />
-              <span className="w-0.5 h-4 bg-[#9E9689] rounded-full opacity-60" />
-            </button>
-
-            {/* Center status LED */}
-            <div className={`w-2.5 h-2.5 rounded-full transition-all ${topicLoading ? "bg-amber-400 animate-ping shadow-[0_0_8px_#f59e0b]" : activeTopic ? "bg-emerald-500 shadow-[0_0_8px_#10b981]" : "bg-[#FA5276] shadow-[0_0_8px_#FA5276]"}`} />
-
-            {/* Circular speaker grill */}
-            <div className="grid grid-cols-5 gap-1 p-1">
-              {Array.from({ length: 25 }).map((_, i) => (
-                <span key={i} className="w-1 h-1 rounded-full bg-[#7D766A]/35" />
-              ))}
-            </div>
-          </div>
-
-          {/* 3...2...1... Countdown Overlay floating over machine */}
-          {countdown !== null && (
-            <div className="absolute inset-0 z-30 rounded-[42px] bg-white/20 backdrop-blur-[2px] flex flex-col items-center justify-center text-center p-4 animate-fade-in pointer-events-auto">
-              <div className="text-7xl sm:text-8xl font-black text-zinc-900 drop-shadow-[0_4px_12px_rgba(255,255,255,0.9)] anim-countdown select-none">
-                {countdown}...
-              </div>
-              <p className="text-xs font-semibold text-zinc-800 mt-2 bg-white/70 px-3 py-1 rounded-full shadow-sm">
-                Get ready to speak!
-              </p>
-              <button
-                type="button"
-                onClick={cancelCountdown}
-                className="mt-3 text-[10px] font-bold text-zinc-600 hover:text-zinc-900 bg-white/70 hover:bg-white px-2.5 py-1 rounded-lg border border-zinc-300 cursor-pointer"
-              >
-                ✕ Cancel
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
+      <TopicDispenser
+        initialTopic={currentDispenserTopic}
+        onTopicChange={handleDispenserTopicChange}
+        countdown={countdown}
+        onCancelCountdown={cancelCountdown}
+      />
     );
   };
+
 
   // ── Practice Console View (Matching Reference Design) ─────────────────────
   const renderPracticeConsole = () => {
@@ -3256,15 +3050,15 @@ export default function DashboardPage() {
               <div className="space-y-3 text-xs text-zinc-600">
                 <div className="flex items-start gap-2.5">
                   <span className="w-5 h-5 rounded-full bg-[#FA5276]/10 text-[#FA5276] font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">1</span>
-                  <p className="leading-snug">Set your module, track, and difficulty right on the retro machine.</p>
+                  <p className="leading-snug">Press the tactile button <strong className="text-zinc-800 font-mono">[ ||| ]</strong> or "Dispense Another Topic" on the retro machine.</p>
                 </div>
                 <div className="flex items-start gap-2.5">
                   <span className="w-5 h-5 rounded-full bg-[#FA5276]/10 text-[#FA5276] font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">2</span>
-                  <p className="leading-snug">Press <strong className="text-zinc-800">POP YOUR TOPIC</strong> to dispense your printed speech prompt.</p>
+                  <p className="leading-snug">Read your dispensed topic and review the 3 suggested points to talk about.</p>
                 </div>
                 <div className="flex items-start gap-2.5">
                   <span className="w-5 h-5 rounded-full bg-[#FA5276]/10 text-[#FA5276] font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">3</span>
-                  <p className="leading-snug">Record your answer (10s minimum, up to 10 minutes maximum) for full AI evaluation.</p>
+                  <p className="leading-snug">Record your answer (10s minimum, up to 10 minutes maximum) for AI coaching evaluation.</p>
                 </div>
               </div>
             </div>
@@ -3276,9 +3070,10 @@ export default function DashboardPage() {
                 <path d="M28,15 L35,20 L27,25" />
               </svg>
               <span className="text-xs font-serif italic text-[#FA5276]">
-                Configure controls on the machine & pop your topic!
+                Press [ ||| ] on the machine to pop your topic slip!
               </span>
             </div>
+
 
             {/* Bottom Quote Card */}
             <div className="mt-auto bg-white/75 backdrop-blur-xs rounded-3xl p-5 border border-[#EAE4D9] shadow-xs space-y-2">

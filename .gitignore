@@ -44,3 +44,7 @@ htmlcov/
 
 # Codebase map
 .codebasemap
+
+# Topic dispenser temp
+frontend/topic-dispenser-extracted/
+*.zip
