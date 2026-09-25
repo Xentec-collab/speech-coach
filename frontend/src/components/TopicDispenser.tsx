@@ -117,7 +117,7 @@ export const TopicDispenser: React.FC<TopicDispenserProps> = ({
                 }
               : { x: 0, y: 0 }
           }
-          className="group relative w-[340px] sm:w-[410px] rounded-[32px] sm:rounded-[36px] bg-[#F6F2EB] border-2 border-[#E7DFC0] cursor-default transition-all duration-200"
+          className="group relative w-full max-w-[330px] sm:max-w-[365px] lg:max-w-[345px] xl:max-w-[380px] rounded-[32px] sm:rounded-[36px] bg-[#F6F2EB] border-2 border-[#E7DFC0] cursor-default transition-all duration-200"
           style={{
             boxShadow: `
               0 30px 60px -15px rgba(80, 50, 20, 0.14),
@@ -146,7 +146,7 @@ export const TopicDispenser: React.FC<TopicDispenserProps> = ({
           <div className="relative w-full flex flex-col items-center -mt-1 z-30">
             {/* Dark Recessed Slit Bezel */}
             <div
-              className="relative w-[315px] sm:w-[350px] h-8 sm:h-9 rounded-lg sm:rounded-xl bg-[#18171D] border-2 border-[#282631] shadow-[inset_0_3px_8px_rgba(0,0,0,0.9),0_2px_4px_rgba(0,0,0,0.12)] flex items-center justify-center overflow-visible"
+              className="relative w-[90%] sm:w-[92%] h-8 sm:h-9 rounded-lg sm:rounded-xl bg-[#18171D] border-2 border-[#282631] shadow-[inset_0_3px_8px_rgba(0,0,0,0.9),0_2px_4px_rgba(0,0,0,0.12)] flex items-center justify-center overflow-visible"
             >
               {/* Dark Inner Cavity */}
               <div className="absolute inset-x-1 inset-y-0.5 bg-[#0C0B0E] rounded-md shadow-inner pointer-events-none" />

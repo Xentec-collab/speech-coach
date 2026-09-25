@@ -3032,25 +3032,25 @@ export default function DashboardPage() {
 
             {/* Big Headline */}
             <div>
-              <h1 className="text-3xl sm:text-4xl font-black text-zinc-900 tracking-tight leading-[1.15]">
+              <h1 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight leading-[1.15]">
                 Random topic.<br />
                 <span className="text-[#FA5276]">Real growth.</span>
               </h1>
-              <p className="text-xs sm:text-sm text-zinc-600 mt-2 leading-relaxed font-normal">
+              <p className="text-xs sm:text-sm text-muted-foreground mt-2 leading-relaxed font-normal">
                 Get a random impromptu topic, speak for up to 10 minutes and get AI coaching to improve.
               </p>
             </div>
 
             {/* How It Works Card */}
-            <div className="bg-white/85 backdrop-blur-md rounded-3xl p-5 border border-[#EAE4D9] shadow-sm space-y-3">
-              <div className="flex items-center gap-2 text-xs font-bold text-zinc-800">
+            <div className="bg-card/90 backdrop-blur-md rounded-3xl p-5 border border-border/80 shadow-sm space-y-3">
+              <div className="flex items-center gap-2 text-xs font-bold text-foreground">
                 <Sparkles className="w-4 h-4 text-[#FA5276]" />
                 <span>Practice Guidelines</span>
               </div>
-              <div className="space-y-3 text-xs text-zinc-600">
+              <div className="space-y-3 text-xs text-muted-foreground">
                 <div className="flex items-start gap-2.5">
                   <span className="w-5 h-5 rounded-full bg-[#FA5276]/10 text-[#FA5276] font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">1</span>
-                  <p className="leading-snug">Press the tactile button <strong className="text-zinc-800 font-mono">[ ||| ]</strong> or "Dispense Another Topic" on the retro machine.</p>
+                  <p className="leading-snug">Press the tactile button <strong className="text-foreground font-mono">[ ||| ]</strong> or "Dispense Another Topic" on the retro machine.</p>
                 </div>
                 <div className="flex items-start gap-2.5">
                   <span className="w-5 h-5 rounded-full bg-[#FA5276]/10 text-[#FA5276] font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">2</span>
@@ -3076,12 +3076,12 @@ export default function DashboardPage() {
 
 
             {/* Bottom Quote Card */}
-            <div className="mt-auto bg-white/75 backdrop-blur-xs rounded-3xl p-5 border border-[#EAE4D9] shadow-xs space-y-2">
+            <div className="mt-auto bg-card/80 backdrop-blur-xs rounded-3xl p-5 border border-border/80 shadow-xs space-y-2">
               <div className="text-2xl text-[#FA5276] leading-none font-serif">“</div>
-              <p className="text-xs text-zinc-700 italic font-medium leading-relaxed">
+              <p className="text-xs text-foreground/90 italic font-medium leading-relaxed">
                 The best way to predict your future is to create it.
               </p>
-              <div className="flex items-center justify-between pt-1 text-zinc-400 text-xs">
+              <div className="flex items-center justify-between pt-1 text-muted-foreground text-xs">
                 <span className="text-[10px]">Daily Inspiration</span>
                 <Heart className="w-3.5 h-3.5 text-[#FA5276] fill-[#FA5276]/20" />
               </div>
@@ -3096,11 +3096,12 @@ export default function DashboardPage() {
           {/* ── RIGHT COLUMN: Your Recording & Tabbed Feedback / Vocab / Metrics ── */}
           <div className="lg:col-span-4 space-y-5">
             {/* Your Recording Card */}
-            <div className="rounded-3xl bg-white/95 backdrop-blur-md p-6 border border-[#EAE4D9] shadow-sm space-y-4">
-              <div className="flex items-center justify-between text-xs font-bold text-zinc-700">
+            <div className="rounded-3xl bg-card/95 backdrop-blur-md p-6 border border-border/80 shadow-sm space-y-4">
+              <div className="flex items-center justify-between text-xs font-bold text-foreground">
                 <span>Your Recording</span>
-                <span className="text-zinc-400 font-normal">10 min max</span>
+                <span className="text-muted-foreground font-normal">10 min max</span>
               </div>
+
 
               {/* Audio Waveform */}
               <div className="h-14 flex items-center justify-center gap-1 px-2">

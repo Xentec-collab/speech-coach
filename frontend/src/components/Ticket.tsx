@@ -116,7 +116,7 @@ export const Ticket: React.FC<TicketProps> = ({
   return (
     <motion.div
       id="dispenser-ticket"
-      className="relative w-[270px] sm:w-[298px] cursor-default select-none will-change-transform"
+      className="relative w-[255px] sm:w-[285px] cursor-default select-none will-change-transform"
       style={{
         transformOrigin: 'top center',
         perspective: 1100,
