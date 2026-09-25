@@ -11,10 +11,11 @@ const nextConfig = {
     if (process.env.VERCEL) {
       return [];
     }
+    const backendUrl = process.env.BACKEND_URL || "https://speech-coach-p7yx.onrender.com";
     return [
       {
         source: '/api/:path*',
-        destination: 'http://localhost:8000/api/:path*'
+        destination: `${backendUrl}/api/:path*`
       }
     ];
   }

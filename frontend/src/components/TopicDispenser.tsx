@@ -82,21 +82,21 @@ export const TopicDispenser: React.FC<TopicDispenserProps> = ({
   const isBusy = dispenserStatus === 'dispensing' || dispenserStatus === 'retracting';
 
   return (
-    <div className="flex flex-col items-center justify-center w-full max-w-xl mx-auto px-4 py-2 select-none relative">
+    <div className="flex flex-col items-center justify-center w-full mx-auto px-0 select-none relative">
       {/* Top hint with arrow: "Press [ ||| ] to get your topic ↓" */}
-      <div className="flex flex-col items-center mb-3">
+      <div className="flex flex-col items-center mb-2">
         <motion.div
           initial={{ opacity: 0, y: -6 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center"
         >
-          <span className="text-[#FF4A57] font-semibold text-sm sm:text-base tracking-wide flex items-center gap-1.5 font-sans">
+          <span className="text-[#FF4A57] font-bold text-xs sm:text-sm tracking-wide flex items-center gap-1.5 font-sans">
             Press [ ||| ] to get your topic
           </span>
           <motion.div
-            animate={{ y: [0, 4, 0] }}
+            animate={{ y: [0, 3, 0] }}
             transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut' }}
-            className="text-[#FF4A57] text-lg font-bold leading-none mt-0.5"
+            className="text-[#FF4A57] text-base font-bold leading-none mt-0.5"
           >
             ↓
           </motion.div>
@@ -104,7 +104,7 @@ export const TopicDispenser: React.FC<TopicDispenserProps> = ({
       </div>
 
       {/* THE TOPIC DISPENSER MACHINE PROTOTYPE */}
-      <div className="relative flex flex-col items-center">
+      <div className="relative flex flex-col items-center w-full">
         {/* Machine Body with Realistic 3D Skeuomorphic Styling */}
         <motion.div
           id="topic-machine"
@@ -117,7 +117,7 @@ export const TopicDispenser: React.FC<TopicDispenserProps> = ({
                 }
               : { x: 0, y: 0 }
           }
-          className="group relative w-full max-w-[330px] sm:max-w-[365px] lg:max-w-[345px] xl:max-w-[380px] rounded-[32px] sm:rounded-[36px] bg-[#F6F2EB] border-2 border-[#E7DFC0] cursor-default transition-all duration-200"
+          className="group relative w-full max-w-[320px] sm:max-w-[340px] rounded-[30px] sm:rounded-[34px] bg-[#F6F2EB] border-2 border-[#E7DFC0] cursor-default transition-all duration-200"
           style={{
             boxShadow: `
               0 30px 60px -15px rgba(80, 50, 20, 0.14),
@@ -131,7 +131,7 @@ export const TopicDispenser: React.FC<TopicDispenserProps> = ({
           <div className="absolute top-1 left-6 right-6 h-3 rounded-full bg-gradient-to-b from-white/70 to-transparent pointer-events-none" />
 
           {/* Machine Upper Deck - Casing above slot */}
-          <div className="relative pt-6 sm:pt-7 pb-2 px-6 sm:px-8 flex flex-col items-center bg-[#F6F2EB] rounded-t-[30px] sm:rounded-t-[34px] z-[40]">
+          <div className="relative pt-5 sm:pt-6 pb-2 px-5 sm:px-6 flex flex-col items-center bg-[#F6F2EB] rounded-t-[28px] sm:rounded-t-[32px] z-[40]">
             {/* Header: • POP YOUR TOPIC • */}
             <div className="flex items-center justify-center gap-3 mb-4 select-none">
               <span className="w-2 h-2 rounded-full bg-[#FF4A57]" />
@@ -207,7 +207,7 @@ export const TopicDispenser: React.FC<TopicDispenserProps> = ({
           </div>
 
           {/* LOWER MACHINE FRONT FACE STAGE (Behind the dispensed hanging ticket) */}
-          <div className="relative w-full min-h-[350px] sm:min-h-[375px] z-10 pointer-events-none" />
+          <div className="relative w-full min-h-[210px] sm:min-h-[225px] z-10 pointer-events-none" />
 
           {/* BOTTOM MACHINE CONTROL PANEL */}
           <div className="w-full px-6 sm:px-8 pb-5 pt-2 z-30 flex flex-col gap-2.5 select-none">
