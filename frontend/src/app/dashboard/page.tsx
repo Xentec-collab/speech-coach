@@ -583,7 +583,19 @@ export default function DashboardPage() {
   const [interviewPersona, setInterviewPersona] = useState("friendly");
   const [difficulty, setDifficulty] = useState("medium");
   const [customTopic, setCustomTopic] = useState("");
-  const [topics, setTopics] = useState<GeneratedTopic[]>([]);
+  const [topics, setTopics] = useState<GeneratedTopic[]>(() => {
+    const first = TOPICS && TOPICS.length > 0 ? TOPICS[0] : null;
+    if (!first) return [];
+    return [{
+      id: first.id,
+      title: first.text,
+      prompt: first.text,
+      context: first.categoryLabel,
+      suggested_points: [...(first.talkingPoints || [])],
+      module_type: "public_speaking",
+      interview_type: "general",
+    }];
+  });
   const [topicLoading, setTopicLoading] = useState(false);
   const [topicError, setTopicError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -856,7 +868,12 @@ export default function DashboardPage() {
   const discardSpeechAndReset=()=>{if(pollingRef.current){clearInterval(pollingRef.current);pollingRef.current=null;}setPolledSpeechId(null);setPolledSpeechDetails(null);discardRecording();};
 
   const handleSubmitSpeech=async()=>{
-    if(!audioBlob||!session)return;
+    if(!audioBlob)return;
+    if(!session){
+      setUploadError("Please log in or register to submit your speech for full AI coaching evaluation.");
+      router.push("/login");
+      return;
+    }
     const activeTopic=topics.length>0?topics[0]:null;
     if(recordSeconds<10){setUploadError("Speech must be at least 10 seconds long.");return;}
     if(audioBlob.size>30*1024*1024){setUploadError("Audio file exceeds 30 MB limit.");return;}
@@ -1907,7 +1924,6 @@ export default function DashboardPage() {
   };
 
   if (loading) return <FullDashboardLayoutSkeleton />;
-  if (!user) return null;
 
   const isCute       = false;
   const activeTopic  = topics.length>0?topics[0]:null;
@@ -2967,22 +2983,6 @@ export default function DashboardPage() {
       interview_type: interviewType,
     }]);
   };
-
-  // Initialize topics with first dispenser topic if empty on mount
-  useEffect(() => {
-    if (topics.length === 0 && TOPICS.length > 0) {
-      const first = TOPICS[0];
-      setTopics([{
-        id: first.id,
-        title: first.text,
-        prompt: first.text,
-        context: first.categoryLabel,
-        suggested_points: [...(first.talkingPoints || [])],
-        module_type: "public_speaking",
-        interview_type: "general",
-      }]);
-    }
-  }, []);
 
   // ── Retro Topic Machine & Dispensed Receipt (From zip prototype) ────────────────
   const renderRetroPrinter = (isDrawer: boolean = false) => {
