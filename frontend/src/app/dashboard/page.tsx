@@ -2977,6 +2977,49 @@ export default function DashboardPage() {
     }]);
   };
 
+  // ── Async Topic Generation Request from Machine ───────────────────────────
+  const handleRequestNewTopic = async (params: {
+    moduleType: string;
+    category: string;
+    difficulty: string;
+    customTopic: string;
+  }): Promise<DispenserTopic | null> => {
+    try {
+      let url = `${getApiBaseUrl()}/api/topics/generate?module_type=${encodeURIComponent(params.moduleType)}&difficulty=${encodeURIComponent(params.difficulty)}`;
+      if (params.moduleType === "public_speaking") {
+        url += `&category=${encodeURIComponent(params.category)}`;
+      } else {
+        url += `&interview_type=${encodeURIComponent(params.category)}&interview_persona=${encodeURIComponent(interviewPersona)}`;
+      }
+      if (params.customTopic && params.customTopic.trim()) {
+        url += `&custom_topic=${encodeURIComponent(params.customTopic.trim())}`;
+      }
+
+      const res = await fetch(url, { headers: getAuthHeaders() });
+      if (!res.ok) {
+        throw new Error(`Failed to generate topic: ${res.status}`);
+      }
+      const data = await res.json();
+      if (data?.topics && data.topics.length > 0) {
+        const gen = data.topics[0];
+        setTopics(data.topics);
+        return {
+          id: gen.id || `topic-${Date.now()}`,
+          text: gen.prompt || gen.title,
+          category: gen.context || params.category,
+          categoryLabel: (params.category || params.moduleType).toUpperCase().replace(/_/g, " "),
+          timeToSpeak: 90,
+          talkingPoints: (gen.suggested_points && gen.suggested_points.length > 0)
+            ? gen.suggested_points
+            : [],
+        };
+      }
+    } catch (err) {
+      console.warn("Backend topic generation request failed, falling back to smart client generator:", err);
+    }
+    return null;
+  };
+
   // ── Retro Topic Machine & Dispensed Receipt (From zip prototype) ────────────────
   const renderRetroPrinter = (isDrawer: boolean = false) => {
     const currentDispenserTopic: DispenserTopic | undefined = activeTopic ? {
@@ -3008,6 +3051,7 @@ export default function DashboardPage() {
         onDifficultyChange={setDifficulty}
         customTopic={customTopic}
         onCustomTopicChange={setCustomTopic}
+        onRequestNewTopic={handleRequestNewTopic}
       />
     );
   };

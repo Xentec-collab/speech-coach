@@ -126,6 +126,152 @@ const RetroSelect: React.FC<RetroSelectProps> = ({
 };
 
 
+interface FallbackParams {
+  moduleType: string;
+  category: string;
+  difficulty: string;
+  customTopic: string;
+}
+
+export function generateTrainedTopicFallback({
+  moduleType,
+  category,
+  difficulty,
+  customTopic,
+}: FallbackParams): Topic {
+  const trimmed = customTopic.trim();
+  const cat = (category || (moduleType === 'interview_preparation' ? 'cat_gdpi' : 'impromptu')).toLowerCase();
+
+  if (trimmed.length > 0) {
+    if (moduleType === 'interview_preparation') {
+      const interviewTemplates: Record<string, { prompt: string; points: string[] }> = {
+        cat_gdpi: {
+          prompt: `Evaluate the socio-economic and strategic implications of ${trimmed} in emerging markets.`,
+          points: [
+            `Market Disruption: Analyze how ${trimmed} shifts consumer behavior, competition, and business models.`,
+            `Stakeholder Tension: Address regulatory friction, ethical concerns, or societal trade-offs involved.`,
+            `Strategic Outlook: Propose a balanced corporate and policy roadmap to maximize sustainable upside.`
+          ]
+        },
+        hr_interview: {
+          prompt: `Describe a scenario where you applied principles of ${trimmed} or overcame a complex challenge related to it in your team.`,
+          points: [
+            `Situation & Stakes: Describe the high-stakes context where ${trimmed} or that core challenge surfaced.`,
+            `Personal Initiative: Highlight your specific communication, empathy, and ownership to solve it.`,
+            `Long-term Impact: The tangible result achieved and the lasting professional lesson learned.`
+          ]
+        },
+        software_engineering: {
+          prompt: `How would you architect a system or evaluate trade-offs when integrating or scaling ${trimmed}?`,
+          points: [
+            `Architectural Constraints: Define latency, fault tolerance, and security boundaries for ${trimmed}.`,
+            `Trade-off Defense: Defend your chosen design pattern against alternatives like speed vs maintainability.`,
+            `Reliability & Scale: Explain how you monitor bottlenecks and ensure zero-downtime resilience.`
+          ]
+        },
+        mba_admissions: {
+          prompt: `How has your exposure to ${trimmed} shaped your strategic leadership philosophy and long-term career ambition?`,
+          points: [
+            `Inflection Point: The pivotal project or insight around ${trimmed} that revealed your growth areas.`,
+            `Leadership Under Ambiguity: Leading diverse teams when navigating unfamiliar complexities like ${trimmed}.`,
+            `Future Vision: How an MBA bridges this domain knowledge into scalable executive leadership.`
+          ]
+        },
+        campus_placement: {
+          prompt: `Walk me through a project, concept, or practical scenario where you engaged deeply with ${trimmed}.`,
+          points: [
+            `Core Curiosity: What initially drew you to explore ${trimmed} and how you defined the scope.`,
+            `Technical Rigor: The specific tools, problem-solving methods, and hurdles you navigated.`,
+            `Readiness to Contribute: How this hands-on learning translates into immediate value for our team.`
+          ]
+        },
+        leadership: {
+          prompt: `Describe how you would steer an organization facing turbulent change or ethical questions around ${trimmed}.`,
+          points: [
+            `Vision Alignment: Fostering organizational clarity amidst the ambiguities of ${trimmed}.`,
+            `Decisive Governance: Making the hard ethical call while protecting long-term employee trust.`,
+            `Cultural Resilience: Building an adaptable culture capable of thriving through this paradigm.`
+          ]
+        }
+      };
+
+      const matched = interviewTemplates[cat] || interviewTemplates.cat_gdpi;
+      return {
+        id: `custom-interview-${Date.now()}`,
+        text: matched.prompt,
+        category: cat,
+        categoryLabel: cat.toUpperCase().replace(/_/g, ' '),
+        timeToSpeak: 120,
+        talkingPoints: matched.points
+      };
+    }
+
+    // Public Speaking custom topic templates by category
+    const publicSpeakingTemplates: Record<string, (theme: string) => { prompt: string; points: string[] }> = {
+      impromptu: (theme) => ({
+        prompt: `The Hidden Lessons of ${theme.charAt(0).toUpperCase() + theme.slice(1)}: Why patience and hidden root growth matter more than rushing to bloom.`,
+        points: [
+          `The Hook & Analogy: Draw an unexpected parallel between ${theme} and human growth or daily challenges.`,
+          `The Core Tension: Examine the quiet struggle between rushing visible results versus doing unseen foundational work.`,
+          `The Takeaway: Share a decisive rule of thumb for how the listener can apply this insight today.`
+        ]
+      }),
+      storytelling: (theme) => ({
+        prompt: `Recount a vivid moment when your relationship with ${theme} or a related pursuit challenged your expectations and taught you humility.`,
+        points: [
+          `Setting the Scene: Establish the initial atmosphere, sensory stakes, and optimism before things unfolded.`,
+          `The Turning Point: The critical moment plans fell apart, an unexpected truth surfaced, or friction peaked.`,
+          `The Transformation: How walking through that experience permanently reshaped your values and perspective.`
+        ]
+      }),
+      persuasive: (theme) => ({
+        prompt: `Why modern society must radically rethink its approach to ${theme} before it's too late.`,
+        points: [
+          `The Thesis & Urgency: State an uncompromising argument on why current neglect of ${theme} harms our future.`,
+          `Refuting the Main Objection: Directly dismantle the leading counterargument with logic and evidence.`,
+          `Inspiring Call to Action: Urge the audience with a concrete, immediate challenge to change their habits.`
+        ]
+      }),
+      life_skill: (theme) => ({
+        prompt: `Cultivating Mastery: How adopting the deliberate mindset of ${theme} builds lifelong resilience and calm.`,
+        points: [
+          `The Common Trap: Why most people approach ${theme} with short bursts of effort rather than sustainable systems.`,
+          `The 15-Minute Habit: A practical daily mental model or exercise anyone can start immediately.`,
+          `The Compounding Dividend: The profound peace and capability gained after practicing this skill for years.`
+        ]
+      }),
+      what_if: (theme) => ({
+        prompt: `Imagine a future where all natural forms of ${theme} suddenly vanished overnight. How would humanity adapt?`,
+        points: [
+          `The Immediate Shock: Detail the psychological and societal disruption of day one in this alternate reality.`,
+          `Creative Human Adaptation: How culture, language, and technology would evolve to replace what was lost.`,
+          `The Philosophical Mirror: What this wild thought experiment reveals about our gratitude and human nature today.`
+        ]
+      })
+    };
+
+    const generator = publicSpeakingTemplates[cat] || publicSpeakingTemplates.impromptu;
+    const generated = generator(trimmed);
+    return {
+      id: `custom-speech-${Date.now()}`,
+      text: generated.prompt,
+      category: cat,
+      categoryLabel: cat.toUpperCase().replace(/_/g, ' '),
+      timeToSpeak: 90,
+      talkingPoints: generated.points
+    };
+  }
+
+  // Normal topic selection: filtered strictly by category
+  const matching = TOPICS.filter((t) => t.category.toLowerCase() === cat);
+  const pool = matching.length > 0 ? matching : TOPICS;
+  const picked = pool[Math.floor(Math.random() * pool.length)];
+  return {
+    ...picked,
+    id: `dispensed-${Date.now()}`
+  };
+}
+
 interface TopicDispenserProps {
   initialTopic?: Topic;
   onTopicChange?: (topic: Topic) => void;
@@ -139,6 +285,12 @@ interface TopicDispenserProps {
   onDifficultyChange?: (val: string) => void;
   customTopic?: string;
   onCustomTopicChange?: (val: string) => void;
+  onRequestNewTopic?: (params: {
+    moduleType: string;
+    category: string;
+    difficulty: string;
+    customTopic: string;
+  }) => Promise<Topic | null>;
 }
 
 export const TopicDispenser: React.FC<TopicDispenserProps> = ({
@@ -154,6 +306,7 @@ export const TopicDispenser: React.FC<TopicDispenserProps> = ({
   onDifficultyChange,
   customTopic = "",
   onCustomTopicChange,
+  onRequestNewTopic,
 }) => {
   // Topics queue / selection - Defaults to IDLE so machine starts waiting for user to pop topic!
   const [currentTopic, setCurrentTopic] = useState<Topic>(initialTopic || TOPICS[0]);
@@ -211,52 +364,55 @@ export const TopicDispenser: React.FC<TopicDispenserProps> = ({
     }
   }, [initialTopic]);
 
-  const dispenseNewTopic = () => {
+  const dispenseNewTopic = async () => {
     setOpenDropdown(null);
     if (dispenserStatus === 'dispensing' || dispenserStatus === 'retracting') return;
 
-    let nextTopic: Topic;
-    if (customTopic && customTopic.trim().length > 0) {
-      nextTopic = {
-        id: `custom-${Date.now()}`,
-        text: customTopic.trim(),
-        category: category || 'custom',
-        categoryLabel: category ? category.toUpperCase() : 'CUSTOM TOPIC',
-        timeToSpeak: 90,
-        talkingPoints: [
-          `Key perspective or argument on ${customTopic.trim().slice(0, 35)}...`,
-          "Concrete example, real-world scenario, or personal experience",
-          "Decisive closing takeaway or call to action for the listener"
-        ]
-      };
-    } else {
-      // Pick next topic from curated pool
-      const matching = TOPICS.filter((t) => 
-        t.id !== currentTopic?.id &&
-        (!category || category === 'impromptu' || t.category.toLowerCase().includes(category.toLowerCase()))
-      );
-      const pool = matching.length > 0 ? matching : TOPICS.filter((t) => t.id !== currentTopic?.id);
-      nextTopic = pool.length > 0 
-        ? pool[Math.floor(Math.random() * pool.length)] 
-        : TOPICS[0];
-    }
-
-    // If a ticket is currently out, retract it first into the slot
+    // 1. If ticket is currently out, retract it smoothly into slot
     if (dispenserStatus === 'ready') {
       setDispenserStatus('retracting');
-
-      // After retraction animation completes (280ms), load next topic and dispense
-      setTimeout(() => {
-        setCurrentTopic(nextTopic);
-        onTopicChange?.(nextTopic);
-        triggerDispenseFeed();
-      }, 280);
-    } else {
-      // Direct dispense from idle or torn
-      setCurrentTopic(nextTopic);
-      onTopicChange?.(nextTopic);
-      triggerDispenseFeed();
+      await new Promise((r) => setTimeout(r, 280));
     }
+
+    // 2. Start motorized tactile feed cycle
+    setDispenserStatus('dispensing');
+    setDispenseCount((prev) => prev + 1);
+
+    // 3. Concurrently fetch the real AI-generated topic while motor rumbles
+    let nextTopic: Topic | null = null;
+    const minFeedPromise = new Promise((r) => setTimeout(r, 2600));
+
+    if (onRequestNewTopic) {
+      try {
+        const fetchPromise = onRequestNewTopic({
+          moduleType,
+          category,
+          difficulty,
+          customTopic,
+        });
+        const timeoutPromise = new Promise<null>((r) => setTimeout(() => r(null), 3800));
+        nextTopic = await Promise.race([fetchPromise, timeoutPromise]);
+      } catch (err) {
+        console.warn("Async topic request error:", err);
+      }
+    }
+
+    // 4. If AI returned null or timed out, use category-trained smart generator
+    if (!nextTopic) {
+      nextTopic = generateTrainedTopicFallback({
+        moduleType,
+        category,
+        difficulty,
+        customTopic,
+      });
+    }
+
+    // Await motorized cycle completion
+    await minFeedPromise;
+
+    setCurrentTopic(nextTopic);
+    onTopicChange?.(nextTopic);
+    setDispenserStatus('ready');
   };
 
   const triggerDispenseFeed = () => {

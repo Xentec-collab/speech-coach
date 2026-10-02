@@ -146,86 +146,199 @@ def generate_speaking_topics(
             detail="Gemini API Key is not configured on the server. Please add GEMINI_API_KEY to your backend/.env file."
         )
 
+    # ── Category & Framework Guidelines ───────────────────────────────────────
+    cat_clean = (category or "impromptu").lower().replace("-", "_").strip()
+    diff_clean = (difficulty or "medium").lower().strip()
+
+    category_frameworks = {
+        "impromptu": {
+            "name": "Impromptu Speaking (Spontaneous & Philosophical)",
+            "goal": "Test rapid mental synthesis, creative metaphors, and structured spontaneity under time pressure.",
+            "prompt_style": "Frame a thought-provoking dilemma, paradoxical question, or metaphorical insight. If a custom theme is given, weave it into a broader philosophical or life dilemma (never just echo the keyword alone!).",
+            "point_1": "The Hook & Metaphor: An unexpected opening analogy or striking observation connecting the topic to everyday human experience.",
+            "point_2": "The Core Dilemma: Exploring the tension between two opposing human instincts, societal frictions, or real-world trade-offs.",
+            "point_3": "The Takeaway Punchline: A memorable concluding maxim, personal rule of thumb, or crisp synthesis for the listener."
+        },
+        "storytelling": {
+            "name": "Storytelling & Narrative Arc",
+            "goal": "Evoke emotional resonance, sensory immersion, tension, and transformative reflection through a personal arc.",
+            "prompt_style": "Challenge the speaker to recount a specific pivotal moment, unexpected hurdle, or memorable turning point.",
+            "point_1": "Setting the Scene: Establish the physical atmosphere, initial expectations, and emotional stakes before the conflict.",
+            "point_2": "The Climax / Turning Point: The pivotal moment where plans crumbled, an unexpected truth emerged, or emotions peaked.",
+            "point_3": "The Transformation & Lingering Lesson: How that experience permanently reshaped your character, habits, or worldview."
+        },
+        "persuasive": {
+            "name": "Persuasive & Debatable Speaking",
+            "goal": "Build an airtight, passionate argument, confront counterarguments, and incite a decisive call to action.",
+            "prompt_style": "Pose a bold, controversial, or urgent proposition that demands a clear stand against conventional wisdom.",
+            "point_1": "The Thesis & Urgent Problem: State a bold, uncompromising position and demonstrate why current complacency is costly.",
+            "point_2": "Dismantling the Main Objection: Directly confront the single strongest counter-argument and dismantle it with logic or evidence.",
+            "point_3": "The Call to Action: Urge the audience with an inspiring, immediate demand to change their behavior or beliefs."
+        },
+        "life_skill": {
+            "name": "Life Skill & Deep Wisdom",
+            "goal": "Share actionable wisdom, mental models, emotional intelligence, and sustainable daily mastery.",
+            "prompt_style": "Examine a quiet discipline, psychological truth, or critical life skill that builds lifelong resilience.",
+            "point_1": "The Common Blindspot: The subtle trap or common rookie mistake most people fall into regarding this skill.",
+            "point_2": "The Actionable Practice: A concrete daily habit, mental model, or 10-minute ritual anyone can implement today.",
+            "point_3": "The Compound Payoff: The profound long-term dividend this skill yields in peace of mind, career, or relationships."
+        },
+        "what_if": {
+            "name": "What If (Speculative Thought Experiment)",
+            "goal": "Spark unconstrained imagination, explore counterfactual realities, and mirror truths about human nature.",
+            "prompt_style": "Pose a mind-bending alternate scenario where an everyday law of nature, society, or technology is radically altered.",
+            "point_1": "The Immediate Disruption: The initial shockwave, chaos, and surreal adjustments of day one in this alternate reality.",
+            "point_2": "Creative Human Adaptation: How society, daily routines, culture, and economies evolve to cope or thrive.",
+            "point_3": "The Philosophical Mirror: What this wild hypothetical teaches us about real human desires, fears, and gratitude today."
+        }
+    }
+
+    interview_frameworks = {
+        "cat_gdpi": {
+            "name": "CAT GDPI (MBA Admissions & Strategic Case)",
+            "goal": "Assess strategic business acumen, socio-economic analysis, policy trade-offs, and multi-stakeholder synthesis.",
+            "point_1": "Economic & Feasibility Pillar: Evaluate market dynamics, cost-benefit realities, and business viability.",
+            "point_2": "Social & Ethical Pillar: Address regulatory impact, stakeholder friction, and environmental/equitable consequences.",
+            "point_3": "Strategic Execution Roadmap: Propose a balanced, actionable framework with measurable KPIs."
+        },
+        "hr_interview": {
+            "name": "HR Behavioral Interview (STAR Method)",
+            "goal": "Evaluate cultural fit, interpersonal emotional intelligence, conflict resolution, accountability, and values.",
+            "point_1": "Situation & Stakes: Describe the high-stakes context, constraints, and interpersonal friction encountered.",
+            "point_2": "Individual Action & Ownership: Explain your deliberate communication, empathy, and specific contributions.",
+            "point_3": "Measurable Result & Growth: Share the quantifiable outcome, team impact, and enduring professional takeaway."
+        },
+        "software_engineering": {
+            "name": "Technical & Engineering Behavioral",
+            "goal": "Evaluate architectural decision-making, incident triage under pressure, technical debt, and team velocity.",
+            "point_1": "Context & Constraints: Define scale bottlenecks, latency budgets, reliability requirements, or legacy friction.",
+            "point_2": "Engineering Strategy & Trade-offs: Defend why you chose architecture A over B, balancing speed vs resilience.",
+            "point_3": "Measurable Impact & Post-Mortem: Quantifiable latency/performance gains, reliability metrics, and systemic learnings."
+        },
+        "mba_admissions": {
+            "name": "MBA Admissions Board",
+            "goal": "Evaluate executive leadership potential, career inflection points, cross-functional impact, and long-term vision.",
+            "point_1": "Strategic Inflection Point: The pivotal career challenge that revealed leadership blindspots and catalyzed growth.",
+            "point_2": "Influence Without Authority: Rallying cross-functional teams and overcoming organizational skepticism.",
+            "point_3": "Long-Term Value Proposition: How this MBA bridge translates into global leadership and enterprise transformation."
+        },
+        "campus_placement": {
+            "name": "Campus Placement & Early Career",
+            "goal": "Assess learning agility, foundational curiosity, problem-solving stamina, and collaborative team mindset.",
+            "point_1": "Core Curiosity & Scope: The specific problem or project that sparked your interest and how you set targets.",
+            "point_2": "Overcoming Roadblocks: How you diagnosed roadblocks, learned new tools on the fly, and stayed resilient.",
+            "point_3": "Readiness to Contribute: Key competency gained and how you intend to add immediate value from day one."
+        },
+        "leadership": {
+            "name": "Executive Leadership & Management",
+            "goal": "Assess leadership through ambiguity, decisive governance, talent empowerment, and ethical accountability.",
+            "point_1": "Navigating Uncertainty: Aligning conflicting stakeholder interests under incomplete or shifting data.",
+            "point_2": "Principled Hard Decision: Making the tough call, owning downside risks, and protecting organizational integrity.",
+            "point_3": "Galvanizing the Team: Inspiring trust, transparent communication, and establishing sustainable momentum."
+        }
+    }
+
+    diff_guide = {
+        "easy": "Keep the tone accessible, relatable, and encouraging. Focus on everyday personal scenarios and intuitive logic.",
+        "medium": "Require structured reasoning, contrasting perspectives, concrete real-world evidence, and clear takeaways.",
+        "hard": "Present high-stakes dilemmas, counter-intuitive paradoxes, abstract tensions, or stress-test questions requiring deep analytical rigor."
+    }.get(diff_clean, "Require structured reasoning and clear takeaways.")
+
     if module_type == "interview_preparation":
+        fw = interview_frameworks.get(cat_clean, interview_frameworks.get("cat_gdpi"))
+        custom_clause = ""
+        if custom_topic and custom_topic.strip():
+            custom_clause = f"""
+            CRITICAL CUSTOM TOPIC INSTRUCTION:
+            The candidate wants to practice an interview scenario around: "{custom_topic.strip()}".
+            - Creatively frame a realistic, professional {fw['name']} interview question addressing "{custom_topic.strip()}".
+            - DO NOT simply echo "{custom_topic.strip()}"! Frame a complete, challenging interview prompt.
+            - The 3 suggested talking points MUST be tailored specifically to "{custom_topic.strip()}" using the framework below.
+            """
+
         if curated_question:
             prompt_text = f"""
-            You are a professional interview preparation coach acting as a {interview_persona} interviewer.
-            We have selected a specific curated question from our question bank for a {interview_type} interview.
+            You are an elite interview preparation coach acting as a {interview_persona} interviewer.
+            We have selected a curated question from our question bank for {fw['name']}:
             
             Curated Question: "{curated_question}"
-            Difficulty Level: {difficulty}
-            Category: {category}
-            Question Context / Background: "{curated_context or ''}"
-            Expected Topics / Keywords: "{expected_topics or ''}"
+            Difficulty: {diff_clean} ({diff_guide})
+            Context: "{curated_context or ''}"
+            Expected Keywords: "{expected_topics or ''}"
             
-            You MUST enrich this question and output the structured JSON response.
-            Your task:
-            1. Create a short, engaging "title" for this question.
-            2. The "prompt" field MUST be the curated question: "{curated_question}" (do not change the core question, but you can format it nicely if needed).
-            3. The "context" field should be a brief background or situational context. If the database context is provided, enrich it.
-            4. The "suggested_points" field must be exactly 3 suggested points, tips, or framework steps (e.g. using the STAR method or specific response advice) the candidate should cover.
-            5. The "evaluation_criteria" should describe exactly what a {interview_persona} interviewer is evaluating in their response (e.g., specific skills, tone, structure, technical keywords).
-            6. The "follow_up_question" should be a realistic follow-up question that could be asked based on this prompt.
+            Framework & Objective: {fw['goal']}
+            Suggested Talking Points Guidance:
+            1. {fw['point_1']}
+            2. {fw['point_2']}
+            3. {fw['point_3']}
             
-            The tone of your instructions and context must match the active interview style/persona: {interview_persona} (friendly, strict, corporate, government panel, ivy league, or MBA panel).
+            You MUST enrich this question and return structured JSON with:
+            1. "title": A concise, sharp interview question title (e.g., "Navigating Ambiguity in Product Roadmaps").
+            2. "prompt": The curated question: "{curated_question}" (formatted clearly).
+            3. "context": Situational context framing what the {interview_persona} interviewer is looking for.
+            4. "suggested_points": Exactly 3 specific, actionable points the candidate should address, following the 3-point framework above.
+            5. "evaluation_criteria": Clear criteria evaluated by a {interview_persona} interviewer (structure, credibility, conciseness).
+            6. "follow_up_question": A realistic, probing follow-up question.
             """
         else:
-            custom_part = f' based on the custom topic/theme: "{custom_topic.strip()}"' if custom_topic and custom_topic.strip() else ""
             prompt_text = f"""
-            You are a professional interview preparation coach acting as a {interview_persona} interviewer.
-            Generate exactly {count} realistic and challenging interview question(s) or scenario(s){custom_part}.
+            You are an elite interview preparation coach acting as a {interview_persona} interviewer.
+            Generate exactly {count} realistic, challenging {fw['name']} interview prompt(s).
             
-            Parameters:
-            - Interview Type: {interview_type} (e.g. CAT GDPI, UPSC, Technical, Campus Placement)
-            - Difficulty Level: {difficulty}
-            - Interview Style / Persona: {interview_persona} (Your generated questions, context, and coaching tone should reflect this style: friendly, strict, corporate, government panel, ivy league, or MBA panel)
+            {custom_clause}
+            Difficulty Level: {diff_clean} ({diff_guide})
+            Interview Persona: {interview_persona}
+            Framework & Objective: {fw['goal']}
             
-            You MUST return a JSON object with a "topics" array. Each topic object MUST contain ALL of these six fields — do not omit any:
-            1. "title": A short, engaging title for the interview question/scenario (string).
-            2. "prompt": The primary interview question/prompt for the user to answer (string).
-            3. "context": Brief background, context, or scenario for the interview question (string).
-            4. "suggested_points": A JSON array of exactly 3 suggested points, tips, or framework steps (e.g. STAR method elements) the candidate can cover in their response (list of strings).
-            5. "evaluation_criteria": Specific criteria or key points the interviewer evaluates (only for interview preparation mode).
-            6. "follow_up_question": A potential follow-up question the candidate should prepare for (only for interview preparation mode).
+            Strict 3-Point Structure for "suggested_points":
+            1. {fw['point_1']}
+            2. {fw['point_2']}
+            3. {fw['point_3']}
             
-            Ensure each prompt is highly realistic for a {interview_type} interview and matches the difficulty level.
+            You MUST return a JSON object with a "topics" array containing {count} object(s):
+            1. "title": A concise, engaging title.
+            2. "prompt": The primary interview question/scenario.
+            3. "context": Situational background and coaching intent.
+            4. "suggested_points": A list of exactly 3 specific, high-caliber points (tailored to the prompt, strictly following the 3-point framework).
+            5. "evaluation_criteria": Specific skills, metrics, or delivery cues evaluated.
+            6. "follow_up_question": A probing follow-up question.
             """
     else:
-        # Public speaking prompt generation (existing behavior)
+        # Public Speaking Module
+        fw = category_frameworks.get(cat_clean, category_frameworks.get("impromptu"))
+        custom_clause = ""
         if custom_topic and custom_topic.strip():
-            prompt_text = f"""
-            You are a professional public speaking coach.
-            The user has provided their own custom topic/theme: "{custom_topic.strip()}".
-            
-            You MUST generate a speaking prompt that is strictly about or directly based on their custom topic/theme. Do not generate a generic prompt.
-            
-            Tailor the prompt's style to the following parameters:
-            - Category: {category} (If category is 'impromptu', structure it as an impromptu speaking prompt about their theme. If it is 'interview', structure it as a job interview question related to their theme. If it is 'persuasive', structure it as a persuasive argument prompt. If it is 'warmup', make it an icebreaker prompt).
-            - Difficulty Level: {difficulty}
-            
-            You MUST return a JSON object with a "topics" array. Each topic object MUST contain ALL of these four fields — do not omit any:
-            1. "title": A short, engaging title (string).
-            2. "prompt": The primary question or prompt for the user to answer in their speech (string).
-            3. "context": Brief background or situational context for the prompt (string).
-            4. "suggested_points": A JSON array of exactly 3 suggested talking points (list of strings).
-            
-            Return exactly {count} topic(s) in the topics array.
+            custom_clause = f"""
+            CRITICAL CUSTOM TOPIC INSTRUCTION:
+            The speaker provided the custom theme/keyword: "{custom_topic.strip()}".
+            - You MUST creatively transform and elevate "{custom_topic.strip()}" into a complete, professional speaking prompt conforming strictly to {fw['name']}.
+            - DO NOT simply output "{custom_topic.strip()}" as the title or prompt!
+            - DO NOT output generic placeholders like "Key perspective on {custom_topic.strip()}..."!
+            - Every single talking point MUST be directly woven with rich, specific ideas about "{custom_topic.strip()}", rigorously following the 3-point framework below!
             """
-        else:
-            prompt_text = f"""
-            You are a professional public speaking coach.
-            Generate a list containing exactly {count} public speaking topic(s).
-            Category: {category}
-            Difficulty Level: {difficulty}
 
-            You MUST return a JSON object with a "topics" array. Each topic object MUST contain ALL of these four fields — do not omit any:
-            1. "title": A short, engaging title (string).
-            2. "prompt": The primary question or prompt for the user to answer in their speech (string).
-            3. "context": Brief background or situational context for the prompt (string).
-            4. "suggested_points": A JSON array of exactly 3 suggested talking points (list of strings).
-
-            Ensure each topic prompt is engaging, creative, realistic, and matches the difficulty level.
-            """
+        prompt_text = f"""
+        You are an elite public speaking coach.
+        Generate exactly {count} public speaking practice prompt(s) for the category: {fw['name']}.
+        
+        {custom_clause}
+        Difficulty: {diff_clean} ({diff_guide})
+        Category Objective: {fw['goal']}
+        Prompt Style: {fw['prompt_style']}
+        
+        Strict 3-Point Framework for "suggested_points":
+        Point 1: {fw['point_1']}
+        Point 2: {fw['point_2']}
+        Point 3: {fw['point_3']}
+        
+        Requirements:
+        - The "title" must be catchy, evocative, and memorable (e.g., "The Secret Lessons of the Garden", "The Unseen Cost of Speed").
+        - The "prompt" must be an articulate, complete question or speech prompt that inspires deep thought.
+        - The "context" must provide brief situational inspiration framing why this topic matters.
+        - The "suggested_points" MUST be a JSON array of exactly 3 distinct, highly specific talking points adhering to Points 1, 2, and 3 above. Never return generic filler!
+        
+        Return a JSON object with a "topics" array.
+        """
 
     try:
         response = call_generative_model(
@@ -251,12 +364,17 @@ def generate_speaking_topics(
             cleaned_topics.append({
                 "title": title,
                 "prompt": t.get("prompt") or f"Share your thoughts on the topic: \"{title}\".",
-                "context": t.get("context") or "Reflect on your personal experiences and perspectives related to this topic.",
-                "suggested_points": t.get("suggested_points") or [
-                    "Start with a brief personal anecdote or example.",
-                    "Explain why this topic matters to you or your audience.",
-                    "Conclude with a clear takeaway or call to action.",
-                ],
+                "suggested_points": t.get("suggested_points") or (
+                    [
+                        f"{fw['point_1'].split(':')[0]}: Focus on your opening perspective and core theme.",
+                        f"{fw['point_2'].split(':')[0]}: Analyze key tensions, real-world examples, or trade-offs.",
+                        f"{fw['point_3'].split(':')[0]}: Deliver a decisive, memorable takeaway or action step."
+                    ] if 'fw' in locals() and isinstance(fw, dict) and 'point_1' in fw else [
+                        "The Opening Hook: Set the stage with a vivid analogy or unexpected angle.",
+                        "The Core Dilemma: Analyze the underlying human tension or trade-off.",
+                        "The Concluding Takeaway: Deliver a memorable principle for the listener."
+                    ]
+                ),
                 "evaluation_criteria": t.get("evaluation_criteria") or "Demonstrate logical structure, domain competence, and relevant details.",
                 "follow_up_question": t.get("follow_up_question") or "Can you elaborate on your answer or provide a specific example?"
             })
