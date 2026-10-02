@@ -12,6 +12,14 @@ interface TopicDispenserProps {
   onTopicChange?: (topic: Topic) => void;
   countdown?: number | null;
   onCancelCountdown?: () => void;
+  moduleType?: string;
+  onModuleTypeChange?: (val: "public_speaking" | "interview_preparation") => void;
+  category?: string;
+  onCategoryChange?: (val: string) => void;
+  difficulty?: string;
+  onDifficultyChange?: (val: string) => void;
+  customTopic?: string;
+  onCustomTopicChange?: (val: string) => void;
 }
 
 export const TopicDispenser: React.FC<TopicDispenserProps> = ({
@@ -19,10 +27,18 @@ export const TopicDispenser: React.FC<TopicDispenserProps> = ({
   onTopicChange,
   countdown = null,
   onCancelCountdown,
+  moduleType = "public_speaking",
+  onModuleTypeChange,
+  category = "impromptu",
+  onCategoryChange,
+  difficulty = "medium",
+  onDifficultyChange,
+  customTopic = "",
+  onCustomTopicChange,
 }) => {
-  // Topics queue / selection
+  // Topics queue / selection - Defaults to IDLE so machine starts waiting for user to pop topic!
   const [currentTopic, setCurrentTopic] = useState<Topic>(initialTopic || TOPICS[0]);
-  const [dispenserStatus, setDispenserStatus] = useState<DispenserStatus>('ready');
+  const [dispenserStatus, setDispenserStatus] = useState<DispenserStatus>(initialTopic ? 'ready' : 'idle');
   const [dispenseCount, setDispenseCount] = useState(1);
   const [isButtonPressed, setIsButtonPressed] = useState(false);
 
@@ -30,17 +46,38 @@ export const TopicDispenser: React.FC<TopicDispenserProps> = ({
   useEffect(() => {
     if (initialTopic && initialTopic.id !== currentTopic.id) {
       setCurrentTopic(initialTopic);
+      setDispenserStatus('ready');
     }
   }, [initialTopic]);
 
   const dispenseNewTopic = () => {
     if (dispenserStatus === 'dispensing' || dispenserStatus === 'retracting') return;
 
-    // Pick a new random topic different from current
-    const pool = TOPICS.filter((t) => t.id !== currentTopic.id);
-    const nextTopic = pool.length > 0 
-      ? pool[Math.floor(Math.random() * pool.length)] 
-      : TOPICS[0];
+    let nextTopic: Topic;
+    if (customTopic && customTopic.trim().length > 0) {
+      nextTopic = {
+        id: `custom-${Date.now()}`,
+        text: customTopic.trim(),
+        category: category || 'custom',
+        categoryLabel: category ? category.toUpperCase() : 'CUSTOM TOPIC',
+        timeToSpeak: 90,
+        talkingPoints: [
+          `Key perspective or argument on ${customTopic.trim().slice(0, 35)}...`,
+          "Concrete example, real-world scenario, or personal experience",
+          "Decisive closing takeaway or call to action for the listener"
+        ]
+      };
+    } else {
+      // Pick next topic from curated pool
+      const matching = TOPICS.filter((t) => 
+        t.id !== currentTopic?.id &&
+        (!category || category === 'impromptu' || t.category.toLowerCase().includes(category.toLowerCase()))
+      );
+      const pool = matching.length > 0 ? matching : TOPICS.filter((t) => t.id !== currentTopic?.id);
+      nextTopic = pool.length > 0 
+        ? pool[Math.floor(Math.random() * pool.length)] 
+        : TOPICS[0];
+    }
 
     // If a ticket is currently out, retract it first into the slot
     if (dispenserStatus === 'ready') {
@@ -53,7 +90,7 @@ export const TopicDispenser: React.FC<TopicDispenserProps> = ({
         triggerDispenseFeed();
       }, 280);
     } else {
-      // Direct dispense (e.g. from idle or torn)
+      // Direct dispense from idle or torn
       setCurrentTopic(nextTopic);
       onTopicChange?.(nextTopic);
       triggerDispenseFeed();
@@ -77,6 +114,9 @@ export const TopicDispenser: React.FC<TopicDispenserProps> = ({
   const handleTearTicket = () => {
     if (dispenserStatus !== 'ready') return;
     setDispenserStatus('torn');
+    setTimeout(() => {
+      setDispenserStatus('idle');
+    }, 400);
   };
 
   const isBusy = dispenserStatus === 'dispensing' || dispenserStatus === 'retracting';
@@ -194,24 +234,112 @@ export const TopicDispenser: React.FC<TopicDispenserProps> = ({
                   clipPath: 'polygon(-50px 0px, calc(100% + 50px) 0px, calc(100% + 50px) 3000px, -50px 3000px)',
                 }}
               >
-                {dispenserStatus !== 'idle' && (
+                {dispenserStatus !== 'idle' ? (
                   <Ticket
                     key={dispenseCount}
                     topic={currentTopic}
                     status={dispenserStatus}
                     onTear={handleTearTicket}
                   />
+                ) : (
+                  /* A neat white paper slip edge peeking out of the slit, waiting to feed */
+                  <div className="w-[220px] sm:w-[240px] h-3 bg-gradient-to-b from-[#FFFDF9] to-[#F5EFE6] border-b border-x border-[#DDD5C7] rounded-b-[3px] shadow-[0_2px_4px_rgba(0,0,0,0.06)] flex items-center justify-center pointer-events-none -mt-0.5">
+                    <span className="text-[8px] font-bold tracking-widest text-[#FF4A57]/80 uppercase font-mono">
+                      ✦ READY TO DISPENSE ✦
+                    </span>
+                  </div>
                 )}
               </div>
             </div>
           </div>
 
-          {/* LOWER MACHINE FRONT FACE STAGE (Behind the dispensed hanging ticket) */}
-          <div className="relative w-full min-h-[210px] sm:min-h-[225px] z-10 pointer-events-none" />
+          {/* LOWER MACHINE FRONT FACE STAGE */}
+          <div className="relative w-full min-h-[210px] sm:min-h-[225px] z-10 flex flex-col justify-between">
+            {dispenserStatus === 'idle' ? (
+              <div className="w-full px-5 py-2.5 flex flex-col gap-2 pointer-events-auto text-left">
+                {/* Module */}
+                <div className="flex flex-col gap-0.5">
+                  <label className="text-[9px] font-extrabold uppercase tracking-wider text-[#A0988E] font-mono">
+                    Module
+                  </label>
+                  <select
+                    value={moduleType}
+                    onChange={(e) => onModuleTypeChange?.(e.target.value as any)}
+                    className="w-full h-7 text-[11px] font-bold bg-white border border-[#DDD5C7] rounded-lg px-2 text-[#2D2A26] shadow-2xs focus:outline-hidden focus:border-[#FF4A57] cursor-pointer"
+                  >
+                    <option value="public_speaking">Public Speaking</option>
+                    <option value="interview_preparation">Interview Preparation</option>
+                  </select>
+                </div>
+
+                {/* Category & Difficulty */}
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="flex flex-col gap-0.5">
+                    <label className="text-[9px] font-extrabold uppercase tracking-wider text-[#A0988E] font-mono">
+                      Category
+                    </label>
+                    <select
+                      value={category}
+                      onChange={(e) => onCategoryChange?.(e.target.value)}
+                      className="w-full h-7 text-[11px] font-bold bg-white border border-[#DDD5C7] rounded-lg px-1.5 text-[#2D2A26] shadow-2xs focus:outline-hidden focus:border-[#FF4A57] cursor-pointer"
+                    >
+                      <option value="impromptu">Impromptu</option>
+                      <option value="storytelling">Storytelling</option>
+                      <option value="persuasive">Persuasive</option>
+                      <option value="life_skill">Life Skill</option>
+                    </select>
+                  </div>
+                  <div className="flex flex-col gap-0.5">
+                    <label className="text-[9px] font-extrabold uppercase tracking-wider text-[#A0988E] font-mono">
+                      Difficulty
+                    </label>
+                    <select
+                      value={difficulty}
+                      onChange={(e) => onDifficultyChange?.(e.target.value)}
+                      className="w-full h-7 text-[11px] font-bold bg-white border border-[#DDD5C7] rounded-lg px-1.5 text-[#2D2A26] shadow-2xs focus:outline-hidden focus:border-[#FF4A57] cursor-pointer"
+                    >
+                      <option value="easy">Easy</option>
+                      <option value="medium">Medium</option>
+                      <option value="hard">Hard</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Custom Topic (Optional) */}
+                <div className="flex flex-col gap-0.5">
+                  <label className="text-[9px] font-extrabold uppercase tracking-wider text-[#A0988E] font-mono">
+                    Custom Topic (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={customTopic}
+                    onChange={(e) => onCustomTopicChange?.(e.target.value)}
+                    placeholder="e.g. why remote work is the future..."
+                    className="w-full h-7 text-[11px] font-medium bg-white border border-[#DDD5C7] rounded-lg px-2 text-[#2D2A26] placeholder:text-[#B5AAA0] shadow-2xs focus:outline-hidden focus:border-[#FF4A57]"
+                  />
+                </div>
+
+                {/* Big Action Button */}
+                <button
+                  type="button"
+                  id="machine-pop-topic-btn"
+                  onClick={dispenseNewTopic}
+                  disabled={isBusy}
+                  className="w-full h-8 mt-1 rounded-xl bg-gradient-to-r from-[#FF4A57] to-[#FA5276] hover:from-[#f43f5e] hover:to-[#e11d48] text-white font-extrabold text-xs tracking-wider uppercase font-sans shadow-md shadow-[#FF4A57]/25 hover:shadow-lg hover:shadow-[#FF4A57]/35 active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 select-none"
+                >
+                  <span>✦</span>
+                  <span>POP YOUR TOPIC</span>
+                  <span>✦</span>
+                </button>
+              </div>
+            ) : (
+              <div className="w-full h-full pointer-events-none" />
+            )}
+          </div>
 
           {/* BOTTOM MACHINE CONTROL PANEL */}
           <div className="w-full px-6 sm:px-8 pb-5 pt-2 z-30 flex flex-col gap-2.5 select-none">
-            {/* Top Row: "🖨 Dispense Another Topic" Label / Action */}
+            {/* Top Row: "🖨 Dispense Another Topic" / "🖨 Pop Your Topic" */}
             <div className="flex items-center justify-start w-full">
               <button
                 type="button"
@@ -220,7 +348,7 @@ export const TopicDispenser: React.FC<TopicDispenserProps> = ({
                 className="inline-flex items-center gap-1.5 text-[#FF4A57] font-bold text-xs sm:text-[13px] tracking-wide select-none hover:underline cursor-pointer disabled:opacity-50"
               >
                 <Printer className="w-4 h-4 text-[#FF4A57]" />
-                <span>Dispense Another Topic</span>
+                <span>{dispenserStatus === 'idle' ? 'Pop Your Topic' : 'Dispense Another Topic'}</span>
               </button>
             </div>
 
@@ -238,7 +366,7 @@ export const TopicDispenser: React.FC<TopicDispenserProps> = ({
                   dispenseNewTopic();
                 }}
                 disabled={isBusy}
-                title="Dispense another topic"
+                title={dispenserStatus === 'idle' ? 'Pop your topic' : 'Dispense another topic'}
                 className={`relative w-14 sm:w-16 h-10 sm:h-11 rounded-xl bg-gradient-to-b from-[#FAF6EF] to-[#E5DDCF] border border-[#D5CAB8] flex items-center justify-center gap-1.5 transition-all duration-150 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed select-none ${
                   isButtonPressed
                     ? 'translate-y-0.5 shadow-[inset_0_2px_4px_rgba(0,0,0,0.2)] bg-[#DDD4C5]'
@@ -252,7 +380,6 @@ export const TopicDispenser: React.FC<TopicDispenserProps> = ({
               </button>
 
               {/* Center: Middle Status LED */}
-              {/* Blinks yellow when topic is being generated/dispensed, solid glowing green when ready */}
               <div className="flex items-center justify-center">
                 <div className="relative flex items-center justify-center w-5 h-5 rounded-full bg-[#E5DDCF] p-0.5 border border-[#D5CBBB] shadow-inner">
                   <motion.div
@@ -268,19 +395,31 @@ export const TopicDispenser: React.FC<TopicDispenserProps> = ({
                               '0 0 12px rgba(234, 179, 8, 0.95), 0 0 4px #EAB308',
                             ],
                           }
-                        : {
+                        : dispenserStatus === 'ready'
+                        ? {
                             backgroundColor: '#10B981',
                             scale: 1,
                             boxShadow:
                               '0 0 10px rgba(16, 185, 129, 0.85), 0 0 3px #10B981, inset 0 1px 2px rgba(255, 255, 255, 0.6)',
                           }
+                        : {
+                            backgroundColor: '#FF4A57',
+                            scale: [1, 1.1, 1],
+                            boxShadow: [
+                              '0 0 8px rgba(255, 74, 87, 0.8), 0 0 2px #FF4A57',
+                              '0 0 4px rgba(255, 74, 87, 0.4)',
+                              '0 0 8px rgba(255, 74, 87, 0.8), 0 0 2px #FF4A57',
+                            ],
+                          }
                     }
                     transition={
                       isBusy
                         ? { duration: 0.5, repeat: Infinity, ease: 'easeInOut' }
+                        : dispenserStatus === 'idle'
+                        ? { duration: 2, repeat: Infinity, ease: 'easeInOut' }
                         : { duration: 0.3 }
                     }
-                    className="w-2.5 h-2.5 rounded-full bg-[#10B981]"
+                    className="w-2.5 h-2.5 rounded-full bg-[#FF4A57]"
                   />
                 </div>
               </div>

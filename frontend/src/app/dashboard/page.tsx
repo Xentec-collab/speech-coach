@@ -583,19 +583,7 @@ export default function DashboardPage() {
   const [interviewPersona, setInterviewPersona] = useState("friendly");
   const [difficulty, setDifficulty] = useState("medium");
   const [customTopic, setCustomTopic] = useState("");
-  const [topics, setTopics] = useState<GeneratedTopic[]>(() => {
-    const first = TOPICS && TOPICS.length > 0 ? TOPICS[0] : null;
-    if (!first) return [];
-    return [{
-      id: first.id,
-      title: first.text,
-      prompt: first.text,
-      context: first.categoryLabel,
-      suggested_points: [...(first.talkingPoints || [])],
-      module_type: "public_speaking",
-      interview_type: "general",
-    }];
-  });
+  const [topics, setTopics] = useState<GeneratedTopic[]>([]);
   const [topicLoading, setTopicLoading] = useState(false);
   const [topicError, setTopicError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -825,6 +813,11 @@ export default function DashboardPage() {
 
   const handleStartWithCountdown = () => {
     if (recordingState !== "idle") return;
+    if (!activeTopic) {
+      const btn = document.getElementById("machine-pop-topic-btn") || document.getElementById("tactile-dispense-button");
+      if (btn) btn.click();
+      return;
+    }
     if (countdownIntervalRef.current) {
       clearInterval(countdownIntervalRef.current);
       countdownIntervalRef.current = null;
@@ -3007,6 +3000,14 @@ export default function DashboardPage() {
         onTopicChange={handleDispenserTopicChange}
         countdown={countdown}
         onCancelCountdown={cancelCountdown}
+        moduleType={moduleType}
+        onModuleTypeChange={setModuleType}
+        category={category}
+        onCategoryChange={setCategory}
+        difficulty={difficulty}
+        onDifficultyChange={setDifficulty}
+        customTopic={customTopic}
+        onCustomTopicChange={setCustomTopic}
       />
     );
   };
@@ -3050,11 +3051,11 @@ export default function DashboardPage() {
               <div className="space-y-3 text-xs text-muted-foreground">
                 <div className="flex items-start gap-2.5">
                   <span className="w-5 h-5 rounded-full bg-[#FA5276]/10 text-[#FA5276] font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">1</span>
-                  <p className="leading-snug">Press the tactile button <strong className="text-foreground font-mono">[ ||| ]</strong> or "Dispense Another Topic" on the retro machine.</p>
+                  <p className="leading-snug">Set your module, track, and difficulty right on the retro machine.</p>
                 </div>
                 <div className="flex items-start gap-2.5">
                   <span className="w-5 h-5 rounded-full bg-[#FA5276]/10 text-[#FA5276] font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">2</span>
-                  <p className="leading-snug">Read your dispensed topic and review the 3 suggested points to talk about.</p>
+                  <p className="leading-snug">Press <strong className="text-foreground">POP YOUR TOPIC</strong> or the tactile switch <strong className="text-foreground font-mono">[ ||| ]</strong> to dispense your printed prompt.</p>
                 </div>
                 <div className="flex items-start gap-2.5">
                   <span className="w-5 h-5 rounded-full bg-[#FA5276]/10 text-[#FA5276] font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">3</span>
@@ -3200,9 +3201,15 @@ export default function DashboardPage() {
                 )}
 
                 <span className="text-[11px] font-medium text-zinc-500">
-                  {recordingState === "idle" ? "Tap to start recording" :
-                   recordingState === "recording" ? "Recording in progress..." :
-                   recordingState === "paused" ? "Paused" : "Review recording"}
+                  {recordingState === "idle"
+                    ? activeTopic
+                      ? "Tap to start recording"
+                      : "Pop a topic from the machine to start recording"
+                    : recordingState === "recording"
+                    ? "Recording in progress..."
+                    : recordingState === "paused"
+                    ? "Paused"
+                    : "Review recording"}
                 </span>
               </div>
             </div>
