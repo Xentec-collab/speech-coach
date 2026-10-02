@@ -1,11 +1,130 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { motion } from 'motion/react';
-import { Printer } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Printer, ChevronDown, Check } from 'lucide-react';
 import { Topic, DispenserStatus } from '../types/dispenser';
 import { TOPICS } from '../data/topics';
 import { Ticket } from './Ticket';
+
+interface RetroSelectOption {
+  value: string;
+  label: string;
+}
+
+interface RetroSelectProps {
+  value: string;
+  onChange: (value: string) => void;
+  options: RetroSelectOption[];
+  isOpen: boolean;
+  onToggle: () => void;
+  onClose: () => void;
+  disabled?: boolean;
+  className?: string;
+}
+
+const RetroSelect: React.FC<RetroSelectProps> = ({
+  value,
+  onChange,
+  options,
+  isOpen,
+  onToggle,
+  onClose,
+  disabled = false,
+  className = "",
+}) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        onClose();
+      }
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen, onClose]);
+
+  const selectedOption = options.find((opt) => opt.value === value) || options[0];
+
+  return (
+    <div ref={containerRef} className={`relative w-full ${isOpen ? "z-50" : "z-10"} ${className}`}>
+      {/* Pill Trigger Button - Matches Reference Design */}
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={(e) => {
+          e.stopPropagation();
+          if (!disabled) onToggle();
+        }}
+        className={`w-full h-8 px-3 rounded-full bg-white border text-left text-xs font-semibold flex items-center justify-between shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-all duration-150 cursor-pointer select-none ${
+          isOpen
+            ? "border-[#FF4A57] ring-2 ring-[#FF4A57]/20 bg-[#FFFDFB] text-[#FF4A57]"
+            : "border-[#DDD5C7] text-[#2D2A26] hover:border-[#FF4A57]/60"
+        } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
+      >
+        <span className="truncate pr-1">{selectedOption?.label || value}</span>
+        <ChevronDown
+          className={`w-3.5 h-3.5 shrink-0 transition-transform duration-200 ${
+            isOpen ? "rotate-180 text-[#FF4A57]" : "text-[#9C9286]"
+          }`}
+        />
+      </button>
+
+      {/* Popover Menu - Cute Retro Dropdown Card */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -4, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -4, scale: 0.98 }}
+            transition={{ duration: 0.14, ease: "easeOut" }}
+            className="absolute left-0 right-0 top-[calc(100%+4px)] z-50 p-1 bg-[#FFFDFB] rounded-2xl border-2 border-[#E7DFC0] shadow-[0_12px_28px_-4px_rgba(60,40,20,0.2),0_4px_10px_rgba(0,0,0,0.06)] overflow-hidden"
+          >
+            <div className="max-h-48 overflow-y-auto space-y-0.5">
+              {options.map((opt) => {
+                const isSelected = opt.value === value;
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onChange(opt.value);
+                      onClose();
+                    }}
+                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-[11px] transition-all duration-150 text-left select-none cursor-pointer ${
+                      isSelected
+                        ? "bg-[#FFE8EC] text-[#FF4A57] font-extrabold shadow-2xs"
+                        : "text-[#3D3730] font-semibold hover:bg-[#FFF0F3] hover:text-[#FF4A57]"
+                    }`}
+                  >
+                    <span className="truncate">{opt.label}</span>
+                    {isSelected && (
+                      <Check className="w-3.5 h-3.5 text-[#FF4A57] shrink-0 ml-1.5" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
 
 interface TopicDispenserProps {
   initialTopic?: Topic;
@@ -41,6 +160,48 @@ export const TopicDispenser: React.FC<TopicDispenserProps> = ({
   const [dispenserStatus, setDispenserStatus] = useState<DispenserStatus>(initialTopic ? 'ready' : 'idle');
   const [dispenseCount, setDispenseCount] = useState(1);
   const [isButtonPressed, setIsButtonPressed] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState<'module' | 'category' | 'difficulty' | null>(null);
+
+  const MODULE_OPTIONS: RetroSelectOption[] = [
+    { value: 'public_speaking', label: 'Public Speaking' },
+    { value: 'interview_preparation', label: 'Interview Preparation' },
+  ];
+
+  const PUBLIC_SPEAKING_CATEGORIES: RetroSelectOption[] = [
+    { value: 'impromptu', label: 'Impromptu' },
+    { value: 'storytelling', label: 'Storytelling' },
+    { value: 'persuasive', label: 'Persuasive' },
+    { value: 'life_skill', label: 'Life Skill' },
+    { value: 'what_if', label: 'What If' },
+  ];
+
+  const INTERVIEW_CATEGORIES: RetroSelectOption[] = [
+    { value: 'cat_gdpi', label: 'CAT GDPI' },
+    { value: 'hr_interview', label: 'HR Interview' },
+    { value: 'software_engineering', label: 'Tech Behavioral' },
+    { value: 'mba_admissions', label: 'MBA Admissions' },
+    { value: 'campus_placement', label: 'Campus Placement' },
+    { value: 'leadership', label: 'Leadership' },
+  ];
+
+  const currentCategoryOptions = moduleType === 'interview_preparation'
+    ? INTERVIEW_CATEGORIES
+    : PUBLIC_SPEAKING_CATEGORIES;
+
+  const DIFFICULTY_OPTIONS: RetroSelectOption[] = [
+    { value: 'easy', label: 'Easy' },
+    { value: 'medium', label: 'Medium' },
+    { value: 'hard', label: 'Hard' },
+  ];
+
+  const handleModuleChange = (newModule: "public_speaking" | "interview_preparation") => {
+    onModuleTypeChange?.(newModule);
+    if (newModule === 'interview_preparation') {
+      onCategoryChange?.('cat_gdpi');
+    } else {
+      onCategoryChange?.('impromptu');
+    }
+  };
 
   // Sync if external initialTopic changes
   useEffect(() => {
@@ -51,6 +212,7 @@ export const TopicDispenser: React.FC<TopicDispenserProps> = ({
   }, [initialTopic]);
 
   const dispenseNewTopic = () => {
+    setOpenDropdown(null);
     if (dispenserStatus === 'dispensing' || dispenserStatus === 'retracting') return;
 
     let nextTopic: Topic;
@@ -254,60 +416,60 @@ export const TopicDispenser: React.FC<TopicDispenserProps> = ({
           </div>
 
           {/* LOWER MACHINE FRONT FACE STAGE */}
-          <div className="relative w-full min-h-[210px] sm:min-h-[225px] z-10 flex flex-col justify-between">
+          <div className="relative w-full min-h-[210px] sm:min-h-[225px] z-40 flex flex-col justify-between overflow-visible">
             {dispenserStatus === 'idle' ? (
-              <div className="w-full px-5 py-2.5 flex flex-col gap-2 pointer-events-auto text-left">
+              <div className="w-full px-5 py-2 flex flex-col gap-2 pointer-events-auto text-left relative z-40 overflow-visible">
                 {/* Module */}
-                <div className="flex flex-col gap-0.5">
-                  <label className="text-[9px] font-extrabold uppercase tracking-wider text-[#A0988E] font-mono">
+                <div className="flex flex-col gap-0.5 relative z-30">
+                  <label className="text-[9px] font-extrabold uppercase tracking-wider text-[#A0988E] font-mono select-none">
                     Module
                   </label>
-                  <select
+                  <RetroSelect
                     value={moduleType}
-                    onChange={(e) => onModuleTypeChange?.(e.target.value as any)}
-                    className="w-full h-7 text-[11px] font-bold bg-white border border-[#DDD5C7] rounded-lg px-2 text-[#2D2A26] shadow-2xs focus:outline-hidden focus:border-[#FF4A57] cursor-pointer"
-                  >
-                    <option value="public_speaking">Public Speaking</option>
-                    <option value="interview_preparation">Interview Preparation</option>
-                  </select>
+                    onChange={(val) => handleModuleChange(val as any)}
+                    options={MODULE_OPTIONS}
+                    isOpen={openDropdown === 'module'}
+                    onToggle={() => setOpenDropdown(prev => prev === 'module' ? null : 'module')}
+                    onClose={() => setOpenDropdown(null)}
+                    disabled={isBusy}
+                  />
                 </div>
 
                 {/* Category & Difficulty */}
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-2 relative z-20">
                   <div className="flex flex-col gap-0.5">
-                    <label className="text-[9px] font-extrabold uppercase tracking-wider text-[#A0988E] font-mono">
+                    <label className="text-[9px] font-extrabold uppercase tracking-wider text-[#A0988E] font-mono select-none">
                       Category
                     </label>
-                    <select
+                    <RetroSelect
                       value={category}
-                      onChange={(e) => onCategoryChange?.(e.target.value)}
-                      className="w-full h-7 text-[11px] font-bold bg-white border border-[#DDD5C7] rounded-lg px-1.5 text-[#2D2A26] shadow-2xs focus:outline-hidden focus:border-[#FF4A57] cursor-pointer"
-                    >
-                      <option value="impromptu">Impromptu</option>
-                      <option value="storytelling">Storytelling</option>
-                      <option value="persuasive">Persuasive</option>
-                      <option value="life_skill">Life Skill</option>
-                    </select>
+                      onChange={(val) => onCategoryChange?.(val)}
+                      options={currentCategoryOptions}
+                      isOpen={openDropdown === 'category'}
+                      onToggle={() => setOpenDropdown(prev => prev === 'category' ? null : 'category')}
+                      onClose={() => setOpenDropdown(null)}
+                      disabled={isBusy}
+                    />
                   </div>
                   <div className="flex flex-col gap-0.5">
-                    <label className="text-[9px] font-extrabold uppercase tracking-wider text-[#A0988E] font-mono">
+                    <label className="text-[9px] font-extrabold uppercase tracking-wider text-[#A0988E] font-mono select-none">
                       Difficulty
                     </label>
-                    <select
+                    <RetroSelect
                       value={difficulty}
-                      onChange={(e) => onDifficultyChange?.(e.target.value)}
-                      className="w-full h-7 text-[11px] font-bold bg-white border border-[#DDD5C7] rounded-lg px-1.5 text-[#2D2A26] shadow-2xs focus:outline-hidden focus:border-[#FF4A57] cursor-pointer"
-                    >
-                      <option value="easy">Easy</option>
-                      <option value="medium">Medium</option>
-                      <option value="hard">Hard</option>
-                    </select>
+                      onChange={(val) => onDifficultyChange?.(val)}
+                      options={DIFFICULTY_OPTIONS}
+                      isOpen={openDropdown === 'difficulty'}
+                      onToggle={() => setOpenDropdown(prev => prev === 'difficulty' ? null : 'difficulty')}
+                      onClose={() => setOpenDropdown(null)}
+                      disabled={isBusy}
+                    />
                   </div>
                 </div>
 
                 {/* Custom Topic (Optional) */}
-                <div className="flex flex-col gap-0.5">
-                  <label className="text-[9px] font-extrabold uppercase tracking-wider text-[#A0988E] font-mono">
+                <div className="flex flex-col gap-0.5 relative z-10">
+                  <label className="text-[9px] font-extrabold uppercase tracking-wider text-[#A0988E] font-mono select-none">
                     Custom Topic (Optional)
                   </label>
                   <input
@@ -315,7 +477,7 @@ export const TopicDispenser: React.FC<TopicDispenserProps> = ({
                     value={customTopic}
                     onChange={(e) => onCustomTopicChange?.(e.target.value)}
                     placeholder="e.g. why remote work is the future..."
-                    className="w-full h-7 text-[11px] font-medium bg-white border border-[#DDD5C7] rounded-lg px-2 text-[#2D2A26] placeholder:text-[#B5AAA0] shadow-2xs focus:outline-hidden focus:border-[#FF4A57]"
+                    className="w-full h-8 text-[11px] font-medium bg-white border border-[#DDD5C7] rounded-full px-3.5 text-[#2D2A26] placeholder:text-[#B5AAA0] shadow-xs focus:outline-hidden focus:border-[#FF4A57] focus:ring-2 focus:ring-[#FF4A57]/20 transition-all"
                   />
                 </div>
 
@@ -325,7 +487,7 @@ export const TopicDispenser: React.FC<TopicDispenserProps> = ({
                   id="machine-pop-topic-btn"
                   onClick={dispenseNewTopic}
                   disabled={isBusy}
-                  className="w-full h-8 mt-1 rounded-xl bg-gradient-to-r from-[#FF4A57] to-[#FA5276] hover:from-[#f43f5e] hover:to-[#e11d48] text-white font-extrabold text-xs tracking-wider uppercase font-sans shadow-md shadow-[#FF4A57]/25 hover:shadow-lg hover:shadow-[#FF4A57]/35 active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 select-none"
+                  className="w-full h-9 mt-0.5 rounded-2xl bg-gradient-to-r from-[#FF4A57] via-[#FA5276] to-[#FF4A57] hover:from-[#f43f5e] hover:to-[#e11d48] text-white font-extrabold text-xs tracking-wider uppercase font-sans shadow-md shadow-[#FF4A57]/25 hover:shadow-lg hover:shadow-[#FF4A57]/35 active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 select-none relative z-10"
                 >
                   <span>✦</span>
                   <span>POP YOUR TOPIC</span>

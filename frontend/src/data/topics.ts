@@ -193,4 +193,77 @@ export const TOPICS: Topic[] = [
       'A surprising realization you had while thinking about it',
     ],
   },
+  {
+    id: 'int-1',
+    text: 'Should AI development be regulated globally or left to market forces?',
+    category: 'cat_gdpi',
+    categoryLabel: 'CAT GDPI',
+    timeToSpeak: 90,
+    talkingPoints: [
+      'The risk of existential safety vs the danger of stifling rapid innovation',
+      'Which international bodies or frameworks could realistically enforce standards',
+      'Your definitive verdict on responsible balance and oversight'
+    ],
+  },
+  {
+    id: 'int-2',
+    text: 'Describe a significant professional failure and what you took from it.',
+    category: 'hr_interview',
+    categoryLabel: 'HR Interview',
+    timeToSpeak: 90,
+    talkingPoints: [
+      'The context of the project and the root cause of the setback',
+      'Immediate steps you took to take ownership and mitigate damages',
+      'The lasting systemic change or personal habit you adopted afterward'
+    ],
+  },
+  {
+    id: 'int-3',
+    text: 'How do you defend technical debt refactoring to business stakeholders?',
+    category: 'software_engineering',
+    categoryLabel: 'Tech Behavioral',
+    timeToSpeak: 90,
+    talkingPoints: [
+      'Translating codebase fragility into financial, velocity, or downtime risk',
+      'Proposing an incremental, non-disruptive migration strategy',
+      'A concrete example where proactive cleanup saved substantial engineering hours'
+    ],
+  },
+  {
+    id: 'int-4',
+    text: 'Why do you believe an MBA is essential for your long-term roadmap now?',
+    category: 'mba_admissions',
+    categoryLabel: 'MBA Admissions',
+    timeToSpeak: 90,
+    talkingPoints: [
+      'The gap between your current technical/operational strengths and executive goals',
+      'Specific network, coursework, and strategic perspective you seek',
+      'Where you expect to lead industry transformation 5 years post-graduation'
+    ],
+  },
+  {
+    id: 'int-5',
+    text: 'Walk me through your most challenging collaborative project.',
+    category: 'campus_placement',
+    categoryLabel: 'Campus Placement',
+    timeToSpeak: 90,
+    talkingPoints: [
+      'The core challenge, tech stack, and your distinct individual contribution',
+      'How your team resolved differing technical opinions under tight deadlines',
+      'Measurable outcome or feedback received upon project delivery'
+    ],
+  },
+  {
+    id: 'int-6',
+    text: 'How do you maintain high team morale during high-stakes uncertainty?',
+    category: 'leadership',
+    categoryLabel: 'Leadership',
+    timeToSpeak: 90,
+    talkingPoints: [
+      'Transparent communication practices that foster trust without causing panic',
+      'Empowering team members with clear ownership of sub-goals',
+      'A real scenario where deliberate empathy preserved project success'
+    ],
+  },
 ];
+
