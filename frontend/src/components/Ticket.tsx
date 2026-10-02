@@ -52,24 +52,24 @@ export const Ticket: React.FC<TicketProps> = ({
   const getAnimationProps = (): TargetAndTransition => {
     if (status === 'retracting') {
       return {
-        y: -300,
+        y: -320,
         z: 0,
         rotateX: 0,
         rotateZ: 0,
         skewX: 0,
         scaleX: 1,
         scaleY: 1,
-        opacity: 1,
+        opacity: [1, 0.7, 0],
         transition: {
-          duration: 0.28,
+          duration: 0.24,
+          times: [0, 0.7, 1],
           ease: [0.38, 0, 0.7, 0.1] as const, // snappy upward retraction into slot
         },
       };
     }
 
     if (status === 'dispensing') {
-      // Prototype 1: Deliberate motorized extrusion (~2.6s) with steady downward feed:
-      // Monotonically terminates at y=0 so the top of the slip remains anchored inside the slot roller
+      // Motorized downward extrusion with steady feed monotonically terminating at y=0
       return {
         x: 0,
         y: [-300, -220, -150, -80, -35, -10, -2, 0, 0],
@@ -79,7 +79,7 @@ export const Ticket: React.FC<TicketProps> = ({
         scaleY: [0.99, 0.995, 1, 1.006, 1.003, 1, 1, 1, 1],
         opacity: 1,
         transition: {
-          duration: 2.6,
+          duration: 2.3,
           times: [0, 0.22, 0.44, 0.65, 0.82, 0.91, 0.95, 0.98, 1],
           ease: [0.22, 0.88, 0.32, 1] as const,
         },

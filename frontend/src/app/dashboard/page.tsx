@@ -3002,7 +3002,6 @@ export default function DashboardPage() {
       const data = await res.json();
       if (data?.topics && data.topics.length > 0) {
         const gen = data.topics[0];
-        setTopics(data.topics);
         return {
           id: gen.id || `topic-${Date.now()}`,
           text: gen.prompt || gen.title,

@@ -312,8 +312,11 @@ export const TopicDispenser: React.FC<TopicDispenserProps> = ({
   const [currentTopic, setCurrentTopic] = useState<Topic>(initialTopic || TOPICS[0]);
   const [dispenserStatus, setDispenserStatus] = useState<DispenserStatus>(initialTopic ? 'ready' : 'idle');
   const [dispenseCount, setDispenseCount] = useState(1);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [isButtonPressed, setIsButtonPressed] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<'module' | 'category' | 'difficulty' | null>(null);
+
+  const isDispensingRef = useRef(false);
 
   const MODULE_OPTIONS: RetroSelectOption[] = [
     { value: 'public_speaking', label: 'Public Speaking' },
@@ -356,76 +359,79 @@ export const TopicDispenser: React.FC<TopicDispenserProps> = ({
     }
   };
 
-  // Sync if external initialTopic changes
+  // Sync if external initialTopic changes (e.g. from tab selection or initial load)
   useEffect(() => {
+    if (isDispensingRef.current) return;
     if (initialTopic && initialTopic.id !== currentTopic.id) {
       setCurrentTopic(initialTopic);
       setDispenserStatus('ready');
     }
-  }, [initialTopic]);
+  }, [initialTopic, currentTopic.id]);
 
   const dispenseNewTopic = async () => {
+    if (isDispensingRef.current || dispenserStatus === 'dispensing' || dispenserStatus === 'retracting') return;
     setOpenDropdown(null);
-    if (dispenserStatus === 'dispensing' || dispenserStatus === 'retracting') return;
+    isDispensingRef.current = true;
+    setIsGenerating(true);
 
-    // 1. If ticket is currently out, retract it smoothly into slot
-    if (dispenserStatus === 'ready') {
-      setDispenserStatus('retracting');
-      await new Promise((r) => setTimeout(r, 280));
-    }
+    try {
+      // 1. Kick off new topic generation concurrently right now
+      const fetchPromise = (async (): Promise<Topic> => {
+        let fetched: Topic | null = null;
+        if (onRequestNewTopic) {
+          try {
+            const reqPromise = onRequestNewTopic({
+              moduleType,
+              category,
+              difficulty,
+              customTopic,
+            });
+            const timeoutPromise = new Promise<null>((r) => setTimeout(() => r(null), 2500));
+            fetched = await Promise.race([reqPromise, timeoutPromise]);
+          } catch (err) {
+            console.warn("Async topic request error:", err);
+          }
+        }
+        if (!fetched) {
+          fetched = generateTrainedTopicFallback({
+            moduleType,
+            category,
+            difficulty,
+            customTopic,
+          });
+        }
+        return fetched;
+      })();
 
-    // 2. Start motorized tactile feed cycle
-    setDispenserStatus('dispensing');
-    setDispenseCount((prev) => prev + 1);
-
-    // 3. Concurrently fetch the real AI-generated topic while motor rumbles
-    let nextTopic: Topic | null = null;
-    const minFeedPromise = new Promise((r) => setTimeout(r, 2600));
-
-    if (onRequestNewTopic) {
-      try {
-        const fetchPromise = onRequestNewTopic({
-          moduleType,
-          category,
-          difficulty,
-          customTopic,
-        });
-        const timeoutPromise = new Promise<null>((r) => setTimeout(() => r(null), 3800));
-        nextTopic = await Promise.race([fetchPromise, timeoutPromise]);
-      } catch (err) {
-        console.warn("Async topic request error:", err);
+      // 2. If ticket is currently out, retract it smoothly into slot
+      if (dispenserStatus === 'ready') {
+        setDispenserStatus('retracting');
+        await new Promise((r) => setTimeout(r, 240));
       }
-    }
 
-    // 4. If AI returned null or timed out, use category-trained smart generator
-    if (!nextTopic) {
-      nextTopic = generateTrainedTopicFallback({
-        moduleType,
-        category,
-        difficulty,
-        customTopic,
-      });
-    }
+      // 3. Await topic resolution (fetching was started concurrently above)
+      const nextTopic = await fetchPromise;
 
-    // Await motorized cycle completion
-    await minFeedPromise;
+      // 4. Update the topic BEFORE extrusion begins!
+      // This guarantees the ticket emerges ALREADY containing the new topic from frame 1
+      setCurrentTopic(nextTopic);
+      onTopicChange?.(nextTopic);
 
-    setCurrentTopic(nextTopic);
-    onTopicChange?.(nextTopic);
-    setDispenserStatus('ready');
-  };
+      // 5. Start motorized downward feed extrusion with the new topic already in place
+      setDispenseCount((prev) => prev + 1);
+      setDispenserStatus('dispensing');
+      setIsGenerating(false);
 
-  const triggerDispenseFeed = () => {
-    setDispenserStatus('dispensing');
-    setDispenseCount((prev) => prev + 1);
-
-    // Deliberate motorized feed duration: 2.6s (2600ms)
-    const duration = 2600;
-
-    // Set ready once paper fully emerges
-    setTimeout(() => {
+      // 6. Complete extrusion cycle
+      await new Promise((r) => setTimeout(r, 2300));
       setDispenserStatus('ready');
-    }, duration + 50);
+    } catch (err) {
+      console.error("Dispenser error:", err);
+      setDispenserStatus('ready');
+    } finally {
+      setIsGenerating(false);
+      isDispensingRef.current = false;
+    }
   };
 
   // Tear off ticket
@@ -437,7 +443,7 @@ export const TopicDispenser: React.FC<TopicDispenserProps> = ({
     }, 400);
   };
 
-  const isBusy = dispenserStatus === 'dispensing' || dispenserStatus === 'retracting';
+  const isBusy = isGenerating || dispenserStatus === 'dispensing' || dispenserStatus === 'retracting';
 
   return (
     <div className="flex flex-col items-center justify-center w-full mx-auto px-0 select-none relative">
@@ -467,11 +473,11 @@ export const TopicDispenser: React.FC<TopicDispenserProps> = ({
         <motion.div
           id="topic-machine"
           animate={
-            dispenserStatus === 'dispensing'
+            isBusy
               ? {
                   x: [-0.7, 0.7, -0.5, 0.5, 0],
                   y: [-0.4, 0.4, 0],
-                  transition: { duration: 0.12, repeat: 8, ease: 'linear' },
+                  transition: { duration: 0.12, repeat: Infinity, ease: 'linear' },
                 }
               : { x: 0, y: 0 }
           }
@@ -646,7 +652,7 @@ export const TopicDispenser: React.FC<TopicDispenserProps> = ({
                   className="w-full h-9 mt-0.5 rounded-2xl bg-gradient-to-r from-[#FF4A57] via-[#FA5276] to-[#FF4A57] hover:from-[#f43f5e] hover:to-[#e11d48] text-white font-extrabold text-xs tracking-wider uppercase font-sans shadow-md shadow-[#FF4A57]/25 hover:shadow-lg hover:shadow-[#FF4A57]/35 active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 select-none relative z-10"
                 >
                   <span>✦</span>
-                  <span>POP YOUR TOPIC</span>
+                  <span>{isBusy ? "PRINTING TOPIC..." : "POP YOUR TOPIC"}</span>
                   <span>✦</span>
                 </button>
               </div>
@@ -666,7 +672,13 @@ export const TopicDispenser: React.FC<TopicDispenserProps> = ({
                 className="inline-flex items-center gap-1.5 text-[#FF4A57] font-bold text-xs sm:text-[13px] tracking-wide select-none hover:underline cursor-pointer disabled:opacity-50"
               >
                 <Printer className="w-4 h-4 text-[#FF4A57]" />
-                <span>{dispenserStatus === 'idle' ? 'Pop Your Topic' : 'Dispense Another Topic'}</span>
+                <span>
+                  {isBusy
+                    ? 'Printing Topic...'
+                    : dispenserStatus === 'idle'
+                    ? 'Pop Your Topic'
+                    : 'Dispense Another Topic'}
+                </span>
               </button>
             </div>
 
