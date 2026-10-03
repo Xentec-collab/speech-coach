@@ -126,6 +126,25 @@ const RetroSelect: React.FC<RetroSelectProps> = ({
 };
 
 
+function getTimeToSpeak(category: string, difficulty: string, moduleType: string): number {
+  if (moduleType === 'interview_preparation') return 120;
+  const base: Record<string, number> = {
+    warmup: 60,
+    impromptu: 90,
+    persuasive: 120,
+    debate: 120,
+    storytelling: 120
+  };
+  const scale: Record<string, number> = { easy: 0.8, medium: 1.0, hard: 1.2 };
+  return Math.round((base[category] || 90) * (scale[difficulty] || 1.0));
+}
+
+// Module-level deduplication — tracks recently dispensed topic IDs
+const recentlyDispensedIds = new Set<string>();
+const DEDUP_WINDOW = 8;
+
+const pick = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
+
 interface FallbackParams {
   moduleType: string;
   category: string;
@@ -214,48 +233,206 @@ export function generateTrainedTopicFallback({
       };
     }
 
-    // Public Speaking custom topic templates by category
+    // Public Speaking custom topic templates — MULTIPLE variants per category
     const publicSpeakingTemplates: Record<string, (theme: string) => { prompt: string; points: string[] }> = {
-      impromptu: (theme) => ({
-        prompt: `How our relationship with ${theme} shapes our modern habits and peace of mind.`,
-        points: [
-          `The Hook & Opening Insight: An unexpected angle or relatable observation connecting ${theme} to everyday human experience.`,
-          `The Core Tension: Exploring the trade-off, paradox, or quiet dilemma at the heart of ${theme}.`,
-          `The Concluding Takeaway: A memorable lesson, personal rule of thumb, or crisp reflection for the listener.`
-        ]
-      }),
-      persuasive: (theme) => ({
-        prompt: `Why we need a radical shift in how modern society approaches ${theme}.`,
-        points: [
-          `The Core Thesis: State a bold, uncompromising position on the real stakes of ${theme}.`,
-          `Dismantling Objections: Directly answer the strongest counterargument with logic, evidence, and conviction.`,
-          `The Call to Action: Urge the audience with an inspiring, actionable challenge to change their habits or beliefs.`
-        ]
-      }),
-      debate: (theme) => ({
-        prompt: `Motion: This House Believes that the rapid expansion of ${theme} does more harm than good.`,
-        points: [
-          `Proposition (Affirmative): The strongest systemic, ethical, or economic case supporting the motion.`,
-          `Opposition (Negative): The indispensable benefits, human liberties, or competitive upside of opposing the motion.`,
-          `The Key Clash Point: The pivotal philosophical or practical trade-off that decides this debate.`
-        ]
-      }),
-      warmup: (theme) => ({
-        prompt: `If you were declared the world’s foremost authority on ${theme} for just 24 hours, what would you do?`,
-        points: [
-          `The Gut Reaction: An entertaining, humorous reaction to suddenly holding ultimate authority over ${theme}.`,
-          `The Playful Decree: A hilarious new rule or quirky custom you would immediately institute.`,
-          `The Lighthearted Conclusion: A fun takeaway reflecting on what makes ${theme} entertaining in real life.`
-        ]
-      }),
-      storytelling: (theme) => ({
-        prompt: `Recount a vivid moment when ${theme} or an experience connected to it taught you an unforgettable lesson.`,
-        points: [
-          `Setting the Scene: Establish the physical atmosphere, initial expectations, and emotional stakes before things unfolded.`,
-          `The Turning Point: The critical moment plans fell apart, an unexpected truth surfaced, or friction peaked.`,
-          `The Transformation: How walking through that experience permanently reshaped your character and perspective.`
-        ]
-      })
+      impromptu: (theme) => pick([
+        {
+          prompt: `How our relationship with ${theme} reveals what we truly value in modern life.`,
+          points: [
+            `The Hook & Opening Insight: An unexpected personal moment where ${theme} caught you off guard.`,
+            `The Core Tension: The hidden trade-off most people ignore when engaging with ${theme}.`,
+            `The Takeaway: A rule of thumb you'd offer a friend navigating ${theme} for the first time.`
+          ]
+        },
+        {
+          prompt: `If ${theme} disappeared overnight, what would we miss — and what would we secretly be relieved to lose?`,
+          points: [
+            `The Hook: The first thing that would change in your daily routine without ${theme}.`,
+            `The Core Tension: What we claim to need vs. what we actually depend on.`,
+            `The Takeaway: What this thought experiment reveals about our real priorities.`
+          ]
+        },
+        {
+          prompt: `What does ${theme} teach us about the difference between comfort and growth?`,
+          points: [
+            `The Hook: A specific moment where ${theme} pushed you outside your comfort zone.`,
+            `The Core Tension: Why we resist the very things that expand us — through the lens of ${theme}.`,
+            `The Takeaway: A principle about growth that ${theme} illustrates better than any textbook.`
+          ]
+        },
+        {
+          prompt: `Is our obsession with ${theme} a symptom of something deeper we're avoiding?`,
+          points: [
+            `The Hook: A provocative observation about how people talk about ${theme} vs. how they actually engage with it.`,
+            `The Core Tension: The gap between what ${theme} promises and what it actually delivers emotionally.`,
+            `The Takeaway: An honest reflection on what healthy engagement with ${theme} looks like.`
+          ]
+        },
+        {
+          prompt: `You have 60 seconds to change a stranger's mind about ${theme}. What's your opening hook?`,
+          points: [
+            `The Hook: The single most surprising fact or angle about ${theme} that stops people mid-sentence.`,
+            `The Core Tension: Why conventional wisdom about ${theme} is incomplete or outdated.`,
+            `The Takeaway: The one mental model that transforms how someone sees ${theme}.`
+          ]
+        }
+      ]),
+
+      persuasive: (theme) => pick([
+        {
+          prompt: `Why we need a radical shift in how modern society approaches ${theme}.`,
+          points: [
+            `The Thesis: State a bold, uncompromising position on the real stakes of ${theme}.`,
+            `Dismantling Objections: Directly answer the strongest counterargument with logic, evidence, and conviction.`,
+            `The Call to Action: Urge the audience with an inspiring, actionable challenge to change their habits or beliefs.`
+          ]
+        },
+        {
+          prompt: `The status quo on ${theme} is quietly failing millions of people — and almost nobody is talking about it.`,
+          points: [
+            `The Urgent Problem: Name the specific population harmed by inaction on ${theme} and quantify the damage.`,
+            `Refuting Complacency: Why "it's always been this way" is the weakest defense against reform.`,
+            `The Demand: One concrete policy, habit, or investment the audience should champion starting today.`
+          ]
+        },
+        {
+          prompt: `If you're not angry about the current state of ${theme}, you haven't been paying attention.`,
+          points: [
+            `The Wake-Up Call: The data point or story about ${theme} that should alarm every informed citizen.`,
+            `The Rebuttal: Dismantling the most popular excuse for ignoring this issue.`,
+            `The Rallying Cry: What collective action on ${theme} looks like — and why it starts with individual choices.`
+          ]
+        },
+        {
+          prompt: `${theme} is the defining test of whether this generation has the courage to act on its values.`,
+          points: [
+            `The Stakes: What future generations will judge us for if we continue to ignore ${theme}.`,
+            `The Counter-Narrative: Why the mainstream position on ${theme} serves powerful interests, not people.`,
+            `The Call to Action: A specific, measurable step every person in this room can take within 30 days.`
+          ]
+        }
+      ]),
+
+      debate: (theme) => pick([
+        {
+          prompt: `Motion: This House Believes that the rapid expansion of ${theme} does more harm than good.`,
+          points: [
+            `Proposition (Affirmative): The strongest systemic, ethical, or economic case supporting the motion.`,
+            `Opposition (Negative): The indispensable benefits, human liberties, or competitive upside of opposing the motion.`,
+            `The Key Clash Point: The pivotal philosophical or practical trade-off that decides this debate.`
+          ]
+        },
+        {
+          prompt: `Motion: This House Would ban ${theme} in public institutions until comprehensive regulation exists.`,
+          points: [
+            `Proposition (Affirmative): Precautionary governance protects vulnerable populations from unregulated ${theme} harms.`,
+            `Opposition (Negative): Blanket bans stifle innovation, push ${theme} underground, and punish responsible actors.`,
+            `The Key Clash Point: Whether precaution or permissionless innovation better serves the public interest.`
+          ]
+        },
+        {
+          prompt: `Motion: This House Believes that governments should subsidize ${theme} as a universal public good.`,
+          points: [
+            `Proposition (Affirmative): ${theme} produces positive externalities that markets under-provide — subsidies correct this failure.`,
+            `Opposition (Negative): Government subsidies distort competition, create dependency, and crowd out private innovation in ${theme}.`,
+            `The Key Clash Point: Whether ${theme} is a merit good deserving public funding or a competitive market best left to private capital.`
+          ]
+        },
+        {
+          prompt: `Motion: This House Believes that the benefits of ${theme} are distributed so unequally that it deepens systemic inequality.`,
+          points: [
+            `Proposition (Affirmative): Access to ${theme} tracks existing wealth, education, and geography — amplifying privilege rather than leveling it.`,
+            `Opposition (Negative): ${theme} has historically democratized access (lower costs, wider reach) and will continue to do so at scale.`,
+            `The Key Clash Point: Whether technological or social progress in ${theme} is inherently equalizing or inherently concentrating.`
+          ]
+        },
+        {
+          prompt: `Motion: This House Would require mandatory transparency and public auditing of all ${theme} systems.`,
+          points: [
+            `Proposition (Affirmative): Public accountability prevents abuse, builds trust, and protects citizens from opaque ${theme} practices.`,
+            `Opposition (Negative): Forced transparency exposes trade secrets, chills innovation, and creates compliance burdens that favor large incumbents.`,
+            `The Key Clash Point: Whether the public's right to understand ${theme} outweighs the private sector's right to competitive secrecy.`
+          ]
+        }
+      ]),
+
+      warmup: (theme) => pick([
+        {
+          prompt: `If you were declared the world’s foremost authority on ${theme} for just 24 hours, what would you do?`,
+          points: [
+            `The Gut Reaction: An entertaining, humorous reaction to suddenly holding ultimate authority over ${theme}.`,
+            `The Playful Decree: A hilarious new rule or quirky custom you would immediately institute.`,
+            `The Lighthearted Conclusion: A fun takeaway reflecting on what makes ${theme} entertaining in real life.`
+          ]
+        },
+        {
+          prompt: `Pitch ${theme} to a five-year-old using only words a five-year-old would understand.`,
+          points: [
+            `The Opening Attempt: Your first, probably hilarious, analogy to explain ${theme} to a child.`,
+            `The Follow-Up Question: The inevitable "but why?" a kid would ask — and your scrambled answer.`,
+            `The Verdict: Whether the five-year-old would be excited, confused, or bored — and what that says about ${theme}.`
+          ]
+        },
+        {
+          prompt: `You're a tour guide giving a dramatically over-the-top guided tour of ${theme}. Go!`,
+          points: [
+            `The Grand Welcome: An absurdly theatrical introduction as if ${theme} were the eighth wonder of the world.`,
+            `The Highlight Reel: The "must-see attractions" of ${theme}, narrated with maximum enthusiasm.`,
+            `The Gift Shop Exit: Your parting recommendation — what souvenir or takeaway should visitors bring home?`
+          ]
+        },
+        {
+          prompt: `Defend ${theme} in a fake courtroom trial where it's been accused of being overrated.`,
+          points: [
+            `Opening Statement: Your passionate defense of ${theme} against the charges of being overrated.`,
+            `Key Evidence: The one irrefutable piece of evidence that proves ${theme} deserves its reputation.`,
+            `Closing Argument: Your dramatic final plea to the jury — why ${theme} must be acquitted.`
+          ]
+        },
+        {
+          prompt: `Create a 30-second movie trailer for a blockbuster film about ${theme}. Narrate it live!`,
+          points: [
+            `The Hook Shot: The dramatic opening scene — explosions, whispers, or a slow zoom on ${theme}.`,
+            `The Plot Twist: The moment in the trailer where the audience gasps — what unexpected angle does ${theme} take?`,
+            `The Tagline: The one-liner that appears on screen before the title drops. Make it iconic.`
+          ]
+        }
+      ]),
+
+      storytelling: (theme) => pick([
+        {
+          prompt: `Recount a vivid moment when ${theme} or an experience connected to it taught you an unforgettable lesson.`,
+          points: [
+            `Setting the Scene: Establish the physical atmosphere, initial expectations, and emotional stakes before things unfolded.`,
+            `The Turning Point: The critical moment plans fell apart, an unexpected truth surfaced, or friction peaked.`,
+            `The Transformation: How walking through that experience permanently reshaped your character and perspective.`
+          ]
+        },
+        {
+          prompt: `Tell the story of the worst advice you ever received about ${theme} — and what following it taught you.`,
+          points: [
+            `The Setup: Who gave you the advice, why you trusted them, and why it sounded reasonable at the time.`,
+            `The Disaster: What happened when you followed it — the specific moment you realized it was wrong.`,
+            `The Real Lesson: What you actually learned, which was more valuable than any "good" advice could have been.`
+          ]
+        },
+        {
+          prompt: `Describe a moment when ${theme} made you feel like an absolute beginner again — and why that was transformative.`,
+          points: [
+            `The Confidence Before: What you thought you knew, and why you felt competent or experienced.`,
+            `The Humbling Moment: The specific event that shattered your expertise and left you starting from scratch.`,
+            `The Growth: How embracing beginner's mind through ${theme} unlocked abilities you didn't know you had.`
+          ]
+        },
+        {
+          prompt: `Tell the story of a conversation about ${theme} that you replay in your head to this day.`,
+          points: [
+            `The Context: Where you were, who you were with, and what made this conversation different from the hundreds before it.`,
+            `The Line That Landed: The exact sentence or question that hit you differently — and the silence or reaction that followed.`,
+            `The Echo: How that conversation quietly shaped decisions you've made since, even years later.`
+          ]
+        }
+      ])
     };
 
     const generator = publicSpeakingTemplates[cat] || publicSpeakingTemplates.impromptu;
@@ -265,17 +442,27 @@ export function generateTrainedTopicFallback({
       text: generated.prompt,
       category: cat,
       categoryLabel: cat.toUpperCase().replace(/_/g, ' '),
-      timeToSpeak: 90,
+      timeToSpeak: getTimeToSpeak(cat, difficulty, moduleType),
       talkingPoints: generated.points
     };
   }
 
-  // Normal topic selection: filtered strictly by category
+  // Normal topic selection: filtered strictly by category with deduplication
   const matching = TOPICS.filter((t) => t.category.toLowerCase() === cat);
-  const pool = matching.length > 0 ? matching : TOPICS;
+  const fresh = matching.filter((t) => !recentlyDispensedIds.has(t.id));
+  const pool = fresh.length > 0 ? fresh : (matching.length > 0 ? matching : TOPICS);
   const picked = pool[Math.floor(Math.random() * pool.length)];
+
+  // Track and cap the sliding window
+  recentlyDispensedIds.add(picked.id);
+  if (recentlyDispensedIds.size > DEDUP_WINDOW) {
+    const oldest = recentlyDispensedIds.values().next().value;
+    if (oldest) recentlyDispensedIds.delete(oldest);
+  }
+
   return {
     ...picked,
+    timeToSpeak: getTimeToSpeak(cat, difficulty, moduleType),
     id: `dispensed-${Date.now()}`
   };
 }
@@ -395,7 +582,7 @@ export const TopicDispenser: React.FC<TopicDispenserProps> = ({
               difficulty,
               customTopic,
             });
-            const timeoutPromise = new Promise<null>((r) => setTimeout(() => r(null), 2500));
+            const timeoutPromise = new Promise<null>((r) => setTimeout(() => r(null), 4000));
             fetched = await Promise.race([reqPromise, timeoutPromise]);
           } catch (err) {
             console.warn("Async topic request error:", err);

@@ -324,6 +324,73 @@ def generate_speaking_topics(
             - Every single talking point MUST be directly woven with rich, specific ideas about "{custom_topic.strip()}", rigorously following the 3-point framework below!
             """
 
+        # ── Few-shot examples per category ────────────────────────────────────
+        category_examples = {
+            "impromptu": '''Example of an excellent Impromptu topic:
+Title: "The Invisible Tax of Convenience"
+Prompt: "Every app that saves us five minutes extracts something we never agreed to trade. What is convenience actually costing us?"
+Context: "In an era of one-click everything, we rarely audit what we surrender — attention, autonomy, the ability to tolerate friction. You're sharing this reflection with friends over coffee."
+Suggested Points:
+1. "The Hook: The last time you chose the harder, slower option on purpose — and what it revealed."
+2. "The Core Tension: How convenience atrophies our tolerance for difficulty, and whether that matters."
+3. "The Takeaway: A personal boundary you'd draw between efficiency and over-optimization."''',
+
+            "persuasive": '''Example of an excellent Persuasive topic:
+Title: "The Case Against Passion as Career Advice"
+Prompt: "We tell every graduate to 'follow your passion' — but this advice is dangerously incomplete and privileges the already-privileged. We need to retire it."
+Context: "You're addressing a university commencement audience that has heard this platitude a thousand times. Channel righteous urgency."
+Suggested Points:
+1. "The Thesis & Stakes: Passion advice assumes financial safety nets that most graduates lack — it's survivorship bias dressed as wisdom."
+2. "Dismantling the Objection: 'But passion drives persistence!' — Counter: discipline and curiosity are more reliable engines than fleeting passion."
+3. "The Call to Action: Replace 'follow your passion' with 'develop rare skills, then passion follows' — and demand career counselors update their scripts."''',
+
+            "debate": '''Example of an excellent Debate topic:
+Title: "The Automation Displacement Dilemma"
+Prompt: "Motion: This House Believes that governments should impose a mandatory automation tax on companies that replace human workers with AI systems."
+Context: "A parliamentary-style debate before a panel of labor economists and tech executives. Both sides have compelling moral and economic ground."
+Suggested Points:
+1. "Proposition: Automation concentrates productivity gains among capital owners while externalizing unemployment costs onto society — a tax corrects this market failure."
+2. "Opposition: An automation tax penalizes innovation, drives companies offshore, and slows the productivity gains that historically create MORE jobs in new sectors."
+3. "Clash Point: Whether technological unemployment is a temporary transition (historically resolved by new industries) or a structural permanent displacement requiring policy intervention."''',
+
+            "warmup": '''Example of an excellent Warmup topic:
+Title: "The Accidental Expert"
+Prompt: "What is something you know an embarrassing amount about — not because you studied it, but because you fell down a rabbit hole one night?"
+Context: "Keep it light, self-deprecating, and funny. You're warming up your voice and loosening your nerves before the real session."
+Suggested Points:
+1. "The Gut Reaction: Confess the obscure thing — medieval siege weapons, competitive dog grooming, the lore of a cartoon you're too old for."
+2. "The Story: How you discovered it — the 2am YouTube spiral, the Wikipedia wormhole, the friend who casually mentioned it."
+3. "The Fun Conclusion: What this says about you as a person, and whether you'd defend this expertise on a game show."''',
+
+            "storytelling": '''Example of an excellent Storytelling topic:
+Title: "The Stranger Who Changed the Script"
+Prompt: "Tell the story of a brief encounter with someone you never saw again — but whose words or actions permanently altered how you see the world."
+Context: "You're performing at a storytelling open mic. The audience craves sensory detail, emotional honesty, and a transformation arc."
+Suggested Points:
+1. "Setting the Scene: Where were you, what were you doing, and what emotional state were you in before this person appeared?"
+2. "The Turning Point: What exactly did they say or do — and the precise moment you felt something shift inside you?"
+3. "The Transformation: How that 30-second encounter rewired a belief, habit, or fear — and whether you've ever tried to find them."'''
+        }
+        example_block = category_examples.get(cat_clean, category_examples["impromptu"])
+
+        # ── Domain diversity instruction ──────────────────────────────────────
+        domain_diversity = """
+        DOMAIN DIVERSITY RULE: Vary the topic domain. Rotate across these areas and 
+        avoid defaulting to AI/technology unless specifically requested:
+        Technology & AI, Healthcare & Bioethics, Economics & Labor, Education & Youth, 
+        Environment & Energy, Governance & Law, Culture & Identity, Science & Space, 
+        Philosophy & Ethics, Sports & Competition, History & Legacy, Art & Expression.
+        """
+
+        # ── Debate-specific motion enforcement ────────────────────────────────
+        debate_enforcement = ""
+        if cat_clean == "debate":
+            debate_enforcement = """
+        DEBATE FORMAT RULE: The "prompt" field MUST begin with exactly "Motion: This House Believes" 
+        or "Motion: This House Would". Never frame it as a question or topic statement. 
+        It must be a formal parliamentary motion that can be affirmed or negated.
+        """
+
         prompt_text = f"""
         You are an elite public speaking coach.
         Generate exactly {count} public speaking practice prompt(s) for the category: {fw['name']}.
@@ -332,27 +399,41 @@ def generate_speaking_topics(
         Difficulty: {diff_clean} ({diff_guide})
         Category Objective: {fw['goal']}
         Prompt Style: {fw['prompt_style']}
+        {debate_enforcement}
         
         Strict 3-Point Framework for "suggested_points":
         Point 1: {fw['point_1']}
         Point 2: {fw['point_2']}
         Point 3: {fw['point_3']}
         
+        {example_block}
+
+        Now generate a COMPLETELY DIFFERENT topic in the same style and quality. Do NOT reuse or paraphrase the example.
+
+        {domain_diversity}
+
         Requirements:
-        - The "title" must be catchy, evocative, and memorable (e.g., "The Secret Lessons of the Garden", "The Unseen Cost of Speed").
+        - The "title" must be catchy, evocative, and memorable (e.g., "The Secret Lessons of the Garden", "The Unseen Cost of Speed"). Avoid generic labels.
         - The "prompt" must be an articulate, complete question or speech prompt that inspires deep thought.
-        - The "context" must provide brief situational inspiration framing why this topic matters.
+        - The "context" MUST provide 2-3 sentences of rich situational framing including:
+          (a) WHO the intended audience is (e.g. "skeptical investors", "curious 10-year-olds", "fellow professionals")
+          (b) WHY this topic is timely or urgent right now
+          (c) WHAT emotional register fits (e.g. "conversational and self-deprecating", "righteous urgency", "playful wonder")
         - The "suggested_points" MUST be a JSON array of exactly 3 distinct, highly specific talking points adhering to Points 1, 2, and 3 above. Never return generic filler!
         
         Return a JSON object with a "topics" array.
         """
 
     try:
+        temp_by_difficulty = {"easy": 0.7, "medium": 0.85, "hard": 0.95}
+        temperature = temp_by_difficulty.get(diff_clean, 0.85)
+
         response = call_generative_model(
             prompt_text,
             generation_config={
                 "response_mime_type": "application/json",
                 "response_schema": pydantic_to_gemini_schema(TopicListResponse),
+                "temperature": temperature,
             }
         )
 

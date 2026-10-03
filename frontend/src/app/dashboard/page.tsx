@@ -3002,12 +3002,27 @@ export default function DashboardPage() {
       const data = await res.json();
       if (data?.topics && data.topics.length > 0) {
         const gen = data.topics[0];
+        const CATEGORY_LABELS: Record<string, string> = {
+          impromptu: 'Impromptu',
+          persuasive: 'Persuasive',
+          debate: 'Debate',
+          warmup: 'Warmup',
+          storytelling: 'Storytelling',
+          cat_gdpi: 'CAT GDPI',
+          hr_interview: 'HR Interview',
+          software_engineering: 'Tech Behavioral',
+          mba_admissions: 'MBA Admissions',
+          campus_placement: 'Campus Placement',
+          upsc_interview: 'UPSC Interview',
+          leadership: 'Leadership',
+        };
+
         return {
           id: gen.id || `topic-${Date.now()}`,
           text: gen.prompt || gen.title,
           category: params.category || "impromptu",
-          categoryLabel: (params.category || params.moduleType).toUpperCase().replace(/_/g, " "),
-          timeToSpeak: 90,
+          categoryLabel: CATEGORY_LABELS[params.category] || params.category || "General Practice",
+          timeToSpeak: gen.time_to_speak || (params.moduleType === 'interview_preparation' ? 120 : (params.category === 'warmup' ? 60 : (params.category === 'impromptu' ? 90 : 120))),
           talkingPoints: (gen.suggested_points && gen.suggested_points.length > 0)
             ? gen.suggested_points
             : [],
