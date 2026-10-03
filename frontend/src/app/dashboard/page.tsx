@@ -3005,7 +3005,7 @@ export default function DashboardPage() {
         return {
           id: gen.id || `topic-${Date.now()}`,
           text: gen.prompt || gen.title,
-          category: gen.context || params.category,
+          category: params.category || "impromptu",
           categoryLabel: (params.category || params.moduleType).toUpperCase().replace(/_/g, " "),
           timeToSpeak: 90,
           talkingPoints: (gen.suggested_points && gen.suggested_points.length > 0)

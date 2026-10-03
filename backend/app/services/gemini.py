@@ -153,11 +153,35 @@ def generate_speaking_topics(
     category_frameworks = {
         "impromptu": {
             "name": "Impromptu Speaking (Spontaneous & Philosophical)",
-            "goal": "Test rapid mental synthesis, creative metaphors, and structured spontaneity under time pressure.",
-            "prompt_style": "Frame a thought-provoking dilemma, paradoxical question, or metaphorical insight. If a custom theme is given, weave it into a broader philosophical or life dilemma (never just echo the keyword alone!).",
-            "point_1": "The Hook & Metaphor: An unexpected opening analogy or striking observation connecting the topic to everyday human experience.",
-            "point_2": "The Core Dilemma: Exploring the tension between two opposing human instincts, societal frictions, or real-world trade-offs.",
+            "goal": "Test rapid mental synthesis, creative analogies, and structured spontaneity under time pressure.",
+            "prompt_style": "Frame a thought-provoking dilemma, paradoxical question, unexpected analogy, or reflective life observation.",
+            "point_1": "The Hook & Opening Insight: A sharp opening analogy or relatable observation connecting the topic to human experience.",
+            "point_2": "The Core Tension: Exploring the friction between opposing instincts, perspectives, or real-world trade-offs.",
             "point_3": "The Takeaway Punchline: A memorable concluding maxim, personal rule of thumb, or crisp synthesis for the listener."
+        },
+        "persuasive": {
+            "name": "Persuasive Speaking",
+            "goal": "Build an airtight, passionate argument, confront counterarguments, and incite a decisive call to action.",
+            "prompt_style": "Pose a bold, controversial, or urgent proposition that demands a clear stand against conventional complacency.",
+            "point_1": "The Thesis & The Stakes: State a bold, uncompromising position and demonstrate why this issue demands urgent attention.",
+            "point_2": "Dismantling the Main Objection: Directly confront the single strongest counter-argument and dismantle it with logic or evidence.",
+            "point_3": "The Call to Action: Urge the audience with an inspiring, immediate demand to change their behavior or beliefs."
+        },
+        "debate": {
+            "name": "Debate (Motion & Sparring)",
+            "goal": "Defend or oppose a formal debate resolution, balance competing stakeholder interests, and anticipate sharp rebuttals.",
+            "prompt_style": "Frame a clear, high-stakes formal motion (e.g. 'Motion: This House Believes...' or 'Motion: ...') with strong arguments on both sides.",
+            "point_1": "Proposition / Affirmative Case: The strongest principled, economic, or ethical argument in favor of the motion.",
+            "point_2": "Opposition / Negative Counter: The compelling downside, unintended consequence, or alternative approach.",
+            "point_3": "The Crucial Clash Point: The fundamental trade-off or philosophical dividing line that decides the debate."
+        },
+        "warmup": {
+            "name": "Warmup & Icebreaker",
+            "goal": "Low-stakes vocal and mental loosening, playful creativity, humor, and relaxed conversational confidence.",
+            "prompt_style": "A lighthearted, imaginative, quirky, or amusing icebreaker question that puts the speaker at ease.",
+            "point_1": "The Initial Reaction: An entertaining gut response, vivid memory, or humorous take on the question.",
+            "point_2": "The Story / Anecdote: A brief, colorful example or playful scenario illustrating your answer.",
+            "point_3": "The Fun Conclusion: A lighthearted closing thought or playful challenge for anyone listening."
         },
         "storytelling": {
             "name": "Storytelling & Narrative Arc",
@@ -166,30 +190,6 @@ def generate_speaking_topics(
             "point_1": "Setting the Scene: Establish the physical atmosphere, initial expectations, and emotional stakes before the conflict.",
             "point_2": "The Climax / Turning Point: The pivotal moment where plans crumbled, an unexpected truth emerged, or emotions peaked.",
             "point_3": "The Transformation & Lingering Lesson: How that experience permanently reshaped your character, habits, or worldview."
-        },
-        "persuasive": {
-            "name": "Persuasive & Debatable Speaking",
-            "goal": "Build an airtight, passionate argument, confront counterarguments, and incite a decisive call to action.",
-            "prompt_style": "Pose a bold, controversial, or urgent proposition that demands a clear stand against conventional wisdom.",
-            "point_1": "The Thesis & Urgent Problem: State a bold, uncompromising position and demonstrate why current complacency is costly.",
-            "point_2": "Dismantling the Main Objection: Directly confront the single strongest counter-argument and dismantle it with logic or evidence.",
-            "point_3": "The Call to Action: Urge the audience with an inspiring, immediate demand to change their behavior or beliefs."
-        },
-        "life_skill": {
-            "name": "Life Skill & Deep Wisdom",
-            "goal": "Share actionable wisdom, mental models, emotional intelligence, and sustainable daily mastery.",
-            "prompt_style": "Examine a quiet discipline, psychological truth, or critical life skill that builds lifelong resilience.",
-            "point_1": "The Common Blindspot: The subtle trap or common rookie mistake most people fall into regarding this skill.",
-            "point_2": "The Actionable Practice: A concrete daily habit, mental model, or 10-minute ritual anyone can implement today.",
-            "point_3": "The Compound Payoff: The profound long-term dividend this skill yields in peace of mind, career, or relationships."
-        },
-        "what_if": {
-            "name": "What If (Speculative Thought Experiment)",
-            "goal": "Spark unconstrained imagination, explore counterfactual realities, and mirror truths about human nature.",
-            "prompt_style": "Pose a mind-bending alternate scenario where an everyday law of nature, society, or technology is radically altered.",
-            "point_1": "The Immediate Disruption: The initial shockwave, chaos, and surreal adjustments of day one in this alternate reality.",
-            "point_2": "Creative Human Adaptation: How society, daily routines, culture, and economies evolve to cope or thrive.",
-            "point_3": "The Philosophical Mirror: What this wild hypothetical teaches us about real human desires, fears, and gratitude today."
         }
     }
 
@@ -228,6 +228,13 @@ def generate_speaking_topics(
             "point_1": "Core Curiosity & Scope: The specific problem or project that sparked your interest and how you set targets.",
             "point_2": "Overcoming Roadblocks: How you diagnosed roadblocks, learned new tools on the fly, and stayed resilient.",
             "point_3": "Readiness to Contribute: Key competency gained and how you intend to add immediate value from day one."
+        },
+        "upsc_interview": {
+            "name": "UPSC Civil Services Board",
+            "goal": "Evaluate administrative acumen, ethical integrity, constitutional perspective, and balanced policy governance.",
+            "point_1": "Constitutional & Ethical Bedrock: Ground the issue in constitutional principles, public interest, and equity.",
+            "point_2": "Multi-Dimensional Analysis: Balance administrative feasibility, social impacts, and grassroots trade-offs.",
+            "point_3": "Pragmatic Policy Solution: Articulate an actionable, non-partisan governance roadmap."
         },
         "leadership": {
             "name": "Executive Leadership & Management",

@@ -192,6 +192,14 @@ export function generateTrainedTopicFallback({
             `Decisive Governance: Making the hard ethical call while protecting long-term employee trust.`,
             `Cultural Resilience: Building an adaptable culture capable of thriving through this paradigm.`
           ]
+        },
+        upsc_interview: {
+          prompt: `How should civil administration balance constitutional rights and public welfare when addressing issues around ${trimmed}?`,
+          points: [
+            `Constitutional Principles: Grounding the administrative stance in constitutional values, rule of law, and equity.`,
+            `Stakeholder Realities: Navigating ground-level social tensions, economic trade-offs, and administrative feasibility.`,
+            `Pragmatic Policy Solution: Formulating a balanced, transparent governance roadmap with public accountability.`
+          ]
         }
       };
 
@@ -209,43 +217,43 @@ export function generateTrainedTopicFallback({
     // Public Speaking custom topic templates by category
     const publicSpeakingTemplates: Record<string, (theme: string) => { prompt: string; points: string[] }> = {
       impromptu: (theme) => ({
-        prompt: `The Hidden Lessons of ${theme.charAt(0).toUpperCase() + theme.slice(1)}: Why patience and hidden root growth matter more than rushing to bloom.`,
+        prompt: `How our relationship with ${theme} shapes our modern habits and peace of mind.`,
         points: [
-          `The Hook & Analogy: Draw an unexpected parallel between ${theme} and human growth or daily challenges.`,
-          `The Core Tension: Examine the quiet struggle between rushing visible results versus doing unseen foundational work.`,
-          `The Takeaway: Share a decisive rule of thumb for how the listener can apply this insight today.`
-        ]
-      }),
-      storytelling: (theme) => ({
-        prompt: `Recount a vivid moment when your relationship with ${theme} or a related pursuit challenged your expectations and taught you humility.`,
-        points: [
-          `Setting the Scene: Establish the initial atmosphere, sensory stakes, and optimism before things unfolded.`,
-          `The Turning Point: The critical moment plans fell apart, an unexpected truth surfaced, or friction peaked.`,
-          `The Transformation: How walking through that experience permanently reshaped your values and perspective.`
+          `The Hook & Opening Insight: An unexpected angle or relatable observation connecting ${theme} to everyday human experience.`,
+          `The Core Tension: Exploring the trade-off, paradox, or quiet dilemma at the heart of ${theme}.`,
+          `The Concluding Takeaway: A memorable lesson, personal rule of thumb, or crisp reflection for the listener.`
         ]
       }),
       persuasive: (theme) => ({
-        prompt: `Why modern society must radically rethink its approach to ${theme} before it's too late.`,
+        prompt: `Why we need a radical shift in how modern society approaches ${theme}.`,
         points: [
-          `The Thesis & Urgency: State an uncompromising argument on why current neglect of ${theme} harms our future.`,
-          `Refuting the Main Objection: Directly dismantle the leading counterargument with logic and evidence.`,
-          `Inspiring Call to Action: Urge the audience with a concrete, immediate challenge to change their habits.`
+          `The Core Thesis: State a bold, uncompromising position on the real stakes of ${theme}.`,
+          `Dismantling Objections: Directly answer the strongest counterargument with logic, evidence, and conviction.`,
+          `The Call to Action: Urge the audience with an inspiring, actionable challenge to change their habits or beliefs.`
         ]
       }),
-      life_skill: (theme) => ({
-        prompt: `Cultivating Mastery: How adopting the deliberate mindset of ${theme} builds lifelong resilience and calm.`,
+      debate: (theme) => ({
+        prompt: `Motion: This House Believes that the rapid expansion of ${theme} does more harm than good.`,
         points: [
-          `The Common Trap: Why most people approach ${theme} with short bursts of effort rather than sustainable systems.`,
-          `The 15-Minute Habit: A practical daily mental model or exercise anyone can start immediately.`,
-          `The Compounding Dividend: The profound peace and capability gained after practicing this skill for years.`
+          `Proposition (Affirmative): The strongest systemic, ethical, or economic case supporting the motion.`,
+          `Opposition (Negative): The indispensable benefits, human liberties, or competitive upside of opposing the motion.`,
+          `The Key Clash Point: The pivotal philosophical or practical trade-off that decides this debate.`
         ]
       }),
-      what_if: (theme) => ({
-        prompt: `Imagine a future where all natural forms of ${theme} suddenly vanished overnight. How would humanity adapt?`,
+      warmup: (theme) => ({
+        prompt: `If you were declared the world’s foremost authority on ${theme} for just 24 hours, what would you do?`,
         points: [
-          `The Immediate Shock: Detail the psychological and societal disruption of day one in this alternate reality.`,
-          `Creative Human Adaptation: How culture, language, and technology would evolve to replace what was lost.`,
-          `The Philosophical Mirror: What this wild thought experiment reveals about our gratitude and human nature today.`
+          `The Gut Reaction: An entertaining, humorous reaction to suddenly holding ultimate authority over ${theme}.`,
+          `The Playful Decree: A hilarious new rule or quirky custom you would immediately institute.`,
+          `The Lighthearted Conclusion: A fun takeaway reflecting on what makes ${theme} entertaining in real life.`
+        ]
+      }),
+      storytelling: (theme) => ({
+        prompt: `Recount a vivid moment when ${theme} or an experience connected to it taught you an unforgettable lesson.`,
+        points: [
+          `Setting the Scene: Establish the physical atmosphere, initial expectations, and emotional stakes before things unfolded.`,
+          `The Turning Point: The critical moment plans fell apart, an unexpected truth surfaced, or friction peaked.`,
+          `The Transformation: How walking through that experience permanently reshaped your character and perspective.`
         ]
       })
     };
@@ -325,10 +333,10 @@ export const TopicDispenser: React.FC<TopicDispenserProps> = ({
 
   const PUBLIC_SPEAKING_CATEGORIES: RetroSelectOption[] = [
     { value: 'impromptu', label: 'Impromptu' },
-    { value: 'storytelling', label: 'Storytelling' },
     { value: 'persuasive', label: 'Persuasive' },
-    { value: 'life_skill', label: 'Life Skill' },
-    { value: 'what_if', label: 'What If' },
+    { value: 'debate', label: 'Debate' },
+    { value: 'warmup', label: 'Warmup' },
+    { value: 'storytelling', label: 'Storytelling' },
   ];
 
   const INTERVIEW_CATEGORIES: RetroSelectOption[] = [
@@ -337,6 +345,7 @@ export const TopicDispenser: React.FC<TopicDispenserProps> = ({
     { value: 'software_engineering', label: 'Tech Behavioral' },
     { value: 'mba_admissions', label: 'MBA Admissions' },
     { value: 'campus_placement', label: 'Campus Placement' },
+    { value: 'upsc_interview', label: 'UPSC Interview' },
     { value: 'leadership', label: 'Leadership' },
   ];
 
