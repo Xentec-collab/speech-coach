@@ -3072,98 +3072,52 @@ export default function DashboardPage() {
 
 
   // ── Practice Console View (Matching Reference Design) ─────────────────────
+  // ── Practice Console View (Refined 2-Column Professional Layout) ─────────────
   const renderPracticeConsole = () => {
     return (
-      <div className="w-full max-w-7xl mx-auto py-2 px-1 sm:px-4 animate-bloom">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
-          {/* ── LEFT COLUMN: Headline & How It Works & Daily Inspiration ── */}
-          <div className="lg:col-span-4 flex flex-col gap-5">
-            {/* Top Navigation / Back */}
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setActiveTab("console")}
-                className="w-8 h-8 rounded-full bg-white/80 hover:bg-white border border-zinc-200 shadow-sm flex items-center justify-center text-zinc-700 transition-all cursor-pointer"
-              >
-                <ChevronRight className="w-4 h-4 rotate-180" />
-              </button>
-            </div>
-
-            {/* Big Headline */}
-            <div>
-              <h1 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight leading-[1.15]">
-                Random topic.<br />
-                <span className="text-[#FA5276]">Real growth.</span>
-              </h1>
-              <p className="text-xs sm:text-sm text-muted-foreground mt-2 leading-relaxed font-normal">
-                Get a random impromptu topic, speak for up to 10 minutes and get AI coaching to improve.
-              </p>
-            </div>
-
-            {/* How It Works Card */}
-            <div className="bg-card/90 backdrop-blur-md rounded-3xl p-5 border border-border/80 shadow-sm space-y-3">
-              <div className="flex items-center gap-2 text-xs font-bold text-foreground">
-                <Sparkles className="w-4 h-4 text-[#FA5276]" />
-                <span>Practice Guidelines</span>
-              </div>
-              <div className="space-y-3 text-xs text-muted-foreground">
-                <div className="flex items-start gap-2.5">
-                  <span className="w-5 h-5 rounded-full bg-[#FA5276]/10 text-[#FA5276] font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">1</span>
-                  <p className="leading-snug">Set your module, track, and difficulty right on the retro machine.</p>
-                </div>
-                <div className="flex items-start gap-2.5">
-                  <span className="w-5 h-5 rounded-full bg-[#FA5276]/10 text-[#FA5276] font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">2</span>
-                  <p className="leading-snug">Press <strong className="text-foreground">POP YOUR TOPIC</strong> or the tactile switch <strong className="text-foreground font-mono">[ ||| ]</strong> to dispense your printed prompt.</p>
-                </div>
-                <div className="flex items-start gap-2.5">
-                  <span className="w-5 h-5 rounded-full bg-[#FA5276]/10 text-[#FA5276] font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">3</span>
-                  <p className="leading-snug">Record your answer (10s minimum, up to 10 minutes maximum) for AI coaching evaluation.</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Playful Annotation pointing to machine */}
-            <div className="flex items-center gap-2 text-[#FA5276] pl-2">
-              <svg className="w-8 h-8 -rotate-12 stroke-current fill-none stroke-[1.8]" viewBox="0 0 40 40">
-                <path d="M5,10 Q20,32 35,20" />
-                <path d="M28,15 L35,20 L27,25" />
-              </svg>
-              <span className="text-xs font-serif italic text-[#FA5276]">
-                Press [ ||| ] on the machine to pop your topic slip!
-              </span>
-            </div>
-
-
-            {/* Bottom Quote Card */}
-            <div className="mt-auto bg-card/80 backdrop-blur-xs rounded-3xl p-5 border border-border/80 shadow-xs space-y-2">
-              <div className="text-2xl text-[#FA5276] leading-none font-serif">“</div>
-              <p className="text-xs text-foreground/90 italic font-medium leading-relaxed">
-                The best way to predict your future is to create it.
-              </p>
-              <div className="flex items-center justify-between pt-1 text-muted-foreground text-xs">
-                <span className="text-[10px]">Daily Inspiration</span>
-                <Heart className="w-3.5 h-3.5 text-[#FA5276] fill-[#FA5276]/20" />
-              </div>
-            </div>
-          </div>
-
-          {/* ── CENTER COLUMN: The 3D Machine ── */}
-          <div className="lg:col-span-4 flex flex-col items-center justify-center pt-2">
+      <div className="w-full max-w-5xl mx-auto py-2 sm:py-4 px-3 sm:px-6 animate-bloom">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start justify-center">
+          {/* ── LEFT COLUMN: The 3D Machine & Dispensed Receipt Slip ── */}
+          <div className="lg:col-span-6 flex flex-col items-center justify-start pt-1">
             {renderRetroPrinter(false)}
           </div>
 
-          {/* ── RIGHT COLUMN: Your Recording & Tabbed Feedback / Vocab / Metrics ── */}
-          <div className="lg:col-span-4 space-y-5">
+          {/* ── RIGHT COLUMN: Studio Recorder & Tabbed Feedback ── */}
+          <div className="lg:col-span-6 flex flex-col gap-4 w-full max-w-[460px] mx-auto lg:mx-0">
             {/* Your Recording Card */}
-            <div className="rounded-3xl bg-card/95 backdrop-blur-md p-6 border border-border/80 shadow-sm space-y-4">
-              <div className="flex items-center justify-between text-xs font-bold text-foreground">
-                <span>Your Recording</span>
-                <span className="text-muted-foreground font-normal">10 min max</span>
+            <div className="rounded-3xl bg-card/95 backdrop-blur-md p-5 sm:p-6 border border-border/80 shadow-md space-y-4 relative overflow-hidden">
+              {/* Countdown 3...2...1... Overlay */}
+              {countdown !== null && (
+                <div className="absolute inset-0 z-30 bg-background/95 backdrop-blur-md rounded-3xl flex flex-col items-center justify-center gap-2 p-6 text-center animate-fade-in">
+                  <div className="flex items-center gap-1.5 text-xs font-mono font-bold tracking-widest text-[#FA5276] uppercase">
+                    <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
+                    RECORDING STARTS IN
+                  </div>
+                  <div key={countdown} className="text-7xl sm:text-8xl font-black text-[#FA5276] font-mono tabular-nums leading-none select-none drop-shadow-[0_0_24px_rgba(250,82,118,0.4)]">
+                    {countdown}
+                  </div>
+                  <p className="text-xs text-muted-foreground font-medium">Take a breath & organize your thoughts...</p>
+                  <Button
+                    variant="ghost"
+                    size="xs"
+                    onClick={cancelCountdown}
+                    className="mt-1 text-muted-foreground hover:text-foreground text-[11px] font-mono uppercase tracking-wider"
+                  >
+                    ✕ Cancel
+                  </Button>
+                </div>
+              )}
+
+              <div className="flex items-center justify-between text-xs font-bold text-foreground pb-2 border-b border-border/40">
+                <div className="flex items-center gap-2">
+                  <span className={`w-2 h-2 rounded-full ${recordingState === "recording" ? "bg-red-500 animate-ping" : "bg-[#FA5276]"}`} />
+                  <span className="tracking-wide">Your Recording</span>
+                </div>
+                <span className="text-muted-foreground font-mono text-[11px]">10 min max</span>
               </div>
 
-
               {/* Audio Waveform */}
-              <div className="h-14 flex items-center justify-center gap-1 px-2">
+              <div className="h-14 flex items-center justify-center gap-1 px-3 py-1.5 bg-muted/20 rounded-2xl border border-border/30">
                 {Array.from({ length: 32 }).map((_, i) => {
                   const heights = [10, 16, 24, 14, 32, 22, 18, 40, 28, 14, 30, 22, 12, 28, 18, 36, 16, 24, 14, 32, 22, 12, 28, 20, 38, 16, 26, 14, 30, 22, 12, 26];
                   const h = heights[i % heights.length];
@@ -3183,18 +3137,29 @@ export default function DashboardPage() {
 
               {/* Timer Display */}
               <div className="text-center">
-                <p className="text-xs font-mono font-semibold text-zinc-600">
-                  {ft(recordSeconds)} / 10:00
+                <p className="text-xl font-black font-mono tracking-tight text-foreground tabular-nums">
+                  {ft(recordSeconds)}
+                  <span className="text-xs text-muted-foreground font-normal ml-1.5 font-sans">/ 10:00</span>
                 </p>
+                {recordingState === "recording" && (
+                  <div className="flex items-center justify-center gap-1.5 mt-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                    <span className="text-[10px] font-mono font-bold tracking-widest text-red-500 uppercase">LIVE RECORDING</span>
+                  </div>
+                )}
+                {recordingState === "paused" && (
+                  <p className="text-[10px] font-mono font-bold tracking-widest text-amber-500 mt-0.5 uppercase">PAUSED</p>
+                )}
               </div>
 
-              {/* Circular Microphone Record Button */}
-              <div className="flex flex-col items-center justify-center gap-2 pt-1">
+              {/* Circular Microphone Record Button & Controls */}
+              <div className="flex flex-col items-center justify-center gap-2 pt-0.5">
                 {recordingState === "idle" && (
                   <button
                     type="button"
                     onClick={handleStartWithCountdown}
-                    className="w-16 h-16 rounded-full bg-gradient-to-tr from-[#FA5276] to-[#FF6B8B] text-white shadow-[0_8px_24px_rgba(250,82,118,0.4)] hover:shadow-[0_12px_28px_rgba(250,82,118,0.5)] hover:scale-105 active:scale-95 transition-all flex items-center justify-center cursor-pointer"
+                    className="w-16 h-16 rounded-full bg-gradient-to-tr from-[#FA5276] to-[#FF6B8B] text-white shadow-[0_8px_24px_rgba(250,82,118,0.4)] hover:shadow-[0_12px_28px_rgba(250,82,118,0.5)] hover:scale-105 active:scale-95 transition-all flex items-center justify-center cursor-pointer select-none"
+                    title="Start Recording"
                   >
                     <Mic className="w-7 h-7" />
                   </button>
@@ -3204,7 +3169,8 @@ export default function DashboardPage() {
                     <button
                       type="button"
                       onClick={pauseRecording}
-                      className="w-12 h-12 rounded-full bg-zinc-100 text-zinc-700 hover:bg-zinc-200 flex items-center justify-center shadow-sm cursor-pointer"
+                      className="w-12 h-12 rounded-full bg-muted text-foreground hover:bg-muted/80 flex items-center justify-center shadow-sm cursor-pointer transition-transform hover:scale-105 active:scale-95"
+                      title="Pause"
                     >
                       <Pause className="w-5 h-5" />
                     </button>
@@ -3212,6 +3178,7 @@ export default function DashboardPage() {
                       type="button"
                       onClick={() => stopStream()}
                       className="w-16 h-16 rounded-full bg-red-500 text-white shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                      title="Stop Recording"
                     >
                       <Square className="w-6 h-6 fill-current" />
                     </button>
@@ -3222,27 +3189,29 @@ export default function DashboardPage() {
                     <button
                       type="button"
                       onClick={resumeRecording}
-                      className="w-14 h-14 rounded-full bg-[#FA5276] text-white shadow-md flex items-center justify-center cursor-pointer"
+                      className="w-14 h-14 rounded-full bg-[#FA5276] text-white shadow-md flex items-center justify-center cursor-pointer transition-transform hover:scale-105 active:scale-95"
+                      title="Resume"
                     >
                       <Play className="w-6 h-6 fill-current ml-0.5" />
                     </button>
                     <button
                       type="button"
                       onClick={() => stopStream()}
-                      className="w-12 h-12 rounded-full bg-zinc-100 text-zinc-700 hover:bg-zinc-200 flex items-center justify-center cursor-pointer"
+                      className="w-12 h-12 rounded-full bg-muted text-foreground hover:bg-muted/80 flex items-center justify-center cursor-pointer transition-transform hover:scale-105 active:scale-95"
+                      title="Stop Recording"
                     >
                       <Square className="w-5 h-5 fill-current" />
                     </button>
                   </div>
                 )}
                 {recordingState === "stopped" && (
-                  <div className="w-full flex flex-col gap-3">
+                  <div className="w-full flex flex-col gap-2.5">
                     <audio src={audioUrl || ""} controls className="w-full h-8 rounded" />
                     <div className="flex gap-2">
                       <Button
                         onClick={handleSubmitSpeech}
                         disabled={isUploading || recordSeconds < 10}
-                        className="flex-1 h-10 rounded-xl font-bold bg-[#FA5276] hover:bg-[#e64064] text-white shadow-md shadow-[#FA5276]/25 cursor-pointer"
+                        className="flex-1 h-10 rounded-xl font-bold bg-[#FA5276] hover:bg-[#e64064] text-white shadow-md shadow-[#FA5276]/25 cursor-pointer text-xs uppercase tracking-wide"
                       >
                         {isUploading ? "Uploading..." : "Submit for Evaluation"}
                       </Button>
@@ -3250,7 +3219,7 @@ export default function DashboardPage() {
                         variant="outline"
                         onClick={discardRecording}
                         disabled={isUploading}
-                        className="h-10 rounded-xl cursor-pointer"
+                        className="h-10 rounded-xl cursor-pointer text-xs"
                       >
                         Discard
                       </Button>
@@ -3258,16 +3227,16 @@ export default function DashboardPage() {
                   </div>
                 )}
 
-                <span className="text-[11px] font-medium text-zinc-500">
+                <span className="text-[11px] font-medium text-muted-foreground mt-0.5">
                   {recordingState === "idle"
                     ? activeTopic
-                      ? "Tap to start recording"
+                      ? "Tap microphone to begin your practice"
                       : "Pop a topic from the machine to start recording"
                     : recordingState === "recording"
                     ? "Recording in progress..."
                     : recordingState === "paused"
-                    ? "Paused"
-                    : "Review recording"}
+                    ? "Paused — tap play to resume"
+                    : "Review recording or submit for AI analysis"}
                 </span>
               </div>
             </div>
@@ -4314,9 +4283,9 @@ export default function DashboardPage() {
 
         {/* ── CENTER PANEL ───────────────────────────────────────────────── */}
         <main className={`flex-1 overflow-y-auto flex flex-col pb-28 md:pb-0 ${isCute ? "bg-transparent" : "bg-background"}`}>
-          {/* Top Breadcrumb Bar */}
+          {/* Top Breadcrumb & Navigation Bar */}
           {!activeSession && (
-            <header className="h-14 border-b border-[var(--border-sidebar)]/60 bg-[var(--bg-sidebar)]/85 backdrop-blur-md flex items-center justify-between px-4 sm:px-6 flex-shrink-0 z-10 sticky top-0">
+            <header className="h-14 border-b border-[var(--border-sidebar)]/60 bg-[var(--bg-sidebar)]/85 backdrop-blur-md flex items-center justify-between px-4 sm:px-6 flex-shrink-0 z-20 sticky top-0">
               <div className="flex items-center gap-2.5 text-xs font-bold text-muted-foreground select-none min-w-0">
                 <button
                   onClick={() => setMobileSidebarOpen(true)}
@@ -4327,7 +4296,10 @@ export default function DashboardPage() {
                 </button>
 
                 {/* Logo Area */}
-                <div className="flex items-center gap-2 select-none shrink-0 mr-1">
+                <div 
+                  className="flex items-center gap-2 select-none shrink-0 mr-1 cursor-pointer"
+                  onClick={() => { setActiveTab("console"); setUploadSuccess(false); }}
+                >
                   <div className="w-6 h-6 rounded-md flex items-center justify-center text-white font-black text-xs shadow-md" style={{ background: 'var(--logo-gradient)' }}>
                     S
                   </div>
@@ -4344,7 +4316,7 @@ export default function DashboardPage() {
                     {polledSpeechDetails?.topics?.title || "Speech Evaluation"}
                   </span>
                 ) : (
-                  <span className="text-foreground truncate">
+                  <span className="text-foreground truncate hidden lg:inline">
                     {activeTab === "console" ? "Practice Console" :
                      activeTab === "tracks" ? "Interview Tracks" :
                      activeTab === "library" ? "Knowledge Library" :
@@ -4353,7 +4325,51 @@ export default function DashboardPage() {
                   </span>
                 )}
               </div>
-              <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+
+              {/* Desktop Navigation Tabs */}
+              <div className="hidden md:flex items-center p-0.5 rounded-lg bg-muted/60 text-[11px] gap-0.5 border border-border/10 backdrop-blur-sm">
+                <button
+                  onClick={() => { setActiveTab("console"); setUploadSuccess(false); }}
+                  className={`px-3 py-1 rounded-md font-semibold transition-all ${activeTab === "console" ? "bg-card text-foreground shadow-xs scale-[1.02]" : "text-muted-foreground hover:text-foreground hover:bg-muted/30"}`}
+                >
+                  Console
+                </button>
+                {moduleType === "interview_preparation" && (
+                  <button
+                    onClick={() => { setActiveTab("tracks"); fetchTrackStats(); }}
+                    className={`px-3 py-1 rounded-md font-semibold transition-all ${activeTab === "tracks" ? "bg-card text-foreground shadow-xs scale-[1.02]" : "text-muted-foreground hover:text-foreground hover:bg-muted/30"}`}
+                  >
+                    Tracks
+                  </button>
+                )}
+                <button
+                  onClick={() => { setActiveTab("library"); }}
+                  className={`px-3 py-1 rounded-md font-semibold transition-all ${activeTab === "library" ? "bg-card text-foreground shadow-xs scale-[1.02]" : "text-muted-foreground hover:text-foreground hover:bg-muted/30"}`}
+                >
+                  Library
+                </button>
+                <button
+                  onClick={() => { setActiveTab("coach"); }}
+                  className={`px-3 py-1 rounded-md font-semibold transition-all ${activeTab === "coach" ? "bg-card text-foreground shadow-xs scale-[1.02]" : "text-muted-foreground hover:text-foreground hover:bg-muted/30"}`}
+                >
+                  AI Coach
+                </button>
+                <button
+                  onClick={() => { setActiveTab("history"); }}
+                  className={`px-3 py-1 rounded-md font-semibold transition-all ${activeTab === "history" ? "bg-card text-foreground shadow-xs scale-[1.02]" : "text-muted-foreground hover:text-foreground hover:bg-muted/30"}`}
+                >
+                  History
+                </button>
+                <button
+                  onClick={() => { setActiveTab("evaluation"); }}
+                  className={`px-3 py-1 rounded-md font-semibold transition-all ${activeTab === "evaluation" ? "bg-card text-foreground shadow-xs scale-[1.02]" : "text-muted-foreground hover:text-foreground hover:bg-muted/30"}`}
+                >
+                  Evaluation {polledSpeechDetails?.overall_score != null ? `(${polledSpeechDetails.overall_score})` : ""}
+                </button>
+              </div>
+
+              {/* Right Zone: Score, Theme & Logout */}
+              <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
                 {uploadSuccess && polledSpeechDetails?.overall_score !== null && (
                   <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--accent-bg)] text-[var(--accent-text)] border border-[var(--accent-border)] text-[10px] font-extrabold uppercase tracking-wide">
                     <span>Score:</span>
@@ -4383,162 +4399,76 @@ export default function DashboardPage() {
             </header>
           )}
 
+          {/* Mobile Tab Strip (Only on screens below md) */}
+          {!activeSession && (
+            <div className="md:hidden flex items-center px-3 py-2 border-b border-border/40 bg-muted/20 overflow-x-auto gap-1 text-[11px] select-none scrollbar-none flex-shrink-0">
+              <button
+                onClick={() => { setActiveTab("console"); setUploadSuccess(false); }}
+                className={`px-3 py-1 rounded-md font-semibold whitespace-nowrap transition-all ${activeTab === "console" ? "bg-card text-foreground shadow-xs" : "text-muted-foreground"}`}
+              >
+                Console
+              </button>
+              {moduleType === "interview_preparation" && (
+                <button
+                  onClick={() => { setActiveTab("tracks"); fetchTrackStats(); }}
+                  className={`px-3 py-1 rounded-md font-semibold whitespace-nowrap transition-all ${activeTab === "tracks" ? "bg-card text-foreground shadow-xs" : "text-muted-foreground"}`}
+                >
+                  Tracks
+                </button>
+              )}
+              <button
+                onClick={() => { setActiveTab("library"); }}
+                className={`px-3 py-1 rounded-md font-semibold whitespace-nowrap transition-all ${activeTab === "library" ? "bg-card text-foreground shadow-xs" : "text-muted-foreground"}`}
+              >
+                Library
+              </button>
+              <button
+                onClick={() => { setActiveTab("coach"); }}
+                className={`px-3 py-1 rounded-md font-semibold whitespace-nowrap transition-all ${activeTab === "coach" ? "bg-card text-foreground shadow-xs" : "text-muted-foreground"}`}
+              >
+                AI Coach
+              </button>
+              <button
+                onClick={() => { setActiveTab("history"); }}
+                className={`px-3 py-1 rounded-md font-semibold whitespace-nowrap transition-all ${activeTab === "history" ? "bg-card text-foreground shadow-xs" : "text-muted-foreground"}`}
+              >
+                History
+              </button>
+              <button
+                onClick={() => { setActiveTab("evaluation"); }}
+                className={`px-3 py-1 rounded-md font-semibold whitespace-nowrap transition-all ${activeTab === "evaluation" ? "bg-card text-foreground shadow-xs" : "text-muted-foreground"}`}
+              >
+                Evaluation {polledSpeechDetails?.overall_score != null ? `(${polledSpeechDetails.overall_score})` : ""}
+              </button>
+            </div>
+          )}
+
           {activeSession ? (
             renderActiveSessionPanel()
           ) : (
             <>
-              {/* Welcome */}
-              {!uploadSuccess&&(
-            <div className={`p-3 sm:p-6 mx-auto space-y-6 animate-bloom ${activeTab === "console" ? "max-w-7xl" : "max-w-4xl"}`}>
-              {/* Header */}
-              <div className="flex justify-between items-center border-b border-[var(--border-color)] pb-3">
-                <div className="flex-grow min-w-0">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between w-full gap-3">
-                    <div>
-                      {activeTab === "console" ? (
-                        moduleType === "interview_preparation" ? (
-                          activeTrack ? (
-                            <Button 
-                              variant="ghost" 
-                              size="xs" 
-                              onClick={() => setActiveTrack(null)}
-                              className="text-[10px] font-bold h-7 gap-1 p-0 hover:bg-transparent text-muted-foreground hover:text-foreground"
-                            >
-                              ← Back to Pathways
-                            </Button>
-                          ) : (
-                            <>
-                              <h1 className="text-base font-black text-foreground tracking-tight flex items-center gap-1.5">
-                                {isCute ? "Interview Prep Pathway 🎯" : "Interview Preparation"}
-                              </h1>
-                              <p className="text-[10px] text-muted-foreground mt-0.5">
-                                Practice realistic interview questions and follow-ups.
-                              </p>
-                            </>
-                          )
-                        ) : (
-                          <>
-                            <h1 className="text-base font-black text-foreground tracking-tight flex items-center gap-1.5 break-words">
-                              {isCute ? (
-                                <span className="flex items-center gap-2">
-                                  Good morning, {user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Speaker"}! 🌸
-                                </span>
-                              ) : (
-                                "Practice Terminal"
-                              )}
-                            </h1>
-                            <p className="text-[10px] text-muted-foreground mt-0.5">
-                              {isCute ? "Let's grow confidence, one speech at a time." : "Generate a custom topic and record your practice speech inline."}
-                            </p>
-                          </>
-                        )
-                      ) : activeTab === "tracks" ? (
-                        <>
-                          <h1 className="text-base font-black text-foreground tracking-tight flex items-center gap-1.5">
-                            {isCute ? "Interview Pathways 🎯" : "Interview Pathways"}
-                          </h1>
-                          <p className="text-[10px] text-muted-foreground mt-0.5">
-                            Structured multi-stage preparation roadmaps.
-                          </p>
-                        </>
-                      ) : activeTab === "library" ? (
-                        <>
-                          <h1 className="text-base font-black text-foreground tracking-tight flex items-center gap-1.5">
-                            {isCute ? "Preparation Library 📚" : "Preparation Library"}
-                          </h1>
-                          <p className="text-[10px] text-muted-foreground mt-0.5">
-                            Curated articles, frameworks, and practice guides.
-                          </p>
-                        </>
-                      ) : activeTab === "history" ? (
-                        <>
-                          <h1 className="text-base font-black text-foreground tracking-tight flex items-center gap-1.5">
-                            Practice History
-                          </h1>
-                          <p className="text-[10px] text-muted-foreground mt-0.5">
-                            Review past recordings, transcripts, and evaluation metrics.
-                          </p>
-                        </>
-                      ) : activeTab === "evaluation" ? (
-                        <>
-                          <h1 className="text-base font-black text-foreground tracking-tight flex items-center gap-1.5">
-                            Speech Evaluation
-                          </h1>
-                          <p className="text-[10px] text-muted-foreground mt-0.5">
-                            Comprehensive speech feedback, score breakdown, and vocabulary upgrades.
-                          </p>
-                        </>
-                      ) : (
-                        <>
-                          <h1 className="text-base font-black text-foreground tracking-tight flex items-center gap-1.5">
-                            {isCute ? "Your AI Coach 🐾" : "AI Coach"}
-                          </h1>
-                          <p className="text-[10px] text-muted-foreground mt-0.5">
-                            Long-term practice analysis, readiness indicators, and targeted improvement pathways.
-                          </p>
-                        </>
-                      )}
-                    </div>
-
-                    <div className="flex flex-wrap p-0.5 rounded-lg bg-muted/60 text-[10px] gap-0.5 shrink-0 border border-border/10 backdrop-blur-sm self-start sm:self-auto">
-                      <button
-                        onClick={() => setActiveTab("console")}
-                        className={`px-3 py-1 rounded-md font-semibold transition-all ${activeTab === "console" ? "bg-card text-foreground shadow-sm scale-[1.02]" : "text-muted-foreground hover:text-foreground hover:bg-muted/30"}`}
-                      >
-                        Console
-                      </button>
-                      {moduleType === "interview_preparation" && (
-                        <button
-                          onClick={() => { setActiveTab("tracks"); fetchTrackStats(); }}
-                          className={`px-3 py-1 rounded-md font-semibold transition-all ${activeTab === "tracks" ? "bg-card text-foreground shadow-sm scale-[1.02]" : "text-muted-foreground hover:text-foreground hover:bg-muted/30"}`}
-                        >
-                          Tracks
-                        </button>
-                      )}
-                      <button
-                        onClick={() => { setActiveTab("library"); }}
-                        className={`px-3 py-1 rounded-md font-semibold transition-all ${activeTab === "library" ? "bg-card text-foreground shadow-sm scale-[1.02]" : "text-muted-foreground hover:text-foreground hover:bg-muted/30"}`}
-                      >
-                        Library
-                      </button>
-                      <button
-                        onClick={() => { setActiveTab("coach"); }}
-                        className={`px-3 py-1 rounded-md font-semibold transition-all ${activeTab === "coach" ? "bg-card text-foreground shadow-sm scale-[1.02]" : "text-muted-foreground hover:text-foreground hover:bg-muted/30"}`}
-                      >
-                        AI Coach
-                      </button>
-                      <button
-                        onClick={() => { setActiveTab("history"); }}
-                        className={`px-3 py-1 rounded-md font-semibold transition-all ${activeTab === "history" ? "bg-card text-foreground shadow-sm scale-[1.02]" : "text-muted-foreground hover:text-foreground hover:bg-muted/30"}`}
-                      >
-                        History
-                      </button>
-                      <button
-                        onClick={() => { setActiveTab("evaluation"); }}
-                        className={`px-3 py-1 rounded-md font-semibold transition-all ${activeTab === "evaluation" ? "bg-card text-foreground shadow-sm scale-[1.02]" : "text-muted-foreground hover:text-foreground hover:bg-muted/30"}`}
-                      >
-                        Evaluation {polledSpeechDetails?.overall_score != null ? `(${polledSpeechDetails.overall_score})` : ""}
-                      </button>
-                    </div>
+              {/* Main Content Area */}
+              {!uploadSuccess && (
+                activeTab === "console" ? (
+                  <div className="w-full flex-1 flex flex-col justify-start">
+                    {renderPracticeConsole()}
                   </div>
-                </div>
-              </div>
-
-              {moduleType === "interview_preparation" && activeTab === "tracks" ? (
-                renderInterviewTracks()
-              ) : activeTab === "library" ? (
-                renderKnowledgeLibrary()
-              ) : activeTab === "coach" ? (
-                renderAICoach()
-              ) : activeTab === "history" ? (
-                renderHistoryTab()
-              ) : activeTab === "evaluation" ? (
-                renderEvaluationTab()
-              ) : (
-                renderPracticeConsole()
+                ) : (
+                  <div className="p-3 sm:p-6 mx-auto space-y-6 animate-bloom max-w-4xl w-full">
+                    {moduleType === "interview_preparation" && activeTab === "tracks" ? (
+                      renderInterviewTracks()
+                    ) : activeTab === "library" ? (
+                      renderKnowledgeLibrary()
+                    ) : activeTab === "coach" ? (
+                      renderAICoach()
+                    ) : activeTab === "history" ? (
+                      renderHistoryTab()
+                    ) : (
+                      renderEvaluationTab()
+                    )}
+                  </div>
+                )
               )}
-            </div>
-          )}
 
           {/* Processing */}
           {isProcessing&&(
