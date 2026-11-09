@@ -3072,13 +3072,87 @@ export default function DashboardPage() {
 
 
   // ── Practice Console View (Matching Reference Design) ─────────────────────
-  // ── Practice Console View (Refined 2-Column Professional Layout) ─────────────
+  // ── Practice Console View (Refined Layout with Cozy Flanking Accents) ─────────────
   const renderPracticeConsole = () => {
     return (
-      <div className="w-full max-w-5xl mx-auto py-2 sm:py-4 px-3 sm:px-6 animate-bloom">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start justify-center">
-          {/* ── LEFT COLUMN: The 3D Machine & Dispensed Receipt Slip ── */}
-          <div className="lg:col-span-6 flex flex-col items-center justify-start pt-1">
+      <div className="w-full max-w-7xl 2xl:max-w-[1440px] mx-auto py-2 sm:py-3 px-3 sm:px-6 animate-bloom">
+        <div className="flex items-start justify-center gap-6 xl:gap-8 2xl:gap-10">
+          {/* ── LEFT FLANK: Cozy Studio Corner (Steaming Mug & Coach Sticky Note) ── */}
+          <div className="hidden lg:flex flex-col items-center justify-start gap-3.5 w-44 xl:w-52 2xl:w-60 shrink-0 pt-2 select-none pointer-events-auto">
+            {/* Steaming Ceramic Studio Mug */}
+            <div className="relative flex flex-col items-center group">
+              <div className="h-7 w-16 relative overflow-visible flex justify-center gap-2 mb-0.5">
+                <span className="w-1 h-5 rounded-full bg-gradient-to-t from-stone-400/50 to-transparent animate-pulse" style={{ animationDuration: "2.4s", animationDelay: "0.1s" }} />
+                <span className="w-1.5 h-7 rounded-full bg-gradient-to-t from-stone-400/60 to-transparent animate-pulse" style={{ animationDuration: "3s", animationDelay: "0.7s" }} />
+                <span className="w-1 h-6 rounded-full bg-gradient-to-t from-stone-400/50 to-transparent animate-pulse" style={{ animationDuration: "2.6s", animationDelay: "1.2s" }} />
+              </div>
+              <svg width="72" height="60" viewBox="0 0 74 64" fill="none" className="drop-shadow-sm transition-transform duration-300 group-hover:scale-105">
+                <ellipse cx="36" cy="58" rx="34" ry="5" fill="#E8DFD5" className="dark:fill-stone-800" />
+                <ellipse cx="36" cy="56" rx="28" ry="4" fill="#DDD2C5" className="dark:fill-stone-700" />
+                <path d="M48 20 C62 20 62 44 48 44" stroke="#D3B89E" strokeWidth="6" strokeLinecap="round" fill="none" />
+                <path d="M48 22 C58 22 58 42 48 42" stroke="#E6D3BF" strokeWidth="3" strokeLinecap="round" fill="none" />
+                <path d="M14 18 C14 18 16 52 36 52 C56 52 58 18 58 18 Z" fill="url(#mugGrad)" />
+                <ellipse cx="36" cy="18" rx="22" ry="5.5" fill="#C9A887" />
+                <ellipse cx="36" cy="18" rx="20" ry="4.5" fill="#4A2E1B" />
+                <path d="M36 17 C34 15 32 16 32 17 C32 19 36 21 36 21 C36 21 40 19 40 17 C40 16 38 15 36 17 Z" fill="#F4EDE4" opacity="0.85" />
+                <defs>
+                  <linearGradient id="mugGrad" x1="14" y1="18" x2="58" y2="52" gradientUnits="userSpaceOnUse">
+                    <stop stopColor="#F5EFE6" />
+                    <stop offset="0.6" stopColor="#EADBC8" />
+                    <stop offset="1" stopColor="#D5BF9F" />
+                  </linearGradient>
+                </defs>
+              </svg>
+              <span className="text-[10px] font-medium text-muted-foreground/80 mt-1 font-mono tracking-tight">Studio Brew</span>
+            </div>
+
+            {/* Pinned Coach Sticky Note */}
+            <div className="w-full bg-[#FEFAF2] dark:bg-card/90 border border-[#E9DFCE] dark:border-border/60 rounded-2xl p-3.5 shadow-xs relative rotate-[-1.5deg] hover:rotate-0 transition-all duration-300">
+              <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-gradient-to-tr from-[#9B7235] via-[#E2B768] to-[#F9DB96] shadow-xs border border-[#7A5624] flex items-center justify-center">
+                <span className="w-1 h-1 rounded-full bg-white/80" />
+              </div>
+              <div className="pt-1 space-y-1.5 text-left">
+                <div className="flex items-center gap-1.5 text-[9px] font-mono font-bold tracking-wider uppercase text-[#B58547] dark:text-[#E2B768]">
+                  <span>✦</span>
+                  <span>Coach Note</span>
+                </div>
+                <p className="text-[11px] leading-snug font-sans text-stone-700 dark:text-stone-300 font-medium">
+                  &ldquo;Embrace the pause. Silence before an important sentence gives your words 2x more authority.&rdquo;
+                </p>
+                <div className="pt-1 flex items-center justify-between text-[9px] font-mono text-muted-foreground/70 border-t border-[#E9DFCE]/60 dark:border-border/40">
+                  <span>Rule of 3</span>
+                  <span>Tempo 140 WPM</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Session Warmup Checklist */}
+            <div className="w-full bg-card/70 backdrop-blur-sm border border-border/60 rounded-2xl p-3 shadow-xs space-y-1.5 text-left">
+              <div className="flex items-center justify-between">
+                <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-muted-foreground">Quick Checklist</span>
+                <span className="text-[10px] font-mono font-bold text-primary">Ready</span>
+              </div>
+              <div className="space-y-1 text-[11px]">
+                <div className="flex items-center gap-1.5 text-foreground/80">
+                  <span className="w-3.5 h-3.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-[9px] font-bold">✓</span>
+                  <span>Topic selected</span>
+                </div>
+                <div className="flex items-center gap-1.5 text-foreground/80">
+                  <span className="w-3.5 h-3.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-[9px] font-bold">✓</span>
+                  <span>Posture straight</span>
+                </div>
+                <div className="flex items-center gap-1.5 text-foreground/80">
+                  <span className="w-3.5 h-3.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center text-[9px] font-bold">●</span>
+                  <span>Deep breath in</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ── CENTER: The 2 Core Columns (Machine + Recorder) — 100% UNTOUCHED ── */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start justify-center max-w-5xl flex-1">
+            {/* ── LEFT COLUMN: The 3D Machine & Dispensed Receipt Slip ── */}
+            <div className="lg:col-span-6 flex flex-col items-center justify-start pt-1">
             {renderRetroPrinter(false)}
           </div>
 
@@ -3432,9 +3506,84 @@ export default function DashboardPage() {
             ) : null}
           </div>
         </div>
+
+        {/* ── RIGHT FLANK: Studio Flora & Audio Hardware Deck ── */}
+        <div className="hidden lg:flex flex-col items-center justify-start gap-3.5 w-44 xl:w-52 2xl:w-60 shrink-0 pt-2 select-none pointer-events-auto">
+          {/* Potted Ceramic Succulent */}
+          <div className="relative flex flex-col items-center group">
+            <svg width="78" height="74" viewBox="0 0 84 84" fill="none" className="drop-shadow-sm transition-transform duration-300 group-hover:scale-105">
+              <ellipse cx="42" cy="54" rx="20" ry="5" fill="#3E2D23" />
+              <path d="M42 54 Q40 28 42 16 Q44 28 42 54 Z" fill="#4A7B59" />
+              <path d="M42 16 Q48 24 45 42 Q42 34 42 16 Z" fill="#659B76" />
+              <path d="M40 50 Q26 42 20 28 Q32 32 40 46 Z" fill="#3D684A" />
+              <path d="M20 28 Q28 26 38 40 Q29 36 20 28 Z" fill="#588B67" />
+              <path d="M44 48 Q60 40 64 26 Q52 32 44 45 Z" fill="#4D7F5D" />
+              <path d="M64 26 Q56 24 46 39 Q55 34 64 26 Z" fill="#6BA37D" />
+              <path d="M41 52 Q35 44 32 38 Q38 42 41 50 Z" fill="#88BE9B" />
+              <path d="M43 52 Q49 44 52 38 Q46 42 43 50 Z" fill="#75AC88" />
+              <path d="M24 50 L28 78 C28 80 56 80 56 78 L60 50 Z" fill="url(#potGrad)" />
+              <ellipse cx="42" cy="50" rx="18" ry="4.5" fill="#EAE3D9" stroke="#D5CCC0" strokeWidth="1" />
+              <line x1="33" y1="54" x2="35" y2="76" stroke="#D3C9BC" strokeWidth="1" strokeLinecap="round" />
+              <line x1="42" y1="54" x2="42" y2="77" stroke="#D3C9BC" strokeWidth="1" strokeLinecap="round" />
+              <line x1="51" y1="54" x2="49" y2="76" stroke="#D3C9BC" strokeWidth="1" strokeLinecap="round" />
+              <defs>
+                <linearGradient id="potGrad" x1="24" y1="50" x2="60" y2="78" gradientUnits="userSpaceOnUse">
+                  <stop stopColor="#F7F3EE" />
+                  <stop offset="0.7" stopColor="#E8E0D5" />
+                  <stop offset="1" stopColor="#D8CEC1" />
+                </linearGradient>
+              </defs>
+            </svg>
+            <span className="text-[10px] font-medium text-muted-foreground/80 mt-1 font-mono tracking-tight">Studio Flora</span>
+          </div>
+
+          {/* Audio Hardware Studio Deck Card */}
+          <div className="w-full bg-card/90 backdrop-blur-sm border border-border/70 rounded-2xl p-3.5 shadow-xs space-y-2 text-left rotate-[1deg] hover:rotate-0 transition-all duration-300">
+            <div className="flex items-center justify-between border-b border-border/40 pb-1.5">
+              <div className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Audio Deck</span>
+              </div>
+              <span className="text-[9px] font-mono text-muted-foreground">48 kHz</span>
+            </div>
+            <div className="space-y-1 text-[11px]">
+              <div className="flex items-center justify-between text-muted-foreground">
+                <span>Mic Input:</span>
+                <span className="font-semibold text-foreground">Active</span>
+              </div>
+              <div className="flex items-center justify-between text-muted-foreground">
+                <span>Noise Gate:</span>
+                <span className="font-semibold text-emerald-600 dark:text-emerald-400">Auto</span>
+              </div>
+              <div className="flex items-center justify-between text-muted-foreground">
+                <span>Buffer Limit:</span>
+                <span className="font-semibold text-foreground">10 min</span>
+              </div>
+            </div>
+            <div className="pt-1.5 border-t border-border/40 text-[10px] text-muted-foreground/80 leading-snug font-sans">
+              Keep 6–8 in. from mic for best vocal resonance.
+            </div>
+          </div>
+
+          {/* Headphones on Stand SVG */}
+          <div className="relative flex flex-col items-center group">
+            <svg width="64" height="54" viewBox="0 0 68 60" fill="none" className="drop-shadow-sm transition-transform duration-300 group-hover:scale-105">
+              <ellipse cx="34" cy="56" rx="20" ry="3.5" fill="#D8CEC1" className="dark:fill-stone-700" />
+              <line x1="34" y1="20" x2="34" y2="56" stroke="#9E8F7F" strokeWidth="3" strokeLinecap="round" />
+              <path d="M22 22 Q34 16 46 22" stroke="#7A6C5D" strokeWidth="4" strokeLinecap="round" fill="none" />
+              <path d="M18 32 C18 14 50 14 50 32" stroke="#4B5563" strokeWidth="3.5" strokeLinecap="round" fill="none" />
+              <rect x="13" y="30" width="8" height="15" rx="4" fill="#FA5276" />
+              <rect x="15" y="32" width="4" height="11" rx="2" fill="#E11D48" />
+              <rect x="47" y="30" width="8" height="15" rx="4" fill="#FA5276" />
+              <rect x="49" y="32" width="4" height="11" rx="2" fill="#E11D48" />
+            </svg>
+            <span className="text-[10px] font-medium text-muted-foreground/80 mt-0.5 font-mono tracking-tight">Studio Monitor</span>
+          </div>
+        </div>
       </div>
-    );
-  };
+    </div>
+  );
+};
 
   // ── Practice History Tab View ─────────────────────────────────────────────
   const renderHistoryTab = () => {
