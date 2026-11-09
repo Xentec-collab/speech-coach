@@ -4312,231 +4312,12 @@ export default function DashboardPage() {
       {/* ── Dashboard Layout ─────────────────────────────────────────────── */}
       <div className="flex flex-1 overflow-hidden z-10 w-full h-full">
 
-        {/* ── LEFT SIDEBAR (DESKTOP) ─────────────────────────────────────── */}
-        <aside className="hidden md:flex w-[260px] shrink-0 border-r border-[var(--border-sidebar)] bg-[var(--bg-sidebar)] flex-col overflow-hidden backdrop-blur-md">
-          {/* Logo Area */}
-          <div className="p-4 border-b border-[var(--border-sidebar)]/60 flex items-center justify-between flex-shrink-0 bg-transparent">
-            <div className="flex items-center gap-2 select-none">
-              <div className="w-6 h-6 rounded-md flex items-center justify-center text-white font-black text-xs shadow-md" style={{ background: 'var(--logo-gradient)' }}>
-                S
-              </div>
-              <span className="font-black text-sm tracking-tight shrink-0 bg-clip-text text-transparent" style={{backgroundImage: "var(--logo-gradient)"}}>
-                SpeakAI Coach
-              </span>
-            </div>
-          </div>
-
-          {/* Navigation Links */}
-          <div className="px-3 py-3 border-b border-[var(--border-sidebar)]/60 flex-shrink-0 space-y-1">
-            {[
-              { id: "console", label: "Practice Console", icon: <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 0 0 6-6v-1.5m-6 7.5a6 6 0 0 1-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 0 1-3-3V4.5a3 3 0 1 1 6 0v8.25a3 3 0 0 1-3 3Z"/></svg> },
-              { id: "tracks", label: "Interview Tracks", icon: <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>, onSelect: () => { setModuleType("interview_preparation"); fetchTrackStats(); } },
-              { id: "library", label: "Knowledge Library", icon: <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"/></svg> },
-              { id: "coach", label: "AI Coach", icon: <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8.625 9.75a.625.625 0 1 1-1.25 0 .625.625 0 0 1 1.25 0Zm4.5 0a.625.625 0 1 1-1.25 0 .625.625 0 0 1 1.25 0Zm4.5 0a.625.625 0 1 1-1.25 0 .625.625 0 0 1 1.25 0Z"/><path strokeLinecap="round" strokeLinejoin="round" d="M20.25 8.511c.046.218.07.444.07.675 0 2.761-2.91 5-6.5 5-1.127 0-2.189-.221-3.084-.607L6.5 15.5v-3.791c-1.879-1.047-3.001-2.617-3.001-4.384 0-3.314 3.582-6 8-6 4.418 0 8 2.686 8 6Z"/></svg> },
-              { id: "history", label: "Practice History", icon: <Clock className="w-4 h-4 shrink-0" /> },
-              { id: "evaluation", label: "Speech Evaluation", icon: <Award className="w-4 h-4 shrink-0" /> }
-            ].map(tab => {
-              const active = !uploadSuccess && activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => {
-                    setActiveTab(tab.id as any);
-                    setUploadSuccess(false);
-                    setPolledSpeechId(null);
-                    setPolledSpeechDetails(null);
-                    if ((tab as any).onSelect) (tab as any).onSelect();
-                  }}
-                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-bold transition-all ${
-                    active
-                      ? "bg-[var(--sidebar-active-bg)] text-[var(--sidebar-active-text)]"
-                      : "text-[var(--sidebar-text)] hover:bg-[var(--sidebar-hover-bg)] hover:text-[var(--sidebar-text-hover)]"
-                  }`}
-                >
-                  {tab.icon}
-                  <span>{tab.label}</span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* History Header */}
-          <div className="p-3 pb-1.5 flex justify-between items-center flex-shrink-0 bg-transparent">
-            <span className="font-bold text-[10px] uppercase tracking-wider text-[var(--sidebar-subtext)]">Practice History</span>
-            <span className="text-[10px] font-bold tracking-wide px-2 py-0.5 rounded-full bg-[var(--sidebar-active-bg)] border border-[var(--border-sidebar)] text-[var(--sidebar-active-text)]">
-              {historyList.length} {historyList.length === 1 ? "session" : "sessions"}
-            </span>
-          </div>
-
-          {/* Search Filters */}
-          <div className="px-3 py-2 flex gap-1 border-b border-[var(--border-sidebar)] shrink-0 overflow-x-auto select-none bg-muted/10">
-            {[
-              { id: "all", label: "All" },
-              { id: "speaking", label: "Speaking" },
-              { id: "interview", label: "Interview" }
-            ].map(f => (
-              <button
-                key={f.id}
-                onClick={() => setHistoryFilter(f.id as any)}
-                className={`text-[11px] font-bold px-2 py-1 rounded-md transition-all whitespace-nowrap ${
-                  historyFilter === f.id
-                    ? "bg-[var(--sidebar-active-bg)] text-[var(--sidebar-active-text)] shadow-sm"
-                    : "text-[var(--sidebar-subtext)] hover:bg-[var(--sidebar-hover-bg)] hover:text-[var(--sidebar-text-hover)]"
-                }`}
-              >
-                {f.label}
-              </button>
-            ))}
-          </div>
-
-          {isCute && <div className="px-3 pt-2 shrink-0">{renderLeafDivider()}</div>}
-
-          {/* History Scroll List */}
-          <div className="flex-1 overflow-y-auto min-h-0 pr-1">
-            {historyLoading ? (
-              <SidebarHistorySkeleton />
-            ) : (
-              <div className="p-3 space-y-4">
-              {historyError&&<p className="text-xs text-destructive p-2">{historyError}</p>}
-              {!historyLoading&&historyList.length===0&&(
-                <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-                  {isCute ? (
-                    <div className="flex flex-col items-center gap-2 animate-bloom relative">
-                      <span className="text-xs absolute -top-1 -left-3 animate-float-leaf">🌼</span>
-                      <span className="text-xs absolute -bottom-1 -right-3 animate-float-leaf" style={{ animationDelay: '1.2s' }}>🌼</span>
-                      <div className="relative w-16 h-16 opacity-95 select-none pointer-events-none flex items-center justify-center">
-                        <span className="text-3xl animate-float-leaf">💤</span>
-                      </div>
-                      <p className="text-[10px] font-extrabold text-[#2d5a37] mt-1">The garden is resting...</p>
-                      <p className="text-[11px] text-[#2d5a37]/75 max-w-[180px] leading-relaxed">Practice to plant your first seed!</p>
-                    </div>
-                  ) : (
-                    <p className="text-xs text-[var(--sidebar-subtext)] text-center py-12 px-4">No sessions yet. Start practicing.</p>
-                  )}
-                </div>
-              )}
-              {getGroupedHistory().map(group => (
-                <div key={group.label} className="space-y-1.5">
-                  <p className="text-[10px] font-extrabold tracking-widest text-muted-foreground/80 dark:text-zinc-400 uppercase px-2 pt-2 pb-0.5">{group.label}</p>
-                  <div className="space-y-0.5">
-                    {group.items.map(item => {
-                      const sel = polledSpeechId === item.id;
-                      const score = item.overall_score;
-                      let dotClass = isCute ? "bg-amber-400 ring-1 ring-background" : "bg-[#899878]/80 ring-1 ring-background";
-                      if (item.status === "failed") {
-                        dotClass = "bg-red-500 ring-1 ring-background";
-                      } else if (item.status !== "completed") {
-                        dotClass = "bg-[#D0D2F1] ring-1 ring-background animate-pulse";
-                      }
-                      const activeClass = sel 
-                      ? "bg-[var(--sidebar-active-bg)] border-l-2 border-l-[var(--sidebar-active-border)]" 
-                      : "border-l-2 border-l-transparent hover:bg-[var(--sidebar-hover-bg)]";
-
-                      return (
-                        <button key={item.id}
-                          onClick={()=>{
-                            if (pollingRef.current) {
-                              clearInterval(pollingRef.current);
-                              pollingRef.current = null;
-                            }
-                            setPolledSpeechId(item.id);
-                            fetchCompletedSessionDetails(item.id);
-                            setActiveTab("evaluation");
-                          }}
-                          className={`w-full text-left px-2.5 py-2 rounded-md transition-all flex flex-col gap-1 ${activeClass}`}
-                          style={{fontFamily:"inherit"}}>
-                          <div className="flex items-center justify-between gap-2 w-full min-w-0">
-                            <div className="flex items-center gap-2 min-w-0 flex-1">
-                              <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${dotClass}`} title={item.status}/>
-                              {item.is_session ? (
-                                <span className={`text-[11px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-[var(--accent-bg)] text-[var(--accent-text)] border border-[var(--accent-border)] shrink-0 truncate max-w-[140px] ${sel ? "text-[var(--sidebar-active-text)]" : ""}`}>
-                                  {item.topics?.title || "Interview"}
-                                </span>
-                              ) : (
-                                <span className={`text-xs font-semibold truncate transition-colors ${sel ? "text-[var(--sidebar-active-text)]" : "text-[var(--sidebar-text)] hover:text-[var(--sidebar-text-hover)]"}`}>
-                                  {item.topics?.title || "Impromptu Speech"}
-                                </span>
-                              )}
-                            </div>
-                            {score !== null && (
-                              <span className={`text-xs font-bold shrink-0 tabular-nums ${sel ? "text-[var(--sidebar-active-text)]" : "text-[var(--sidebar-text)]"}`}>
-                                {score}
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/75 dark:text-zinc-400/90 pl-3.5">
-                            <span>{fd(item.duration_seconds)}</span>
-                            <span>•</span>
-                            <span>{fTime(item.created_at)}</span>
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
-            </div>
-            )}
-          </div>
-
-          {isCute && (
-            <div className="p-3 border-t border-[var(--border-sidebar)] bg-transparent flex-shrink-0">
-              <div className="rounded-2xl border border-[rgba(236,72,153,0.18)] bg-white/45 backdrop-blur-md p-3 relative flex items-center gap-3 overflow-hidden shadow-sm hover:border-[rgba(236,72,153,0.35)] transition-all">
-                <div className="absolute top-0 right-0 w-12 h-12 bg-pink-100/30 rounded-bl-full pointer-events-none" />
-                <img src="/cute_sleeping_puppy.png" alt="Sleeping Puppy" className="w-14 h-14 object-contain shrink-0 animate-bounce" style={{ animationDuration: '6s' }} />
-                <div className="min-w-0">
-                  <p className="text-[10px] font-extrabold text-[var(--accent-text)]">Garden Companion</p>
-                  <p className="text-[9px] text-[var(--sidebar-subtext)] mt-0.5 leading-normal">
-                    {stats?.current_streak ? `You've practiced ${stats.current_streak} days in a row!` : "Cozying up... ready to practice today!"}
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Sidebar Ad Placement */}
-          <div className="px-3 flex-shrink-0">
-            <AdBanner placement="sidebar" hidden={shouldHideAds} />
-          </div>
-
-          {/* History Pagination */}
-          <div className="flex-shrink-0 px-3 py-2 border-t border-[var(--border-sidebar)] flex justify-between items-center bg-transparent">
-            <Button variant="ghost" size="xs" className="text-[10px] h-6 font-semibold text-[var(--sidebar-text-muted)] hover:text-[var(--sidebar-text-hover)] hover:bg-[var(--sidebar-hover-bg)]" onClick={()=>fetchHistory(historyPage-1)} disabled={historyPage===1||historyLoading}>Prev</Button>
-            <span className="text-[10px] font-medium text-[var(--sidebar-subtext)]">Page {historyPage}</span>
-            <Button variant="ghost" size="xs" className="text-[10px] h-6 font-semibold text-[var(--sidebar-text-muted)] hover:text-[var(--sidebar-text-hover)] hover:bg-[var(--sidebar-hover-bg)]" onClick={()=>fetchHistory(historyPage+1)} disabled={!hasMoreHistory||historyLoading}>Next</Button>
-          </div>
-
-          {/* Left Sidebar Bottom Zone (Theme & Logout) */}
-          <div className="p-3 border-t border-[var(--border-sidebar)] flex items-center justify-between bg-transparent flex-shrink-0">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={() => setTheme(isDark ? "light" : "dark")}
-              className="h-8 w-8 text-[var(--sidebar-text-muted)] hover:text-[var(--sidebar-text-hover)] hover:bg-[var(--sidebar-hover-bg)] rounded-lg transition-all"
-              aria-label="Toggle theme"
-            >
-              {!isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </Button>
-            
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={handleLogout} 
-              disabled={logoutLoading} 
-              className="text-xs gap-1.5 text-[var(--sidebar-text-muted)] hover:text-[var(--sidebar-text-hover)] hover:bg-[var(--sidebar-hover-bg)] transition-all h-8 px-2.5 rounded-lg"
-            >
-              <LogOut className="w-4 h-4" />
-              {logoutLoading ? "..." : "Sign out"}
-            </Button>
-          </div>
-        </aside>
-
         {/* ── CENTER PANEL ───────────────────────────────────────────────── */}
         <main className={`flex-1 overflow-y-auto flex flex-col pb-28 md:pb-0 ${isCute ? "bg-transparent" : "bg-background"}`}>
           {/* Top Breadcrumb Bar */}
           {!activeSession && (
             <header className="h-14 border-b border-[var(--border-sidebar)]/60 bg-[var(--bg-sidebar)]/85 backdrop-blur-md flex items-center justify-between px-4 sm:px-6 flex-shrink-0 z-10 sticky top-0">
-              <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground select-none min-w-0">
+              <div className="flex items-center gap-2.5 text-xs font-bold text-muted-foreground select-none min-w-0">
                 <button
                   onClick={() => setMobileSidebarOpen(true)}
                   className="md:hidden p-2 -ml-1 h-10 w-10 flex items-center justify-center text-foreground hover:bg-muted/60 rounded-lg shrink-0"
@@ -4544,6 +4325,18 @@ export default function DashboardPage() {
                 >
                   <Menu className="w-5 h-5" />
                 </button>
+
+                {/* Logo Area */}
+                <div className="flex items-center gap-2 select-none shrink-0 mr-1">
+                  <div className="w-6 h-6 rounded-md flex items-center justify-center text-white font-black text-xs shadow-md" style={{ background: 'var(--logo-gradient)' }}>
+                    S
+                  </div>
+                  <span className="font-black text-sm tracking-tight shrink-0 bg-clip-text text-transparent hidden sm:inline" style={{backgroundImage: "var(--logo-gradient)"}}>
+                    SpeakAI Coach
+                  </span>
+                </div>
+
+                <span className="hidden sm:inline text-muted-foreground/30">/</span>
                 <span className="hidden sm:inline">Dashboard</span>
                 <span className="hidden sm:inline text-[10px] text-muted-foreground/50">/</span>
                 {uploadSuccess && polledSpeechDetails ? (
@@ -4567,14 +4360,25 @@ export default function DashboardPage() {
                     <span className="tabular-nums">{polledSpeechDetails?.overall_score}/100</span>
                   </div>
                 )}
-                {/* Mobile Theme Toggle */}
+                {/* Theme Toggle (Desktop & Mobile) */}
                 <button 
                   onClick={() => setTheme(isDark ? "light" : "dark")}
-                  className="md:hidden p-1.5 text-muted-foreground hover:text-foreground rounded-lg"
+                  className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted/60 rounded-lg transition-colors"
                   aria-label="Toggle theme"
                 >
                   {!isDark ? <Sun className="w-4 h-4 text-amber-500" /> : <Moon className="w-4 h-4 text-indigo-400" />}
                 </button>
+                {/* Logout Button */}
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={handleLogout} 
+                  disabled={logoutLoading} 
+                  className="text-xs gap-1.5 text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all h-8 px-2.5 rounded-lg"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">{logoutLoading ? "..." : "Sign out"}</span>
+                </Button>
               </div>
             </header>
           )}
@@ -5543,62 +5347,26 @@ export default function DashboardPage() {
               })}
             </div>
 
-            {/* Practice History List */}
-            <div className="p-3 pb-1.5 flex justify-between items-center flex-shrink-0">
-              <span className="font-bold text-[10px] uppercase tracking-wider text-[var(--sidebar-subtext)]">Practice History</span>
-              <span className="text-[10px] font-bold tracking-wide px-2 py-0.5 rounded-full bg-[var(--sidebar-active-bg)] border border-[var(--border-sidebar)] text-[var(--sidebar-active-text)]">
-                {historyList.length} {historyList.length === 1 ? "session" : "sessions"}
-              </span>
-            </div>
-
-            <div className="flex-1 overflow-y-auto pr-1">
-              <div className="p-3 space-y-3">
-                {historyList.length === 0 ? (
-                  <p className="text-xs text-[var(--sidebar-subtext)] text-center py-8">No sessions yet. Start practicing.</p>
-                ) : (
-                  getGroupedHistory().map(group => (
-                    <div key={group.label} className="space-y-1">
-                      <p className="text-[10px] font-extrabold tracking-widest text-muted-foreground/80 uppercase px-2 pt-2 pb-0.5">{group.label}</p>
-                      {group.items.map(item => {
-                        const sel = polledSpeechId === item.id;
-                        return (
-                          <button key={item.id}
-                            onClick={()=>{
-                              if (pollingRef.current) {
-                                clearInterval(pollingRef.current);
-                                pollingRef.current = null;
-                              }
-                              setPolledSpeechId(item.id);
-                              fetchCompletedSessionDetails(item.id);
-                              setActiveTab("evaluation");
-                              setMobileSidebarOpen(false);
-                            }}
-                            className={`w-full text-left px-2.5 py-2 rounded-md transition-all flex flex-col gap-1 ${
-                              sel ? "bg-[var(--sidebar-active-bg)] text-[var(--sidebar-active-text)]" : "text-[var(--sidebar-text)]"
-                            }`}
-                          >
-                            <div className="flex items-center justify-between gap-2 w-full">
-                              <span className="text-xs font-semibold truncate">{item.topics?.title || "Speech Session"}</span>
-                              {item.overall_score !== null && <span className="text-xs font-bold">{item.overall_score}</span>}
-                            </div>
-                            <span className="text-[10px] text-muted-foreground">{fd(item.duration_seconds)} • {fTime(item.created_at)}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
+            <div className="flex-1" />
 
             {/* Drawer Footer */}
-            <div className="p-3 border-t border-[var(--border-sidebar)] flex items-center justify-between flex-shrink-0">
+            <div className="p-4 border-t border-[var(--border-sidebar)] flex items-center justify-between flex-shrink-0">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => setTheme(isDark ? "light" : "dark")}
+                className="h-8 w-8 text-[var(--sidebar-text-muted)] hover:text-[var(--sidebar-text-hover)] hover:bg-[var(--sidebar-hover-bg)] rounded-lg transition-all"
+                aria-label="Toggle theme"
+              >
+                {!isDark ? <Sun className="w-4 h-4 text-amber-500" /> : <Moon className="w-4 h-4 text-indigo-400" />}
+              </Button>
+
               <Button 
                 variant="ghost" 
                 size="sm" 
                 onClick={handleLogout} 
                 disabled={logoutLoading} 
-                className="text-xs gap-1.5 text-[var(--sidebar-text-muted)] hover:text-[var(--sidebar-text-hover)] transition-all h-8 px-2.5 rounded-lg"
+                className="text-xs gap-1.5 text-[var(--sidebar-text-muted)] hover:text-[var(--sidebar-text-hover)] hover:bg-[var(--sidebar-hover-bg)] transition-all h-8 px-2.5 rounded-lg"
               >
                 <LogOut className="w-4 h-4" />
                 {logoutLoading ? "..." : "Sign out"}
